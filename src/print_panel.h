@@ -84,11 +84,13 @@ class PrintPanel : public NotifyConsumer {
   void show_batch_delete_confirmation();
   void delete_next_in_batch(size_t index);
 
-  // Start print: asks for the bed mesh mode and the adaptive purge line (KAMP pins of the Power Script) before sending
-  // the print. Printers without those pins start the print straight away.
+  // Start print: asks for the bed mesh mode, the adaptive purge line (KAMP pins of the Power Script) and, with the CFS
+  // connected, where the filament comes from (CFS or external spool) before sending the print. Printers with none of
+  // these start the print straight away.
   struct StartDialog;
   void begin_print_flow(const std::string &path);
-  void show_start_dialog(const std::string &path, bool has_mesh, int mesh_mode, bool has_purge, bool purge_on);
+  void show_start_dialog(const std::string &path, bool has_mesh, int mesh_mode, bool has_purge, bool purge_on,
+                         bool has_cfs);
   void start_print_now(const std::string &path, const std::string &prepare_script);
   static void _start_dialog_event(lv_event_t *event);
   

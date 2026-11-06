@@ -1261,15 +1261,18 @@ struct PrintPanel::StartDialog {
   std::string path;
   bool has_mesh;
   bool has_purge;
+  bool has_cfs;
   int current_mesh;
   bool current_purge;
   lv_obj_t *overlay;
   lv_obj_t *mesh_selector;
   lv_obj_t *purge_switch;
+  lv_obj_t *filament_selector;
 };
 
 namespace {
 const char *MESH_MAP[] = {"Off", "Adaptive", "Full", ""};
+const char *FILAMENT_MAP[] = {"CFS", "External spool", ""};
 }
 
 void PrintPanel::begin_print_flow(const std::string &path) {
@@ -1279,7 +1282,10 @@ void PrintPanel::begin_print_flow(const std::string &path) {
   auto purge = s->get_data("/printer_state/output_pin ADAPTIVE_PURGE_LINE/value"_json_pointer);
   const bool has_mesh = adaptive.is_number() && full.is_number();
   const bool has_purge = purge.is_number();
-  if (!has_mesh && !has_purge) {
+  // Con il CFS collegato si sceglie da dove arriva il filamento: CFS o bobina esterna.
+  auto box_state = s->get_data("/printer_state/box/state"_json_pointer);
+  const bool has_cfs = box_state.is_string() && box_state.template get<std::string>() == "connect";
+  if (!has_mesh && !has_purge && !has_cfs) {
     start_print_now(path, "");
     return;
   }
@@ -1287,7 +1293,7 @@ void PrintPanel::begin_print_flow(const std::string &path) {
   if (has_mesh) {
     mesh_mode = adaptive.template get<double>() > 0.5 ? 1 : (full.template get<double>() > 0.5 ? 2 : 0);
   }
-  show_start_dialog(path, has_mesh, mesh_mode, has_purge, has_purge && purge.template get<double>() > 0.5);
+  show_start_dialog(path, has_mesh, mesh_mode, has_purge, has_purge && purge.template get<double>() > 0.5, has_cfs);
 }
 
 void PrintPanel::start_print_now(const std::string &path, const std::string &prepare_script) {
@@ -1306,9 +1312,10 @@ void PrintPanel::start_print_now(const std::string &path, const std::string &pre
   });
 }
 
-void PrintPanel::show_start_dialog(const std::string &path, bool has_mesh, int mesh_mode, bool has_purge, bool purge_on) {
+void PrintPanel::show_start_dialog(const std::string &path, bool has_mesh, int mesh_mode, bool has_purge, bool purge_on,
+                                   bool has_cfs) {
   using namespace powerui;
-  StartDialog *dialog = new StartDialog{this, path, has_mesh, has_purge, mesh_mode, purge_on, NULL, NULL, NULL};
+  StartDialog *dialog = new StartDialog{this, path, has_mesh, has_purge, has_cfs, mesh_mode, purge_on, NULL, NULL, NULL, NULL};
 
   lv_obj_t *overlay = lv_obj_create(lv_layer_top());
   lv_obj_remove_style_all(overlay);
@@ -1321,7 +1328,7 @@ void PrintPanel::show_start_dialog(const std::string &path, bool has_mesh, int m
   lv_obj_add_event_cb(overlay, [](lv_event_t *e) { delete (StartDialog *)lv_obj_get_user_data(lv_event_get_target(e)); },
                       LV_EVENT_DELETE, NULL);
 
-  const int rows = (has_mesh ? 1 : 0) + (has_purge ? 1 : 0);
+  const int rows = (has_mesh ? 1 : 0) + (has_purge ? 1 : 0) + (has_cfs ? 1 : 0);
   const int w = 540, h = 150 + rows * 62 + 70;
   lv_obj_t *dlg = card(overlay, 0, 0, w, h);
   lv_obj_center(dlg);
@@ -1373,6 +1380,19 @@ void PrintPanel::show_start_dialog(const std::string &path, bool has_mesh, int m
     }
     y += 62;
   }
+  if (has_cfs) {
+    row_title("Filament", "External spool: load it by hand first");
+    dialog->filament_selector = lv_btnmatrix_create(dlg);
+    lv_btnmatrix_set_map(dialog->filament_selector, FILAMENT_MAP);
+    lv_btnmatrix_set_btn_ctrl_all(dialog->filament_selector, LV_BTNMATRIX_CTRL_CHECKABLE);
+    lv_btnmatrix_set_one_checked(dialog->filament_selector, true);
+    lv_btnmatrix_set_btn_ctrl(dialog->filament_selector, 0, LV_BTNMATRIX_CTRL_CHECKED);
+    lv_obj_set_size(dialog->filament_selector, px(250), px(44));
+    lv_obj_set_pos(dialog->filament_selector, px(w - 24 - 250), px(y + 4));
+    style_segmented(dialog->filament_selector);
+    lv_obj_set_style_text_font(dialog->filament_selector, &lv_font_montserrat_14, LV_PART_ITEMS);
+    y += 62;
+  }
 
   action_button(dlg, NULL, "Cancel", ActionKind::Outline, 24, h - 74, 196, 50, &PrintPanel::_start_dialog_event, dialog);
   action_button(dlg, &ui_icon_play, "Start", ActionKind::Primary, w - 24 - 292, h - 74, 292, 50, &PrintPanel::_start_dialog_event, dialog);
@@ -1390,6 +1410,11 @@ void PrintPanel::_start_dialog_event(lv_event_t *event) {
   const std::string path = dialog->path;
   std::string script;
   if (start) {
+    if (dialog->has_cfs) {
+      // Si manda sempre, cosi' la scelta non dipende da come ha lasciato il CFS la stampa precedente.
+      const bool esterna = lv_btnmatrix_has_btn_ctrl(dialog->filament_selector, 1, LV_BTNMATRIX_CTRL_CHECKED);
+      script += esterna ? "BOX_ENABLE_CFS_PRINT ENABLE=0\n" : "BOX_ENABLE_CFS_PRINT ENABLE=1\n";
+    }
     if (dialog->has_mesh) {
       const int mode = lv_btnmatrix_get_selected_btn(dialog->mesh_selector);
       const int checked = lv_btnmatrix_has_btn_ctrl(dialog->mesh_selector, 0, LV_BTNMATRIX_CTRL_CHECKED) ? 0
