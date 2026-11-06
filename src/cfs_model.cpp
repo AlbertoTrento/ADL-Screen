@@ -80,6 +80,17 @@ const std::map<std::string, MaterialEntry> &material_db() {
   return db;
 }
 
+// Il tag del CFS da' il codice con un 1 davanti ("106003"), nel database e' senza ("06003").
+// Cerca prima il codice esatto, poi quello senza l'1.
+std::map<std::string, MaterialEntry>::const_iterator find_in_db(const std::map<std::string, MaterialEntry> &db,
+                                                                const std::string &id) {
+  auto it = db.find(id);
+  if (it == db.end() && id.size() == 6 && id[0] == '1') {
+    it = db.find(id.substr(1));
+  }
+  return it;
+}
+
 std::string str_at(const json &arr, int i) {
   if (arr.is_array() && i >= 0 && static_cast<size_t>(i) < arr.size() && arr[i].is_string()) {
     return arr[i].get<std::string>();
@@ -100,6 +111,9 @@ bool is_hex(const std::string &s) {
   }
   return true;
 }
+
+// Con una bobina con tag il campo vender e' il contenuto grezzo del tag: non e' una marca da mostrare.
+bool is_raw_tag(const std::string &s) { return s.size() >= 20 && is_hex(s); }
 
 // Accepts "#RRGGBB", "RRGGBB" and "0RRGGBB" (Creality's 7-character form).
 bool parse_color(const std::string &raw, uint32_t &out) {
@@ -145,8 +159,9 @@ Slot parse_slot(const json &box_obj, int i) {
     slot.kind = SlotKind::Defined;
     slot.material_id = mat;
     const auto &db = material_db();
-    auto it = db.find(mat);
+    auto it = find_in_db(db, mat);
     if (it != db.end()) {
+      slot.material_id = it->first;  // il codice del database, quello che Edit slot sa cercare
       slot.name = it->second.name;
       slot.material = it->second.type;
       slot.brand = it->second.brand;
@@ -156,13 +171,13 @@ Slot parse_slot(const json &box_obj, int i) {
     } else {
       slot.name = "Material " + mat;
     }
-    if (has_vender) {
+    if (has_vender && !is_raw_tag(vender)) {
       slot.brand = vender;
     }
   } else if (slot.has_color || any_unknown || has_vender) {
     slot.kind = SlotKind::Unset;
     slot.name = "Not set";
-    if (has_vender) {
+    if (has_vender && !is_raw_tag(vender)) {
       slot.brand = vender;
     }
   } else {
