@@ -1,0 +1,133 @@
+--- a/src/font/lv_font_montserrat_12.c
++++ b/src/font/lv_font_montserrat_12.c
+@@ -1898,6 +1898,8 @@
+  *  PUBLIC FONT
+  *----------------*/
+ 
++extern const lv_font_t adl_latin_12;
++
+ /*Initialize a public general font descriptor*/
+ #if LV_VERSION_CHECK(8, 0, 0)
+ const lv_font_t lv_font_montserrat_12 = {
+@@ -1915,6 +1917,7 @@
+     .underline_position = -1,
+     .underline_thickness = 1,
+ #endif
++    .fallback = &adl_latin_12,
+     .dsc = &font_dsc           /*The custom font data. Will be accessed by `get_glyph_bitmap/dsc` */
+ };
+ 
+--- a/src/font/lv_font_montserrat_14.c
++++ b/src/font/lv_font_montserrat_14.c
+@@ -2174,6 +2174,8 @@
+  *  PUBLIC FONT
+  *----------------*/
+ 
++extern const lv_font_t adl_latin_14;
++
+ /*Initialize a public general font descriptor*/
+ #if LV_VERSION_CHECK(8, 0, 0)
+ const lv_font_t lv_font_montserrat_14 = {
+@@ -2191,6 +2193,7 @@
+     .underline_position = -1,
+     .underline_thickness = 1,
+ #endif
++    .fallback = &adl_latin_14,
+     .dsc = &font_dsc           /*The custom font data. Will be accessed by `get_glyph_bitmap/dsc` */
+ };
+ 
+--- a/src/font/lv_font_montserrat_16.c
++++ b/src/font/lv_font_montserrat_16.c
+@@ -2443,6 +2443,8 @@
+  *  PUBLIC FONT
+  *----------------*/
+ 
++extern const lv_font_t adl_latin_16;
++
+ /*Initialize a public general font descriptor*/
+ #if LV_VERSION_CHECK(8, 0, 0)
+ const lv_font_t lv_font_montserrat_16 = {
+@@ -2460,6 +2462,7 @@
+     .underline_position = -1,
+     .underline_thickness = 1,
+ #endif
++    .fallback = &adl_latin_16,
+     .dsc = &font_dsc           /*The custom font data. Will be accessed by `get_glyph_bitmap/dsc` */
+ };
+ 
+--- a/src/font/lv_font_montserrat_18.c
++++ b/src/font/lv_font_montserrat_18.c
+@@ -2843,6 +2843,8 @@
+  *  PUBLIC FONT
+  *----------------*/
+ 
++extern const lv_font_t adl_latin_18;
++
+ /*Initialize a public general font descriptor*/
+ #if LV_VERSION_CHECK(8, 0, 0)
+ const lv_font_t lv_font_montserrat_18 = {
+@@ -2860,6 +2862,7 @@
+     .underline_position = -1,
+     .underline_thickness = 1,
+ #endif
++    .fallback = &adl_latin_18,
+     .dsc = &font_dsc           /*The custom font data. Will be accessed by `get_glyph_bitmap/dsc` */
+ };
+ 
+--- a/src/font/lv_font_montserrat_20.c
++++ b/src/font/lv_font_montserrat_20.c
+@@ -3200,6 +3200,8 @@
+  *  PUBLIC FONT
+  *----------------*/
+ 
++extern const lv_font_t adl_latin_20;
++
+ /*Initialize a public general font descriptor*/
+ #if LV_VERSION_CHECK(8, 0, 0)
+ const lv_font_t lv_font_montserrat_20 = {
+@@ -3217,6 +3219,7 @@
+     .underline_position = -1,
+     .underline_thickness = 1,
+ #endif
++    .fallback = &adl_latin_20,
+     .dsc = &font_dsc           /*The custom font data. Will be accessed by `get_glyph_bitmap/dsc` */
+ };
+ 
+--- a/src/font/lv_font_montserrat_24.c
++++ b/src/font/lv_font_montserrat_24.c
+@@ -4040,6 +4040,8 @@
+  *  PUBLIC FONT
+  *----------------*/
+ 
++extern const lv_font_t adl_latin_24;
++
+ /*Initialize a public general font descriptor*/
+ #if LV_VERSION_CHECK(8, 0, 0)
+ const lv_font_t lv_font_montserrat_24 = {
+@@ -4057,6 +4059,7 @@
+     .underline_position = -2,
+     .underline_thickness = 1,
+ #endif
++    .fallback = &adl_latin_24,
+     .dsc = &font_dsc           /*The custom font data. Will be accessed by `get_glyph_bitmap/dsc` */
+ };
+ 
+--- a/src/font/lv_font_montserrat_40.c
++++ b/src/font/lv_font_montserrat_40.c
+@@ -9231,6 +9231,8 @@
+  *  PUBLIC FONT
+  *----------------*/
+ 
++extern const lv_font_t adl_latin_40;
++
+ /*Initialize a public general font descriptor*/
+ #if LV_VERSION_CHECK(8, 0, 0)
+ const lv_font_t lv_font_montserrat_40 = {
+@@ -9248,6 +9250,7 @@
+     .underline_position = -3,
+     .underline_thickness = 2,
+ #endif
++    .fallback = &adl_latin_40,
+     .dsc = &font_dsc           /*The custom font data. Will be accessed by `get_glyph_bitmap/dsc` */
+ };
+ 

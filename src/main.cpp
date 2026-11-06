@@ -1,4 +1,5 @@
 #include "lvgl/lvgl.h"
+#include "i18n.h"
 #include "lv_drivers/display/fbdev.h"
 #include "lv_drivers/indev/evdev.h"
 #include "lv_tc.h"
@@ -42,6 +43,10 @@ int main(void)
     Config *conf = Config::get_instance();
     auto config_path = fs::canonical("/proc/self/exe").parent_path() / "powerscreenconfig.json";
     conf->init(config_path.string(), "/usr/data/printer_data/thumbnails");
+
+    // Lingua del pannello, prima di creare le schermate.
+    const auto &language = conf->get_json("/language");
+    i18n::init(language.is_string() ? language.template get<std::string>() : "it");
 
     PowerScreen::init(hal_init);
     PowerScreen::loop();

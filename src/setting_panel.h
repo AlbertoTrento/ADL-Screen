@@ -52,9 +52,11 @@ class SettingPanel {
   SquareButton sysinfo_btn;
   SquareButton spoolman_btn;
   SquareButton powerscreen_update_btn;
+  SquareButton language_btn;
 
   // The Restart tile opens a list: PowerScreen, Klipper or the firmware.
   void show_restart_menu();
+  void show_language_menu();
   void restart_powerscreen();
   // Confirmation before restarting Klipper or the firmware.
 

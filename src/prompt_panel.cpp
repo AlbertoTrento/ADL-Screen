@@ -328,7 +328,7 @@ void PromptPanel::handle_callback(lv_event_t *event) {
         // native prompt before running them so no nested RESPOND is needed.
         const char *button_text = label == NULL ? "" : lv_label_get_text(label);
         // CLOSE is recognised by its command: its label carries an icon, so the text no longer reads "CLOSE".
-        if (!strcmp(button_text, "RESUME") || !strcmp(button_text, "STOP") || !strcmp(button_text, "X") || cmd.find("action:prompt_end") != std::string::npos) {
+        if (cmd == "PS_RESUME" || cmd == "PS_CANCEL" || !strcmp(button_text, "X") || cmd.find("action:prompt_end") != std::string::npos) {
             background();
         }
 

@@ -23,7 +23,7 @@ WARNINGS		:= -Wall -Wextra -Wno-unused-function -Wno-error=strict-prototypes -Wp
 					-Wno-missing-field-initializers -Wtype-limits -Wsizeof-pointer-memaccess -Wno-format-nonliteral -Wpointer-arith -Wno-cast-qual \
 					-Wunreachable-code -Wno-switch-default -Wreturn-type -Wmultichar -Wformat-security -Wno-sign-compare
 CFLAGS 			?= -O3 -g0 -MD -MP -I$(LVGL_DIR)/ $(WARNINGS) 
-LDFLAGS 		?= -static -lm -Llibhv/lib -Lspdlog/build -l:libhv.a -latomic -lpthread -Lwpa_supplicant/wpa_supplicant/ -l:libwpa_client.a -lstdc++fs -l:libspdlog.a
+LDFLAGS 		?= -static -lm -Llibhv/lib -Lspdlog/build -l:libhv.a -latomic -lpthread -Lwpa_supplicant/wpa_supplicant/ -l:libwpa_client.a -lstdc++fs -l:libspdlog.a -Wl,--wrap=lv_label_set_text,--wrap=lv_dropdown_set_options,--wrap=lv_btnmatrix_set_map,--wrap=lv_textarea_set_placeholder_text
 BIN 			= powerscreen
 BUILD_DIR 		= ./build
 BUILD_OBJ_DIR 	= $(BUILD_DIR)/obj

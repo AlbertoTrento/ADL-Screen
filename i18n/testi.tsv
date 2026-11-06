@@ -1,0 +1,395 @@
+# Testi del pannello: chiave (come scritta nel codice), poi italiano, inglese, tedesco, francese, spagnolo. Separati da TAB.
+# Chiave che finisce con uno spazio = inizio di frase. Chiave che inizia con uno spazio = fine di frase.
+# Dopo una modifica: python i18n/genera_tabella.py
+Algorithm	Algoritmo	Algorithm	Algorithmus	Algorithme	Algoritmo
+Bed Mesh	Mesh del piatto	Bed Mesh	Bettnetz	Maillage du plateau	Malla de la cama
+Bed mesh	Mesh del piatto	Bed mesh	Bettnetz	Maillage du plateau	Malla de la cama
+Calibrate	Calibra	Calibrate	Kalibrieren	Calibrer	Calibrar
+Cancel	Annulla	Cancel	Abbrechen	Annuler	Cancelar
+Clear	Pulisci	Clear	Leeren	Effacer	Borrar
+  Clear	  Pulisci	  Clear	  Leeren	  Effacer	  Borrar
+Profiles	Profili	Profiles	Profile	Profils	Perfiles
+Save	Salva	Save	Speichern	Enregistrer	Guardar
+Saving the profile will restart the printer.	Salvando il profilo la stampante si riavvia.	Saving the profile will restart the printer.	Beim Speichern startet der Drucker neu.	L'enregistrement redémarre l'imprimante.	Al guardar se reinicia la impresora.
+Tension	Tensione	Tension	Spannung	Tension	Tensión
+Axis	Asse	Axis	Achse	Axe	Eje
+Belt resonance	Risonanza cinghie	Belt resonance	Riemenresonanz	Résonance des courroies	Resonancia de correas
+Belts / Shake	Cinghie / Vibrazione	Belts / Shake	Riemen / Schütteln	Courroies / Vibration	Correas / Vibración
+Compares the two belts of the CoreXY	Confronta le due cinghie del CoreXY	Compares the two belts of the CoreXY	Vergleicht die zwei CoreXY-Riemen	Compare les deux courroies du CoreXY	Compara las dos correas del CoreXY
+Do you want to emergency stop?	Vuoi fare l'arresto di emergenza?	Do you want to emergency stop?	Nothalt ausführen?	Faire un arrêt d'urgence ?	¿Hacer parada de emergencia?
+Excite	Eccita	Excite	Anregen	Exciter	Excitar
+Frequency	Frequenza	Frequency	Frequenz	Fréquence	Frecuencia
+No graph yet	Ancora nessun grafico	No graph yet	Noch keine Grafik	Pas encore de graphique	Aún sin gráfico
+Run Shake Belts to refresh the graph. Tap the graph to enlarge it.	Avvia Vibra cinghie per aggiornare il grafico. Tocca il grafico per ingrandirlo.	Run Shake Belts to refresh the graph. Tap the graph to enlarge it.	Riemen schütteln startet die Grafik. Tippen zum Vergrößern.	Lancez Vibrer les courroies pour le graphique. Touchez pour agrandir.	Ejecuta Vibrar correas para el gráfico. Toca para ampliar.
+Shake Belts	Vibra cinghie	Shake Belts	Riemen schütteln	Vibrer les courroies	Vibrar correas
+Stop	Ferma	Stop	Stopp	Arrêter	Parar
+Confirm	Conferma	Confirm	Bestätigen	Confirmer	Confirmar
+Material 	Materiale 	Material 	Material 	Matériau 	Material
+Non impostato	Non impostato	Not set	Nicht gesetzt	Non défini	Sin definir
+Vuoto	Vuoto	Empty	Leer	Vide	Vacío
+ m rimasti	 m rimasti	 m left	 m übrig	 m restants	 m restantes
+ salvato	 salvato	 saved	 gespeichert	 enregistré	 guardado
+: il CFS non ha confermato	: il CFS non ha confermato	: the CFS did not confirm	: CFS hat nicht bestätigt	: le CFS n'a pas confirmé	: el CFS no confirmó
+Annulla	Annulla	Cancel	Abbrechen	Annuler	Cancelar
+Bobina caricata	Bobina caricata	Spool loaded	Spule geladen	Bobine chargée	Bobina cargada
+Bobina esterna	Bobina esterna	External spool	Externe Spule	Bobine externe	Bobina externa
+Bobina esterna salvata	Bobina esterna salvata	External spool saved	Externe Spule gespeichert	Bobine externe enregistrée	Bobina externa guardada
+CFS non collegato	CFS non collegato	CFS not connected	CFS nicht verbunden	CFS non connecté	CFS no conectado
+Collega il CFS alla stampante per vedere qui i suoi quattro slot.	Collega il CFS alla stampante per vedere qui i suoi quattro slot.	Connect the CFS to the printer to see its four slots here.	CFS mit dem Drucker verbinden, um die vier Slots zu sehen.	Connectez le CFS pour voir ses quatre emplacements ici.	Conecta el CFS para ver aquí sus cuatro ranuras.
+Colore personalizzato	Colore personalizzato	Custom color	Eigene Farbe	Couleur personnalisée	Color personalizado
+Controlla filamenti	Controlla filamenti	Check filaments	Filamente prüfen	Vérifier filaments	Comprobar filamentos
+Controllo filamenti...	Controllo filamenti...	Checking filaments...	Filamente werden geprüft...	Vérification des filaments...	Comprobando filamentos...
+Database materiali non trovato	Database materiali non trovato	Material database not found	Materialdatenbank nicht gefunden	Base de matériaux introuvable	Base de materiales no encontrada
+FILAMENTO	FILAMENTO	FILAMENT	FILAMENT	FILAMENT	FILAMENTO
+MARCA	MARCA	BRAND	MARKE	MARQUE	MARCA
+MATERIALE	MATERIALE	MATERIAL	MATERIAL	MATÉRIAU	MATERIAL
+COLOR	COLORE	COLOR	FARBE	COULEUR	COLOR
+Modifica	Modifica	Edit	Bearbeiten	Modifier	Editar
+Modifica 	Modifica 	Edit 	Bearbeiten: 	Modifier 	Editar
+Modifica slot	Modifica slot	Edit slot	Slot bearbeiten	Modifier l'emplacement	Editar ranura
+Nessuna bobina	Nessuna bobina	No spool	Keine Spule	Pas de bobine	Sin bobina
+Nessuna bobina in questo slot	Nessuna bobina in questo slot	No spool in this slot	Keine Spule in diesem Slot	Pas de bobine ici	Sin bobina en esta ranura
+Non si puo' controllare durante la stampa	Non si può controllare durante la stampa	Cannot check while printing	Während des Drucks nicht möglich	Impossible pendant l'impression	No disponible durante la impresión
+Non si puo' modificare durante la stampa	Non si può modificare durante la stampa	Cannot edit while printing	Während des Drucks nicht möglich	Impossible pendant l'impression	No disponible durante la impresión
+Nuovo tentativo slot 	Nuovo tentativo slot 	Retrying slot 	Neuer Versuch Slot 	Nouvel essai 	Reintentando ranura
+Salva	Salva	Save	Speichern	Enregistrer	Guardar
+Salvataggio slot 	Salvataggio slot 	Saving slot 	Speichere Slot 	Enregistrement 	Guardando ranura
+Scegli il filamento caricato	Scegli il filamento caricato	Choose the loaded filament	Geladenes Filament wählen	Choisir le filament chargé	Elige el filamento cargado
+Scegli materiale e colore con Modifica slot	Scegli materiale e colore con Modifica slot	Set material and color with Edit slot	Material und Farbe unter Slot bearbeiten	Choisir matériau et couleur avec Modifier	Elige material y color con Editar ranura
+Back Fan	Ventola posteriore	Back Fan	Hinterer Lüfter	Ventilateur arrière	Ventilador trasero
+Side Fan	Ventola laterale	Side Fan	Seitenlüfter	Ventilateur latéral	Ventilador lateral
+Toolhead Fan	Ventola testina	Toolhead Fan	Kopflüfter	Ventilateur de tête	Ventilador del cabezal
+Part Fan	Ventola pezzo	Part Fan	Bauteillüfter	Ventilateur de pièce	Ventilador de pieza
+  Send	  Invia	  Send	  Senden	  Envoyer	  Enviar
+Send G-code...	Invia G-code...	Send G-code...	G-Code senden...	Envoyer G-code...	Enviar G-code...
+Bed map	Mappa del piatto	Bed map	Bettkarte	Carte du plateau	Mapa de la cama
+Exclude	Escludi	Exclude	Ausschließen	Exclure	Excluir
+Exclude 	Escludi 	Exclude 	Ausschließen: 	Exclure 	Excluir
+Exclude Object	Escludi oggetto	Exclude Object	Objekt ausschließen	Exclure un objet	Excluir objeto
+Exclude object?	Escludere l'oggetto?	Exclude object?	Objekt ausschließen?	Exclure l'objet ?	¿Excluir objeto?
+Excluded	Escluso	Excluded	Ausgeschlossen	Exclu	Excluido
+Excluding an object cannot be undone until the next print.	L'esclusione non si può annullare fino alla prossima stampa.	Excluding an object cannot be undone until the next print.	Bis zum nächsten Druck nicht rückgängig zu machen.	Irréversible jusqu'à la prochaine impression.	No se puede deshacer hasta la próxima impresión.
+It will not be printed. This cannot be undone until the next print.	Non verrà stampato. Non si può annullare fino alla prossima stampa.	It will not be printed. This cannot be undone until the next print.	Wird nicht gedruckt. Bis zum nächsten Druck endgültig.	Il ne sera pas imprimé. Irréversible jusqu'à la prochaine impression.	No se imprimirá. No se puede deshacer hasta la próxima impresión.
+No objects	Nessun oggetto	No objects	Keine Objekte	Aucun objet	Sin objetos
+Object	Oggetto	Object	Objekt	Objet	Objeto
+Objects	Oggetti	Objects	Objekte	Objets	Objetos
+Printing	In stampa	Printing	Druckt	Impression	Imprimiendo
+Printing now	In stampa ora	Printing now	Wird gedruckt	En impression	Imprimiendo ahora
+This file has no labeled objects. Enable \"Label objects\" in the slicer.	Questo file non ha oggetti etichettati. Attiva \"Etichetta oggetti\" nello slicer.	This file has no labeled objects. Enable \"Label objects\" in the slicer.	Keine benannten Objekte. \"Objekte benennen\" im Slicer aktivieren.	Aucun objet étiqueté. Activez \"Étiqueter les objets\" dans le slicer.	Sin objetos etiquetados. Activa \"Etiquetar objetos\" en el slicer.
+Cambio in pausa	Cambio in pausa	Change while paused	Wechsel in Pause	Changement en pause	Cambio en pausa
+Carica filamento	Carica filamento	Load filament	Filament laden	Charger le filament	Cargar filamento
+Carica mm	Carica mm	Load mm	Laden mm	Charger mm	Cargar mm
+Filamento	Filamento	Filament	Filament	Filament	Filamento
+FILAMENT CONTROL	FILAMENTO	FILAMENT	FILAMENT	FILAMENT	FILAMENTO
+Home e carica	Home e carica	Home and load	Home und laden	Origine et charger	Origen y cargar
+La stampante non ha fatto l'home. Faccio l'home e poi carico il filamento?	La stampante non ha fatto l'home. Faccio l'home e poi carico il filamento?	The printer is not homed. Home now and then load the filament?	Drucker ist nicht referenziert. Jetzt referenzieren und laden?	L'imprimante n'a pas fait l'origine. La faire puis charger ?	La impresora no tiene origen. ¿Hacer origen y cargar?
+Lunghezza per Carica mm e Scarica mm	Lunghezza per Carica mm e Scarica mm	Length for Load mm and Unload mm	Länge für Laden und Entladen (mm)	Longueur pour Charger et Décharger (mm)	Longitud para Cargar y Descargar (mm)
+Porta il filamento all'ugello, spurga e pulisce	Porta il filamento all'ugello, spurga e pulisce	Brings the filament to the nozzle, purges and cleans	Führt Filament zur Düse, spült und reinigt	Amène le filament à la buse, purge et nettoie	Lleva el filamento a la boquilla, purga y limpia
+Scalda e tira indietro: poi lo sfili a mano	Scalda e tira indietro: poi lo sfili a mano	Heats and pulls back: then pull it out by hand	Heizt und zieht zurück: dann von Hand entnehmen	Chauffe et recule : retirez-le ensuite à la main	Calienta y retrae: luego sácalo a mano
+Scarica mm	Scarica mm	Unload mm	Entladen mm	Décharger mm	Descargar mm
+Serve l'home	Serve l'home	Homing required	Referenzfahrt nötig	Origine requise	Origen necesario
+Spegne il riscaldamento dell'ugello	Spegne il riscaldamento dell'ugello	Turns off the nozzle heater	Schaltet die Düsenheizung aus	Coupe la chauffe de la buse	Apaga la calefacción de la boquilla
+Spegni ugello	Spegni ugello	Nozzle off	Düse aus	Couper la buse	Apagar boquilla
+Spinge in avanti il filamento dei mm scelti	Spinge in avanti il filamento dei mm scelti	Pushes the filament forward by the chosen mm	Schiebt das Filament um die gewählten mm vor	Avance le filament des mm choisis	Empuja el filamento los mm elegidos
+Temperatura ugello (°C)	Temperatura ugello (°C)	Nozzle temperature (°C)	Düsentemperatur (°C)	Température buse (°C)	Temperatura boquilla (°C)
+Tira indietro il filamento dei mm scelti	Tira indietro il filamento dei mm scelti	Pulls the filament back by the chosen mm	Zieht das Filament um die gewählten mm zurück	Recule le filament des mm choisis	Retrae el filamento los mm elegidos
+Togli filamento	Togli filamento	Remove filament	Filament entfernen	Retirer le filament	Quitar filamento
+Off	Spento	Off	Aus	Éteint	Apagado
+Running	In funzione	Running	Läuft	En marche	En marcha
+Chamber Fan	Ventola camera	Chamber Fan	Kammerlüfter	Ventilateur de chambre	Ventilador de cámara
+Chamber fan target	Obiettivo ventola camera	Chamber fan target	Kammerlüfter-Ziel	Cible ventilateur chambre	Objetivo ventilador cámara
+Fans	Ventole	Fans	Lüfter	Ventilateurs	Ventiladores
+Hotend Fan	Ventola hotend	Hotend Fan	Hotend-Lüfter	Ventilateur hotend	Ventilador hotend
+Rear Fan	Ventola posteriore	Rear Fan	Hinterer Lüfter	Ventilateur arrière	Ventilador trasero
+Filament	Filamento	Filament	Filament	Filament	Filamento
+Layers	Strati	Layers	Schichten	Couches	Capas
+Print time	Tempo di stampa	Print time	Druckzeit	Durée d'impression	Tiempo de impresión
+Copied to USB	Copiato su USB	Copied to USB	Auf USB kopiert	Copié sur USB	Copiado a USB
+Copy to USB	Copia su USB	Copy to USB	Auf USB kopieren	Copier sur USB	Copiar a USB
+Could not copy	Copia non riuscita	Could not copy	Kopieren fehlgeschlagen	Copie impossible	No se pudo copiar
+Delete	Elimina	Delete	Löschen	Supprimer	Eliminar
+Delete 	Elimina 	Delete 	Löschen: 	Supprimer 	Eliminar
+Delete video?	Eliminare il video?	Delete video?	Video löschen?	Supprimer la vidéo ?	¿Eliminar el vídeo?
+Duration	Durata	Duration	Dauer	Durée	Duración
+Finished prints appear here once Moonraker has recorded them.	Le stampe finite compaiono qui quando Moonraker le registra.	Finished prints appear here once Moonraker has recorded them.	Fertige Drucke erscheinen hier, sobald Moonraker sie speichert.	Les impressions terminées apparaissent ici.	Las impresiones terminadas aparecen aquí.
+Insert a USB drive and try again.	Inserisci una chiavetta USB e riprova.	Insert a USB drive and try again.	USB-Stick einstecken und erneut versuchen.	Insérez une clé USB et réessayez.	Inserta un USB y reinténtalo.
+No print history	Nessuna stampa nello storico	No print history	Kein Druckverlauf	Aucun historique	Sin historial
+No timelapse videos	Nessun video timelapse	No timelapse videos	Keine Zeitraffer-Videos	Aucune vidéo timelapse	Sin vídeos timelapse
+Print again	Stampa di nuovo	Print again	Erneut drucken	Réimprimer	Imprimir de nuevo
+Reset	Azzera	Reset	Zurücksetzen	Réinitialiser	Restablecer
+Reset totals?	Azzerare i totali?	Reset totals?	Summen zurücksetzen?	Réinitialiser les totaux ?	¿Restablecer totales?
+Select a print to see its details	Scegli una stampa per i dettagli	Select a print to see its details	Druck für Details wählen	Choisissez une impression	Elige una impresión
+Select a video to see its details	Scegli un video per i dettagli	Select a video to see its details	Video für Details wählen	Choisissez une vidéo	Elige un vídeo
+Size	Dimensione	Size	Größe	Taille	Tamaño
+Started	Iniziata	Started	Gestartet	Démarrée	Iniciada
+The counters go back to zero. The list of prints is not deleted.	I contatori tornano a zero. L'elenco delle stampe non viene cancellato.	The counters go back to zero. The list of prints is not deleted.	Zähler werden auf null gesetzt. Die Liste bleibt.	Les compteurs reviennent à zéro. La liste reste.	Los contadores vuelven a cero. La lista se mantiene.
+The screen cannot play videos. Open the file from Fluidd or copy it with USB.	Lo schermo non riproduce i video. Apri il file da Fluidd o copialo su USB.	The screen cannot play videos. Open the file from Fluidd or copy it with USB.	Das Display spielt keine Videos ab. In Fluidd öffnen oder auf USB kopieren.	L'écran ne lit pas les vidéos. Ouvrez-les dans Fluidd ou copiez sur USB.	La pantalla no reproduce vídeos. Ábrelos en Fluidd o cópialos a USB.
+The video is on the USB drive.	Il video è sulla chiavetta USB.	The video is on the USB drive.	Das Video ist auf dem USB-Stick.	La vidéo est sur la clé USB.	El vídeo está en el USB.
+Videos recorded by the timelapse module appear here.	I video del timelapse compaiono qui.	Videos recorded by the timelapse module appear here.	Zeitraffer-Videos erscheinen hier.	Les vidéos timelapse apparaissent ici.	Los vídeos timelapse aparecen aquí.
+Fine Tune	Regolazione fine	Fine Tune	Feinabstimmung	Réglage fin	Ajuste fino
+Flow	Flusso	Flow	Fluss	Débit	Flujo
+Multiplier step (%)	Passo moltiplicatore (%)	Multiplier step (%)	Multiplikator-Schritt (%)	Pas du multiplicateur (%)	Paso multiplicador (%)
+Pressure advance	Pressure advance	Pressure advance	Pressure Advance	Pressure advance	Pressure advance
+Speed	Velocità	Speed	Geschwindigkeit	Vitesse	Velocidad
+Z (mm) / PA step	Passo Z (mm) / PA	Z (mm) / PA step	Z (mm) / PA-Schritt	Pas Z (mm) / PA	Paso Z (mm) / PA
+Z offset	Offset Z	Z offset	Z-Versatz	Décalage Z	Desfase Z
+Distance (mm)	Distanza (mm)	Distance (mm)	Strecke (mm)	Distance (mm)	Distancia (mm)
+Emergency Stop	Arresto di emergenza	Emergency Stop	Nothalt	Arrêt d'urgence	Parada de emergencia
+Home All	Home tutti	Home All	Alle referenzieren	Origine tout	Origen todos
+Home XY	Home XY	Home XY	XY referenzieren	Origine XY	Origen XY
+Home Z	Home Z	Home Z	Z referenzieren	Origine Z	Origen Z
+Motor Off	Motori spenti	Motor Off	Motoren aus	Moteurs éteints	Motores apagados
+Movement	Movimento	Movement	Bewegung	Mouvement	Movimiento
+Waiting for printer to initialize...	Attendo l'avvio della stampante...	Waiting for printer to initialize...	Warte auf den Drucker...	Attente de l'imprimante...	Esperando a la impresora...
+Graphs	Grafici	Graphs	Grafiken	Graphiques	Gráficos
+Needs an accelerometer. Save restarts Klipper	Serve un accelerometro. Salva riavvia Klipper	Needs an accelerometer. Save restarts Klipper	Beschleunigungssensor nötig. Speichern startet Klipper neu	Accéléromètre requis. Enregistrer redémarre Klipper	Requiere acelerómetro. Guardar reinicia Klipper
+Run Calibrate to measure this axis	Avvia Calibra per misurare questo asse	Run Calibrate to measure this axis	Kalibrieren misst diese Achse	Lancez Calibrer pour cet axe	Ejecuta Calibrar para este eje
+X axis	Asse X	X axis	X-Achse	Axe X	Eje X
+Y axis	Asse Y	Y axis	Y-Achse	Axe Y	Eje Y
+Acceleration	Accelerazione	Acceleration	Beschleunigung	Accélération	Aceleración
+Acceleration to deceleration	Accelerazione a decelerazione	Acceleration to deceleration	Beschl. zu Verzögerung	Accél. à décélération	Aceleración a deceleración
+Default: 	Predefinito: 	Default: 	Standard: 	Défaut : 	Por defecto:
+Limits	Limiti	Limits	Limits	Limites	Límites
+Square corner velocity	Velocità negli angoli	Square corner velocity	Eckengeschwindigkeit	Vitesse dans les angles	Velocidad en esquinas
+Velocity	Velocità	Velocity	Geschwindigkeit	Vitesse	Velocidad
+ parameter	 parametro	 parameter	 Parameter	 paramètre	 parámetro
+ parameters	 parametri	 parameters	 Parameter	 paramètres	 parámetros
+No parameters	Nessun parametro	No parameters	Keine Parameter	Aucun paramètre	Sin parámetros
+ groups	 gruppi	 groups	 Gruppen	 groupes	 grupos
+All	Tutte	All	Alle	Toutes	Todas
+Create	Crea	Create	Erstellen	Créer	Crear
+Enter a name	Scrivi un nome	Enter a name	Namen eingeben	Saisir un nom	Escribe un nombre
+Group name	Nome del gruppo	Group name	Gruppenname	Nom du groupe	Nombre del grupo
+Group options	Opzioni gruppo	Group options	Gruppenoptionen	Options du groupe	Opciones del grupo
+Hide macro	Nascondi macro	Hide macro	Makro ausblenden	Masquer la macro	Ocultar macro
+Its macros go back to All.	Le sue macro tornano in Tutte.	Its macros go back to All.	Die Makros gehen zurück zu Alle.	Ses macros reviennent dans Toutes.	Sus macros vuelven a Todas.
+Macro options	Opzioni macro	Macro options	Makrooptionen	Options de macro	Opciones de macro
+Maximum 	Massimo 	Maximum 	Maximal 	Maximum 	Máximo
+Move to group	Sposta nel gruppo	Move to group	In Gruppe verschieben	Déplacer dans le groupe	Mover al grupo
+New group	Nuovo gruppo	New group	Neue Gruppe	Nouveau groupe	Grupo nuevo
+No macros found	Nessuna macro trovata	No macros found	Keine Makros gefunden	Aucune macro trouvée	Sin macros
+Other	Altro	Other	Andere	Autre	Otro
+Remove from group	Togli dal gruppo	Remove from group	Aus Gruppe entfernen	Retirer du groupe	Quitar del grupo
+Rename	Rinomina	Rename	Umbenennen	Renommer	Renombrar
+Rename group	Rinomina gruppo	Rename group	Gruppe umbenennen	Renommer le groupe	Renombrar grupo
+Run	Esegui	Run	Ausführen	Exécuter	Ejecutar
+Run 	Esegui 	Run 	Ausführen: 	Exécuter 	Ejecutar
+Search macros	Cerca macro	Search macros	Makros suchen	Chercher une macro	Buscar macros
+Show hidden	Mostra nascoste	Show hidden	Ausgeblendete zeigen	Afficher masquées	Mostrar ocultas
+Show macro	Mostra macro	Show macro	Makro anzeigen	Afficher la macro	Mostrar macro
+That group already exists	Il gruppo esiste già	That group already exists	Gruppe existiert bereits	Ce groupe existe déjà	Ese grupo ya existe
+That name is reserved	Questo nome è riservato	That name is reserved	Dieser Name ist reserviert	Ce nom est réservé	Ese nombre está reservado
+The configuration will be saved and Klipper will restart.	La configurazione viene salvata e Klipper si riavvia.	The configuration will be saved and Klipper will restart.	Konfiguration wird gespeichert, Klipper startet neu.	La configuration est enregistrée et Klipper redémarre.	Se guarda la configuración y Klipper se reinicia.
+The printer service or firmware will restart.	Il servizio della stampante o il firmware si riavvia.	The printer service or firmware will restart.	Druckerdienst oder Firmware startet neu.	Le service ou le firmware redémarre.	El servicio o el firmware se reinicia.
+  Indietro	  Indietro	  Back	  Zurück	  Retour	  Atrás
+Calibrazioni	Calibrazioni	Calibrations	Kalibrierung	Calibrations	Calibraciones
+Camera macros not found	Macro della camera non trovate	Camera macros not found	Kamera-Makros nicht gefunden	Macros caméra introuvables	Macros de cámara no encontradas
+Ferma	Ferma	Idle	Bereit	À l'arrêt	Parada
+File	File	Files	Dateien	Fichiers	Archivos
+Impostazioni	Impostazioni	Settings	Einstellungen	Réglages	Ajustes
+Keep it on	Lasciala accesa	Keep it on	Eingeschaltet lassen	La laisser allumée	Dejarla encendida
+LED acceso	LED acceso	LED on	LED an	LED allumée	LED encendido
+LED spento	LED spento	LED off	LED aus	LED éteinte	LED apagado
+Movimento	Movimento	Movement	Bewegung	Mouvement	Movimiento
+Piatto	Piatto	Bed	Bett	Plateau	Cama
+Temperature	Temperature	Temperatures	Temperaturen	Températures	Temperaturas
+The timelapse takes its photos with the camera.	Il timelapse scatta le foto con la camera.	The timelapse takes its photos with the camera.	Der Zeitraffer nutzt die Kamera.	Le timelapse utilise la caméra.	El timelapse usa la cámara.
+Turn off	Spegni	Turn off	Ausschalten	Éteindre	Apagar
+Turn the camera off?	Spegnere la camera?	Turn the camera off?	Kamera ausschalten?	Éteindre la caméra ?	¿Apagar la cámara?
+Ugello	Ugello	Nozzle	Düse	Buse	Boquilla
+Ultimi 5 minuti	Ultimi 5 minuti	Last 5 minutes	Letzte 5 Minuten	5 dernières minutes	Últimos 5 minutos
+Ventole	Ventole	Fans	Lüfter	Ventilateurs	Ventiladores
+Camera	Camera	Chamber	Kammer	Chambre	Cámara
+Annullata	Annullata	Cancelled	Abgebrochen	Annulée	Cancelada
+Errore	Errore	Error	Fehler	Erreur	Error
+Errore di stampa	Errore di stampa	Print error	Druckfehler	Erreur d'impression	Error de impresión
+Escludi oggetti	Escludi oggetti	Exclude objects	Objekte ausschließen	Exclure des objets	Excluir objetos
+Finita	Finita	Complete	Fertig	Terminée	Terminada
+In pausa	In pausa	Paused	Pausiert	En pause	En pausa
+In stampa	In stampa	Printing	Druckt	Impression	Imprimiendo
+Lenta	Lenta	Slow	Langsam	Lente	Lenta
+Nessuna stampa	Nessuna stampa	No active print	Kein aktiver Druck	Aucune impression	Sin impresión
+Normale	Normale	Standard	Normal	Normale	Normal
+Pausa	Pausa	Pause	Pause	Pause	Pausa
+Personale	Personale	Custom	Eigene	Perso	Personal
+Pronta	Pronta	Ready	Bereit	Prête	Lista
+Riprendi	Riprendi	Resume	Fortsetzen	Reprendre	Reanudar
+Stampa annullata	Stampa annullata	Print cancelled	Druck abgebrochen	Impression annulée	Impresión cancelada
+Stampa finita	Stampa finita	Print complete	Druck fertig	Impression terminée	Impresión terminada
+Stampa in corso	Stampa in corso	Print in progress	Druck läuft	Impression en cours	Impresión en curso
+Strato	Strato	Layer	Schicht	Couche	Capa
+Trascorso	Trascorso	Elapsed	Vergangen	Écoulé	Transcurrido
+Veloce	Veloce	Fast	Schnell	Rapide	Rápida
+Velocita'	Velocità	Speed	Geschwindigkeit	Vitesse	Velocidad
+Velocita' di stampa	Velocità di stampa	Print speed	Druckgeschwindigkeit	Vitesse d'impression	Velocidad de impresión
+Set temperature	Imposta temperatura	Set temperature	Temperatur setzen	Régler la température	Fijar temperatura
+Heater PID	PID riscaldamento	Heater PID	Heizungs-PID	PID de chauffe	PID de calefacción
+Not available while printing	Non disponibile durante la stampa	Not available while printing	Während des Drucks nicht verfügbar	Indisponible pendant l'impression	No disponible al imprimir
+Not available while printing. The result is saved with SAVE_CONFIG and restarts Klipper.	Non disponibile durante la stampa. Il risultato si salva con SAVE_CONFIG e Klipper si riavvia.	Not available while printing. The result is saved with SAVE_CONFIG and restarts Klipper.	Nicht während des Drucks. Ergebnis wird mit SAVE_CONFIG gespeichert, Klipper startet neu.	Indisponible pendant l'impression. Résultat enregistré, Klipper redémarre.	No disponible al imprimir. Se guarda y Klipper se reinicia.
+PID Tune	Taratura PID	PID Tune	PID-Abstimmung	Réglage PID	Ajuste PID
+Start	Avvia	Start	Start	Démarrer	Iniciar
+Start PID tune	Avvia taratura PID	Start PID tune	PID-Abstimmung starten	Lancer le réglage PID	Iniciar ajuste PID
+Start PID tune?	Avviare la taratura PID?	Start PID tune?	PID-Abstimmung starten?	Lancer le réglage PID ?	¿Iniciar ajuste PID?
+The printer heats to the selected temperature	La stampante scalda alla temperatura scelta	The printer heats to the selected temperature	Drucker heizt auf die gewählte Temperatur	L'imprimante chauffe à la température choisie	La impresora calienta a la temperatura elegida
+Tuning...	Taratura...	Tuning...	Abstimmung...	Réglage...	Ajustando...
+No power devices	Nessun dispositivo di alimentazione	No power devices	Keine Stromgeräte	Aucun appareil	Sin dispositivos
+On	Acceso	On	An	Allumé	Encendido
+Power Devices	Dispositivi di alimentazione	Power Devices	Stromgeräte	Appareils d'alimentation	Dispositivos de energía
+Power devices	Dispositivi di alimentazione	Power devices	Stromgeräte	Appareils d'alimentation	Dispositivos de energía
+Printer power outlets managed by Moonraker	Prese della stampante gestite da Moonraker	Printer power outlets managed by Moonraker	Steckdosen über Moonraker	Prises gérées par Moonraker	Enchufes gestionados por Moonraker
+Adattiva	Adattiva	Adaptive	Adaptiv	Adaptatif	Adaptativa
+Adattiva misura solo la zona del pezzo	Adattiva misura solo la zona del pezzo	Adaptive measures only the area of the part	Adaptiv misst nur den Bauteilbereich	Adaptatif mesure seulement la zone de la pièce	Adaptativa mide solo la zona de la pieza
+Avvia	Avvia	Start	Start	Démarrer	Iniciar
+Avvia stampa	Avvia stampa	Start print	Druck starten	Lancer l'impression	Iniciar impresión
+Bobina esterna: infilala fino all'estrusore	Bobina esterna: infilala fino all'estrusore	External spool: feed it up to the extruder	Externe Spule: bis zum Extruder einführen	Bobine externe : insérer jusqu'à l'extrudeur	Bobina externa: introdúcela hasta el extrusor
+Completa	Completa	Full	Voll	Complet	Completa
+Delete file?	Eliminare il file?	Delete file?	Datei löschen?	Supprimer le fichier ?	¿Eliminar el archivo?
+Deleting is blocked while printing	Non si può eliminare durante la stampa	Deleting is blocked while printing	Löschen während des Drucks gesperrt	Suppression bloquée pendant l'impression	No se puede eliminar al imprimir
+Folder	Cartella	Folder	Ordner	Dossier	Carpeta
+History	Storico	History	Verlauf	Historique	Historial
+Insert a USB drive and tap the reload button.	Inserisci una chiavetta USB e tocca ricarica.	Insert a USB drive and tap the reload button.	USB-Stick einstecken und Neu laden tippen.	Insérez une clé USB et touchez recharger.	Inserta un USB y toca recargar.
+Local	Locale	Local	Lokal	Local	Local
+Mesh del piatto	Mesh del piatto	Bed mesh	Bettnetz	Maillage du plateau	Malla de la cama
+Modified	Modificato	Modified	Geändert	Modifié	Modificado
+No USB drive detected	Nessuna chiavetta USB trovata	No USB drive detected	Kein USB-Stick erkannt	Aucune clé USB	USB no detectado
+No files here	Nessun file qui	No files here	Keine Dateien hier	Aucun fichier ici	Sin archivos aquí
+Printing in progress...	Stampa in corso...	Printing in progress...	Druck läuft...	Impression en cours...	Imprimiendo...
+Queue Job	Metti in coda	Queue Job	In Warteschlange	Mettre en file	Poner en cola
+Select	Seleziona	Select	Auswählen	Sélectionner	Seleccionar
+Spenta	Spenta	Off	Aus	Désactivé	Apagada
+Spurga accanto al pezzo	Spurga accanto al pezzo	Purges next to the part	Spült neben dem Bauteil	Purge à côté de la pièce	Purga junto a la pieza
+Spurgo adattivo	Spurgo adattivo	Adaptive purge line	Adaptive Spüllinie	Purge adaptative	Purga adaptativa
+Stampa	Stampa	Print	Drucken	Imprimer	Imprimir
+Tap files to select them	Tocca i file per selezionarli	Tap files to select them	Dateien zum Auswählen antippen	Touchez pour sélectionner	Toca para seleccionar
+Upload G-code from Fluidd or a USB drive.	Carica il G-code da Fluidd o da una chiavetta USB.	Upload G-code from Fluidd or a USB drive.	G-Code aus Fluidd oder per USB laden.	Envoyez le G-code depuis Fluidd ou une clé USB.	Sube el G-code desde Fluidd o un USB.
+View Job	Vedi lavoro	View Job	Auftrag ansehen	Voir la tâche	Ver trabajo
+CANCELLED	ANNULLATA	CANCELLED	ABGEBROCHEN	ANNULÉE	CANCELADA
+COMPLETE	FINITA	COMPLETE	FERTIG	TERMINÉE	TERMINADA
+Cancel print	Annulla stampa	Cancel print	Druck abbrechen	Annuler l'impression	Cancelar impresión
+Cancel the print?	Annullare la stampa?	Cancel the print?	Druck abbrechen?	Annuler l'impression ?	¿Cancelar la impresión?
+Do you want to cancel the print?	Vuoi annullare la stampa?	Do you want to cancel the print?	Druck wirklich abbrechen?	Annuler l'impression ?	¿Cancelar la impresión?
+ERROR	ERRORE	ERROR	FEHLER	ERREUR	ERROR
+Elapsed	Trascorso	Elapsed	Vergangen	Écoulé	Transcurrido
+Keep printing	Continua a stampare	Keep printing	Weiter drucken	Continuer	Seguir imprimiendo
+Layer	Strato	Layer	Schicht	Couche	Capa
+Motion	Movimento	Motion	Bewegung	Mouvement	Movimiento
+PAUSED	IN PAUSA	PAUSED	PAUSIERT	EN PAUSE	EN PAUSA
+PRINT STATUS	STATO STAMPA	PRINT STATUS	DRUCKSTATUS	ÉTAT D'IMPRESSION	ESTADO
+PRINTING	IN STAMPA	PRINTING	DRUCKT	IMPRESSION	IMPRIMIENDO
+Pause	Pausa	Pause	Pause	Pause	Pausa
+Progress	Avanzamento	Progress	Fortschritt	Progression	Progreso
+READY	PRONTA	READY	BEREIT	PRÊTE	LISTA
+Remaining	Rimanente	Remaining	Verbleibend	Restant	Restante
+Resume	Riprendi	Resume	Fortsetzen	Reprendre	Reanudar
+Stato stampa	Stato stampa	Print Status	Druckstatus	État d'impression	Estado de impresión
+Temperature and cooling	Temperatura e raffreddamento	Temperature and cooling	Temperatur und Kühlung	Température et refroidissement	Temperatura y refrigeración
+The print stops and cannot be resumed.	La stampa si ferma e non si può riprendere.	The print stops and cannot be resumed.	Der Druck stoppt und kann nicht fortgesetzt werden.	L'impression s'arrête sans reprise possible.	La impresión se detiene y no se puede reanudar.
+Tune	Regola	Tune	Anpassen	Régler	Ajustar
+Belt tension and shake	Tensione e vibrazione cinghie	Belt tension and shake	Riemenspannung und Schütteln	Tension et vibration courroies	Tensión y vibración de correas
+Clean	Pulisci	Clean	Reinigen	Nettoyer	Limpiar
+Clean the nozzle	Pulisci l'ugello	Clean the nozzle	Düse reinigen	Nettoyer la buse	Limpiar la boquilla
+Clean the nozzle?	Pulire l'ugello?	Clean the nozzle?	Düse reinigen?	Nettoyer la buse ?	¿Limpiar la boquilla?
+G-code and macros	G-code e macro	G-code and macros	G-Code und Makros	G-code et macros	G-code y macros
+Hotend and bed	Hotend e piatto	Hotend and bed	Hotend und Bett	Hotend et plateau	Hotend y cama
+Motor driver tuning	Taratura driver motori	Motor driver tuning	Motortreiber-Abstimmung	Réglage des pilotes	Ajuste de drivers
+Nozzle Clean	Pulizia ugello	Nozzle Clean	Düsenreinigung	Nettoyage buse	Limpieza boquilla
+Nozzle Clean is not available while printing.	La pulizia ugello non è disponibile durante la stampa.	Nozzle Clean is not available while printing.	Düsenreinigung nicht während des Drucks.	Nettoyage indisponible pendant l'impression.	Limpieza no disponible al imprimir.
+Printer power outlets	Prese della stampante	Printer power outlets	Drucker-Steckdosen	Prises de l'imprimante	Enchufes de la impresora
+Printing in progress	Stampa in corso	Printing in progress	Druck läuft	Impression en cours	Imprimiendo
+Probe the bed surface	Misura la superficie del piatto	Probe the bed surface	Bettoberfläche abtasten	Palper le plateau	Medir la cama
+Resonance and shapers	Risonanze e shaper	Resonance and shapers	Resonanz und Shaper	Résonance et shapers	Resonancia y shapers
+Stepper driver statistics	Statistiche driver motori	Stepper driver statistics	Treiberstatistik	Statistiques des pilotes	Estadísticas de drivers
+The toolhead moves to the brush and wipes the nozzle. Keep the area around the brush clear.	La testina va alla spazzola e pulisce l'ugello. Tieni libera la zona intorno.	The toolhead moves to the brush and wipes the nozzle. Keep the area around the brush clear.	Der Kopf fährt zur Bürste und reinigt die Düse. Bereich frei halten.	La tête va à la brosse et nettoie la buse. Gardez la zone libre.	El cabezal va al cepillo y limpia la boquilla. Mantén la zona libre.
+Velocity and acceleration	Velocità e accelerazione	Velocity and acceleration	Geschwindigkeit und Beschleunigung	Vitesse et accélération	Velocidad y aceleración
+Z, speed, flow and PA	Z, velocità, flusso e PA	Z, speed, flow and PA	Z, Geschw., Fluss und PA	Z, vitesse, débit et PA	Z, velocidad, flujo y PA
+  Close	  Chiudi	  Close	  Schließen	  Fermer	  Cerrar
+At temperature	In temperatura	At temperature	Auf Temperatur	À température	En temperatura
+CLOSE	CHIUDI	CLOSE	SCHLIESSEN	FERMER	CERRAR
+Cooling	Raffreddamento	Cooling	Kühlt	Refroidissement	Enfriando
+Heater off	Riscaldamento spento	Heater off	Heizung aus	Chauffe éteinte	Calefacción apagada
+Heating	Riscaldamento	Heating	Heizt	Chauffe	Calentando
+LOAD	CARICA	LOAD	LADEN	CHARGER	CARGAR
+Manual filament change\n#A1A1A1 Select an option to continue#	Cambio filamento manuale\n#A1A1A1 Scegli un'opzione per continuare#	Manual filament change\n#A1A1A1 Select an option to continue#	Manueller Filamentwechsel\n#A1A1A1 Option wählen#	Changement de filament\n#A1A1A1 Choisissez une option#	Cambio manual de filamento\n#A1A1A1 Elige una opción#
+MANUAL FILAMENT CHANGE	CAMBIO FILAMENTO MANUALE	MANUAL FILAMENT CHANGE	MANUELLER FILAMENTWECHSEL	CHANGEMENT DE FILAMENT	CAMBIO DE FILAMENTO
+RESUME	RIPRENDI	RESUME	FORTSETZEN	REPRENDRE	REANUDAR
+STOP	FERMA	STOP	STOPP	ARRÊTER	PARAR
+UNLOAD	SCARICA	UNLOAD	ENTLADEN	DÉCHARGER	DESCARGAR
+ADL Screen and Script	ADL Screen e Script	ADL Screen and Script	ADL Screen und Script	ADL Screen et Script	ADL Screen y Script
+Filament system	Sistema filamenti	Filament system	Filamentsystem	Système de filament	Sistema de filamento
+Klipper will restart.	Klipper si riavvia.	Klipper will restart.	Klipper startet neu.	Klipper redémarre.	Klipper se reinicia.
+Lingua	Lingua	Language	Sprache	Langue	Idioma
+Macros	Macro	Macros	Makros	Macros	Macros
+Network	Rete	Network	Netzwerk	Réseau	Red
+Offline	Non collegato	Offline	Offline	Hors ligne	Sin conexión
+Power Update	Aggiornamenti	Update	Aktualisierung	Mise à jour	Actualización
+Preferences and info	Preferenze e informazioni	Preferences and info	Einstellungen und Info	Préférences et infos	Preferencias e info
+Restart	Riavvia	Restart	Neustart	Redémarrer	Reiniciar
+Restart Firmware?	Riavviare il firmware?	Restart Firmware?	Firmware neu starten?	Redémarrer le firmware ?	¿Reiniciar el firmware?
+Restart Klipper?	Riavviare Klipper?	Restart Klipper?	Klipper neu starten?	Redémarrer Klipper ?	¿Reiniciar Klipper?
+Run printer macros	Esegui le macro della stampante	Run printer macros	Druckermakros ausführen	Exécuter les macros	Ejecutar macros
+Screen, Klipper, Firmware	Schermo, Klipper, Firmware	Screen, Klipper, Firmware	Display, Klipper, Firmware	Écran, Klipper, Firmware	Pantalla, Klipper, Firmware
+System	Sistema	System	System	Système	Sistema
+The printer firmware will restart.	Il firmware della stampante si riavvia.	The printer firmware will restart.	Die Firmware startet neu.	Le firmware redémarre.	El firmware se reinicia.
+About	Informazioni	About	Über	À propos	Acerca de
+Brightness	Luminosità	Brightness	Helligkeit	Luminosité	Brillo
+ADL Screen UPDATED!	ADL Screen AGGIORNATO!	ADL Screen UPDATED!	ADL Screen AKTUALISIERT!	ADL Screen MIS À JOUR !	¡ADL Screen ACTUALIZADO!
+ADL Screen cannot be updated while a print is in progress.	ADL Screen non si può aggiornare durante una stampa.	ADL Screen cannot be updated while a print is in progress.	Während eines Drucks nicht möglich.	Mise à jour impossible pendant l'impression.	No se puede actualizar al imprimir.
+ADL Screen is already up to date (	ADL Screen è già aggiornato (	ADL Screen is already up to date (	ADL Screen ist aktuell (	ADL Screen est à jour (	ADL Screen está al día (
+ADL Screen, from PowerScreen by Boris SdK	ADL Screen, da PowerScreen di Boris SdK	ADL Screen, from PowerScreen by Boris SdK	ADL Screen, aus PowerScreen von Boris SdK	ADL Screen, d'après PowerScreen de Boris SdK	ADL Screen, de PowerScreen por Boris SdK
+Check for updates	Cerca aggiornamenti	Check for updates	Nach Updates suchen	Rechercher	Buscar actualizaciones
+Checking for the latest version...	Cerco l'ultima versione...	Checking for the latest version...	Suche neueste Version...	Recherche de la version...	Buscando la última versión...
+Checking...	Controllo...	Checking...	Prüfe...	Vérification...	Comprobando...
+Close	Chiudi	Close	Schließen	Fermer	Cerrar
+Developed by Boris SdK	Sviluppato da Boris SdK	Developed by Boris SdK	Entwickelt von Boris SdK	Développé par Boris SdK	Desarrollado por Boris SdK
+Display Sleep	Spegnimento schermo	Display Sleep	Display-Ruhezustand	Veille de l'écran	Reposo de pantalla
+Do not turn off the printer. The screen restarts by itself.	Non spegnere la stampante. Lo schermo riparte da solo.	Do not turn off the printer. The screen restarts by itself.	Drucker nicht ausschalten. Display startet von selbst neu.	N'éteignez pas l'imprimante. L'écran redémarre seul.	No apagues la impresora. La pantalla se reinicia sola.
+Download	Scarica	Download	Download	Télécharger	Descargar
+Downloading 	Scarico 	Downloading 	Lade 	Téléchargement 	Descargando
+Install files	Installa i file	Install files	Dateien installieren	Installer	Instalar archivos
+Installing 	Installo 	Installing 	Installiere 	Installation 	Instalando
+Invert Z Icon	Inverti icona Z	Invert Z Icon	Z-Symbol umkehren	Inverser l'icône Z	Invertir icono Z
+Log Level	Livello di log	Log Level	Protokollstufe	Niveau de log	Nivel de registro
+No update needed	Nessun aggiornamento necessario	No update needed	Kein Update nötig	Pas de mise à jour	No hace falta actualizar
+Preferences	Preferenze	Preferences	Einstellungen	Préférences	Preferencias
+Preparing update...	Preparo l'aggiornamento...	Preparing update...	Update wird vorbereitet...	Préparation...	Preparando...
+Prompt Emergency Stop	Conferma arresto di emergenza	Prompt Emergency Stop	Nothalt bestätigen	Confirmer l'arrêt d'urgence	Confirmar parada de emergencia
+Restart ADL Screen	Riavvia ADL Screen	Restart ADL Screen	ADL Screen neu starten	Redémarrer ADL Screen	Reiniciar ADL Screen
+Restart ADL Screen to apply the new version.	Riavvia ADL Screen per usare la nuova versione.	Restart ADL Screen to apply the new version.	ADL Screen neu starten, um die Version zu nutzen.	Redémarrez ADL Screen pour appliquer.	Reinicia ADL Screen para aplicar.
+Restart needed	Serve il riavvio	Restart needed	Neustart nötig	Redémarrage requis	Hay que reiniciar
+Restarting ADL Screen...	Riavvio ADL Screen...	Restarting ADL Screen...	ADL Screen startet neu...	Redémarrage...	Reiniciando...
+Tap to open Wi-Fi	Tocca per aprire il Wi-Fi	Tap to open Wi-Fi	Tippen für WLAN	Touchez pour le Wi-Fi	Toca para abrir el Wi-Fi
+The screen will be back in a few seconds.	Lo schermo torna tra pochi secondi.	The screen will be back in a few seconds.	Das Display ist gleich wieder da.	L'écran revient dans quelques secondes.	La pantalla vuelve en unos segundos.
+The update script did not finish.	Lo script di aggiornamento non è finito.	The update script did not finish.	Das Update-Skript wurde nicht beendet.	Le script n'a pas terminé.	El script no terminó.
+Unavailable	Non disponibile	Unavailable	Nicht verfügbar	Indisponible	No disponible
+UPDATE	AGGIORNA	UPDATE	AKTUALISIEREN	METTRE À JOUR	ACTUALIZAR
+Update Channel	Canale aggiornamenti	Update Channel	Update-Kanal	Canal de mise à jour	Canal de actualización
+Update channel	Canale aggiornamenti	Update channel	Update-Kanal	Canal de mise à jour	Canal de actualización
+Update failed	Aggiornamento fallito	Update failed	Update fehlgeschlagen	Échec de la mise à jour	Actualización fallida
+Update failed.	Aggiornamento fallito.	Update failed.	Update fehlgeschlagen.	Échec de la mise à jour.	Actualización fallida.
+Update not available	Aggiornamento non disponibile	Update not available	Update nicht verfügbar	Mise à jour indisponible	Actualización no disponible
+Update script not found.	Script di aggiornamento non trovato.	Update script not found.	Update-Skript nicht gefunden.	Script introuvable.	Script no encontrado.
+Updating ADL Screen	Aggiornamento ADL Screen	Updating ADL Screen	ADL Screen wird aktualisiert	Mise à jour d'ADL Screen	Actualizando ADL Screen
+Version: 	Versione: 	Version: 	Version: 	Version : 	Versión:
+Alert	Avviso	Alert	Warnung	Alerte	Aviso
+Current / load	Corrente / carico	Current / load	Strom / Last	Courant / charge	Corriente / carga
+Save/Restart	Salva e riavvia	Save/Restart	Speichern/Neustart	Enregistrer/Redémarrer	Guardar/Reiniciar
+Tuning Goal	Obiettivo	Tuning Goal	Ziel	Objectif	Objetivo
+  Connected	  Collegato	  Connected	  Verbunden	  Connecté	  Conectado
+  Scan again	  Cerca di nuovo	  Scan again	  Erneut suchen	  Rechercher	  Buscar de nuevo
+Connect	Collega	Connect	Verbinden	Connecter	Conectar
+Connect to network	Collega alla rete	Connect to network	Mit Netzwerk verbinden	Connecter au réseau	Conectar a la red
+Connected	Collegato	Connected	Verbunden	Connecté	Conectado
+Connecting to 	Collegamento a 	Connecting to 	Verbinde mit 	Connexion à 	Conectando a
+Excellent signal	Segnale ottimo	Excellent signal	Sehr gutes Signal	Excellent signal	Señal excelente
+Fair signal	Segnale discreto	Fair signal	Mittleres Signal	Signal moyen	Señal aceptable
+Forget network	Dimentica la rete	Forget network	Netzwerk vergessen	Oublier le réseau	Olvidar red
+Good signal	Segnale buono	Good signal	Gutes Signal	Bon signal	Buena señal
+Move closer to the router and scan again.	Avvicinati al router e cerca di nuovo.	Move closer to the router and scan again.	Näher zum Router und erneut suchen.	Rapprochez-vous du routeur et réessayez.	Acércate al router y busca de nuevo.
+Networks	Reti	Networks	Netzwerke	Réseaux	Redes
+No networks found	Nessuna rete trovata	No networks found	Keine Netzwerke gefunden	Aucun réseau	Sin redes
+Not connected	Non collegato	Not connected	Nicht verbunden	Non connecté	No conectado
+Open	Aperta	Open	Offen	Ouvert	Abierta
+Password for 	Password per 	Password for 	Passwort für 	Mot de passe pour 	Contraseña de
+Saved	Salvata	Saved	Gespeichert	Enregistré	Guardada
+Select a network	Scegli una rete	Select a network	Netzwerk wählen	Choisir un réseau	Elige una red
+Weak signal	Segnale debole	Weak signal	Schwaches Signal	Signal faible	Señal débil

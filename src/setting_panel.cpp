@@ -41,6 +41,7 @@ LV_IMG_DECLARE(network_img);
 LV_IMG_DECLARE(refresh_img);
 LV_IMG_DECLARE(ui_cfs_img);
 LV_IMG_DECLARE(ui_logo_watermark_img);
+LV_IMG_DECLARE(ui_adl_logo);
 LV_IMG_DECLARE(update_img);
 
 LV_IMG_DECLARE(info_img);
@@ -60,6 +61,7 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
   , sysinfo_btn(cont, &info_img, "System", &SettingPanel::_handle_callback, this)
   , spoolman_btn(cont, &ui_cfs_img, "CFS", &SettingPanel::_handle_callback, this)
   , powerscreen_update_btn(cont, &update_img, "Power Update", &SettingPanel::_handle_callback, this)
+  , language_btn(cont, &info_img, "Lingua", &SettingPanel::_handle_callback, this)
   , update_lock_timer(NULL)
   , update_locked(false)
 {
@@ -74,6 +76,7 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
   sysinfo_btn.set_subtitle("Preferences and info");
   spoolman_btn.set_subtitle("Filament system");
   powerscreen_update_btn.set_subtitle("ADL Screen and Script");
+  language_btn.set_subtitle("Italiano, English, Deutsch...");
 
   spoolman_btn.disable();
   spoolman_btn.set_pill("Offline", lv_color_hex(powerui::COLOR_DESTRUCTIVE));
@@ -99,6 +102,7 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
   // row 2: restart, the watermark and Power Update as the last tile (the Console lives in Calibrations)
   lv_obj_set_grid_cell(restart_btn.get_button(), S, 0, 1, S, 1, 1);
   lv_obj_set_grid_cell(powerscreen_update_btn.get_button(), S, 3, 1, S, 1, 1);
+  lv_obj_set_grid_cell(language_btn.get_button(), S, 1, 1, S, 1, 1);
 
   // Restart stands out: soft red surface, red icon and title.
   restart_btn.set_active(true, lv_color_hex(powerui::COLOR_DESTRUCTIVE));
@@ -110,12 +114,11 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
 
   // Watermark in the free grid cell: the PowerScreen logo at low opacity with the installed version below.
   lv_obj_t *mark = powerui::plain(cont);
-  lv_obj_set_grid_cell(mark, S, 1, 2, S, 1, 1);
+  lv_obj_set_grid_cell(mark, S, 2, 1, S, 1, 1);
   lv_obj_clear_flag(mark, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_t *mark_logo = lv_img_create(mark);
-  lv_img_set_src(mark_logo, &ui_logo_watermark_img);
+  lv_img_set_src(mark_logo, &ui_adl_logo);
   lv_obj_clear_flag(mark_logo, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_set_style_img_opa(mark_logo, LV_OPA_10, 0);
   lv_obj_align(mark_logo, LV_ALIGN_CENTER, 0, -powerui::px(12));
   lv_obj_t *mark_version = powerui::label(mark, fmt::format("ADL Screen {}", package_version()).c_str(),
                                           &lv_font_montserrat_12, lv_color_hex(powerui::COLOR_MUTED));
@@ -153,6 +156,8 @@ void SettingPanel::handle_callback(lv_event_t *event) {
     } else if (btn == restart_btn.get_button()) {
       spdlog::trace("setting restart pressed");
       show_restart_menu();
+    } else if (btn == language_btn.get_button()) {
+      show_language_menu();
     } else if (btn == macros_btn.get_button()) {
       spdlog::trace("setting macros pressed");
       if (open_macros) {
@@ -182,6 +187,29 @@ void SettingPanel::show_restart_menu() {
       show_confirm("Restart Firmware?", "printer.firmware_restart");
     }
   });
+}
+
+void SettingPanel::show_language_menu() {
+  static const char *const CODES[5] = {"it", "en", "de", "fr", "es"};
+  Config *conf = Config::get_instance();
+  const auto &language = conf->get_json("/language");
+  const std::string current = language.is_string() ? language.template get<std::string>() : "it";
+  int selected = 0;
+  for (int i = 0; i < 5; ++i) {
+    if (current == CODES[i]) {
+      selected = i;
+    }
+  }
+  powerui::choice_dialog("Lingua", {"Italiano", "English", "Deutsch", "Français", "Español"}, [this](int index) {
+    if (index < 0 || index >= 5) {
+      return;
+    }
+    Config *conf = Config::get_instance();
+    conf->set<std::string>("/language", CODES[index]);
+    conf->save();
+    // La lingua si applica quando le schermate vengono ricreate: riparte solo il pannello, non la stampa.
+    restart_powerscreen();
+  }, selected);
 }
 
 void SettingPanel::restart_powerscreen() {
