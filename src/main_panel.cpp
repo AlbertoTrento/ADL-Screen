@@ -32,6 +32,7 @@ LV_IMG_DECLARE(fan);
 LV_IMG_DECLARE(heater);
 LV_IMG_DECLARE(chamber);
 LV_IMG_DECLARE(ui_logo);
+LV_IMG_DECLARE(ui_adl_logo);
 LV_IMG_DECLARE(ui_icon_house);
 LV_IMG_DECLARE(ui_icon_sliders);
 LV_IMG_DECLARE(ui_icon_folder);
@@ -122,6 +123,9 @@ MainPanel::MainPanel(KWebSocketClient &websocket,
     lv_obj_set_size(logo, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(logo, LV_FLEX_FLOW_ROW);
     lv_obj_set_style_pad_column(logo, px(6), 0);
+    lv_obj_set_flex_align(logo, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_t *adl_logo = lv_img_create(logo);
+    lv_img_set_src(adl_logo, &ui_adl_logo);
     powerui::label(logo, "ADL", &lv_font_montserrat_24, lv_color_hex(COLOR_WHITE));
     powerui::label(logo, "Screen", &lv_font_montserrat_24, lv_color_hex(COLOR_MAT_RED));
     lv_obj_clear_flag(logo, LV_OBJ_FLAG_CLICKABLE);
