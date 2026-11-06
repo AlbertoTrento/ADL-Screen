@@ -176,13 +176,13 @@ Slot parse_slot(const json &box_obj, int i) {
     }
   } else if (slot.has_color || any_unknown || has_vender) {
     slot.kind = SlotKind::Unset;
-    slot.name = "Not set";
+    slot.name = "Non impostato";
     if (has_vender && !is_raw_tag(vender)) {
       slot.brand = vender;
     }
   } else {
     slot.kind = SlotKind::Empty;
-    slot.name = "Empty";
+    slot.name = "Vuoto";
   }
   return slot;
 }

@@ -71,11 +71,13 @@ void spool_set(lv_obj_t *spool, const cfs::Slot &slot, bool active) {
 
 namespace {
 
-constexpr int SLOT_W = 128;
+constexpr int SLOT_W = 162;
 constexpr int SLOT_H = 144;
 constexpr int SLOT_GAP = 10;
 constexpr int SLOT_COUNT = 5;  // i quattro slot del CFS piu' la bobina esterna
 constexpr int EXTERNAL_SLOT = 4;
+constexpr int EXTERNAL_X = 484;  // riquadro della bobina esterna, sotto a destra
+constexpr int EXTERNAL_W = 240;
 
 // Palette of the editor (same hues as the PowerUI sketch).
 const uint32_t PALETTE[12] = {0xFFFFFF, 0x2B2B2B, 0xEF4444, 0xF97316, 0xEAB308, 0x22C55E,
@@ -90,7 +92,7 @@ std::string color_data(uint32_t color, int format) {
   return std::string(buf);
 }
 
-std::string slot_letter(int i) { return i == EXTERNAL_SLOT ? std::string("Ext") : std::string(1, static_cast<char>('A' + i)); }
+std::string slot_letter(int i) { return i == EXTERNAL_SLOT ? std::string("Bobina esterna") : std::string(1, static_cast<char>('A' + i)); }
 
 std::string slot_title(int i) { return i == EXTERNAL_SLOT ? std::string("Bobina esterna") : "Slot " + slot_letter(i); }
 
@@ -104,15 +106,15 @@ std::string hex_text(uint32_t color) {
 std::string slot_subtitle(const cfs::Slot &s) {
   switch (s.kind) {
     case cfs::SlotKind::Empty:
-      return "No spool";
+      return "Nessuna bobina";
     case cfs::SlotKind::Unset:
-      return "Spool loaded";
+      return "Bobina caricata";
     case cfs::SlotKind::Defined: {
       std::string text = s.material;
       if (s.remain_len >= 0) {
         text += (text.empty() ? "" : ", ") + std::to_string(s.remain_len) + " m";
       }
-      return text.empty() ? std::string("Spool loaded") : text;
+      return text.empty() ? std::string("Bobina caricata") : text;
     }
   }
   return std::string();
@@ -190,16 +192,20 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
   lv_obj_set_pos(header_label, px(20), px(16));
   status_label = label(slots_card, "", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
   lv_obj_set_pos(status_label, px(76), px(18));
-  version_label = label(slots_card, "", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_align(version_label, LV_ALIGN_TOP_RIGHT, -px(20 + 132 + 12), px(18));
+  version_label = label(slots_card, "", &lv_font_montserrat_12, lv_color_hex(COLOR_ACCENT));
+  lv_obj_align(version_label, LV_ALIGN_TOP_RIGHT, -px(20 + 190 + 12), px(18));
   // Same command as the refresh button of the Creality screen; disabled while printing (see refresh()).
-  refresh_btn = action_button(slots_card, NULL, "Refresh", ActionKind::Outline, 712 - 20 - 132, 8, 132, 34,
+  refresh_btn = action_button(slots_card, NULL, "Controlla filamenti", ActionKind::Outline, 712 - 20 - 190, 8, 190, 34,
                               [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->refresh_slots(); }, this);
 
   for (int i = 0; i < SLOT_COUNT; ++i) {
     SlotWidget &w = slots[i];
     handles[i] = {this, i};
-    w.card = card(slots_card, 16 + i * (SLOT_W + SLOT_GAP), 48, SLOT_W, SLOT_H);
+    // La bobina esterna ha il suo riquadro sotto: i quattro slot del CFS restano in alto.
+    const bool esterna = i == EXTERNAL_SLOT;
+    const int card_w = esterna ? EXTERNAL_W : SLOT_W;
+    w.card = esterna ? card(cont, EXTERNAL_X, 232, EXTERNAL_W, 196)
+                     : card(slots_card, 16 + i * (SLOT_W + SLOT_GAP), 48, SLOT_W, SLOT_H);
     lv_obj_set_style_bg_color(w.card, lv_color_hex(COLOR_BG), 0);
     lv_obj_add_flag(w.card, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(w.card, [](lv_event_t *e) {
@@ -213,7 +219,7 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
     // Pencil: opens the editor of this slot.
     w.pencil = plain(w.card);
     lv_obj_set_size(w.pencil, px(34), px(30));
-    lv_obj_set_pos(w.pencil, px(SLOT_W - 38), px(2));
+    lv_obj_set_pos(w.pencil, px(card_w - 38), px(2));
     lv_obj_add_flag(w.pencil, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_t *pencil_icon = label(w.pencil, LV_SYMBOL_EDIT, &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
     lv_obj_center(pencil_icon);
@@ -226,57 +232,62 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
     lv_obj_align(w.spool, LV_ALIGN_TOP_MID, 0, px(22));
 
     w.name = label(w.card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_FG));
-    lv_obj_set_width(w.name, px(SLOT_W - 16));
+    lv_obj_set_width(w.name, px(card_w - 16));
     lv_obj_set_style_text_align(w.name, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(w.name, LV_LABEL_LONG_DOT);
     lv_obj_align(w.name, LV_ALIGN_TOP_MID, 0, px(92));
 
     w.sub = label(w.card, "", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-    lv_obj_set_width(w.sub, px(SLOT_W - 16));
+    lv_obj_set_width(w.sub, px(card_w - 16));
     lv_obj_set_style_text_align(w.sub, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(w.sub, LV_LABEL_LONG_DOT);
     lv_obj_align(w.sub, LV_ALIGN_TOP_MID, 0, px(114));
+    if (esterna) {
+      action_button(w.card, NULL, "Modifica", ActionKind::Outline, 40, 144, 160, 40, [](lv_event_t *e) {
+        static_cast<CfsPanel *>(e->user_data)->open_edit(EXTERNAL_SLOT);
+      }, this);
+    }
   }
 
   load_external();
 
   // ---- Detail card of the selected slot.
-  detail_card = card(cont, 12, 232, 712, 196);
-  detail_spool = cfs_ui::spool_create(detail_card, 84, lv_color_hex(COLOR_CARD), 0);
-  lv_obj_set_pos(detail_spool, px(36), px(56));
+  detail_card = card(cont, 12, 232, 460, 196);
+  detail_spool = cfs_ui::spool_create(detail_card, 72, lv_color_hex(COLOR_CARD), 0);
+  lv_obj_set_pos(detail_spool, px(20), px(44));
   detail_slot_label = label(detail_card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(detail_slot_label, px(152), px(40));
+  lv_obj_set_pos(detail_slot_label, px(110), px(18));
   detail_name = label(detail_card, "", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
   lv_obj_set_width(detail_name, px(330));
   lv_label_set_long_mode(detail_name, LV_LABEL_LONG_DOT);
-  lv_obj_set_pos(detail_name, px(152), px(64));
+  lv_obj_set_pos(detail_name, px(110), px(40));
   detail_info = label(detail_card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_width(detail_info, px(340));
-  lv_obj_set_pos(detail_info, px(152), px(104));
+  lv_obj_set_width(detail_info, px(330));
+  lv_obj_set_pos(detail_info, px(110), px(78));
   detail_remain = label(detail_card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_width(detail_remain, px(340));
-  lv_obj_set_pos(detail_remain, px(152), px(130));
-  detail_edit_btn = action_button(detail_card, NULL, "Edit slot", ActionKind::Outline, 520, 70, 168, 48,
+  lv_obj_set_width(detail_remain, px(330));
+  lv_obj_set_pos(detail_remain, px(110), px(102));
+  detail_edit_btn = action_button(detail_card, NULL, "Modifica slot", ActionKind::Outline, 110, 138, 190, 44,
                                   [](lv_event_t *e) {
                                     CfsPanel *p = static_cast<CfsPanel *>(e->user_data);
                                     p->open_edit(p->selected);
                                   }, this);
 
   // ---- Shown instead of both cards while the CFS is not connected.
-  empty = empty_state(cont, &ui_cfs_img, "CFS not connected",
-                      "Connect the CFS to the printer to see its four slots here.");
+  empty = empty_state(cont, &ui_cfs_img, "CFS non collegato",
+                      "Collega il CFS alla stampante per vedere qui i suoi quattro slot.");
   lv_obj_add_flag(empty, LV_OBJ_FLAG_HIDDEN);
 
   // ---- Slot editor (modal over the screen).
   edit_root = dim_overlay(cont);
   lv_obj_t *ec = card(edit_root, 24, 12, 688, 416);
-  edit_title = label(ec, "Edit slot", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
+  edit_title = label(ec, "Modifica slot", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
   lv_obj_set_pos(edit_title, px(24), px(16));
-  lv_obj_t *edit_sub = label(ec, "Set what is loaded in this CFS slot", &lv_font_montserrat_12,
+  lv_obj_t *edit_sub = label(ec, "Scegli il filamento caricato", &lv_font_montserrat_12,
                              lv_color_hex(COLOR_MUTED));
   lv_obj_set_pos(edit_sub, px(24), px(46));
 
-  const char *captions[3] = {"BRAND", "MATERIAL", "FILAMENT"};
+  const char *captions[3] = {"MARCA", "MATERIALE", "FILAMENTO"};
   lv_obj_t **dds[3] = {&brand_dd, &type_dd, &name_dd};
   for (int i = 0; i < 3; ++i) {
     const int y = 76 + i * 76;
@@ -337,18 +348,18 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
   lv_obj_set_style_border_opa(hex_preview, LV_OPA_30, 0);
   hex_label = label(ec, "#FFFFFF", &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
   lv_obj_set_pos(hex_label, px(410), px(220));
-  action_button(ec, NULL, "Custom color", ActionKind::Outline, 364, 262, 288, 44,
+  action_button(ec, NULL, "Colore personalizzato", ActionKind::Outline, 364, 262, 288, 44,
                 [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->open_color_dialog(); }, this);
 
-  action_button(ec, NULL, "Cancel", ActionKind::Outline, 24, 344, 304, 48,
+  action_button(ec, NULL, "Annulla", ActionKind::Outline, 24, 344, 304, 48,
                 [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->close_edit(); }, this);
-  action_button(ec, NULL, "Save", ActionKind::Primary, 364, 344, 288, 48,
+  action_button(ec, NULL, "Salva", ActionKind::Primary, 364, 344, 288, 48,
                 [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->save_edit(); }, this);
 
   // ---- Custom color dialog (three sliders), above the editor.
   color_root = dim_overlay(cont);
   lv_obj_t *cc = card(color_root, 146, 40, 420, 336);
-  lv_obj_t *color_title = label(cc, "Custom color", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
+  lv_obj_t *color_title = label(cc, "Colore personalizzato", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
   lv_obj_set_pos(color_title, px(24), px(16));
   color_preview = lv_obj_create(cc);
   lv_obj_remove_style_all(color_preview);
@@ -376,7 +387,7 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
     lv_obj_add_event_cb(sl, [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->handle_color_slider(); },
                         LV_EVENT_VALUE_CHANGED, this);
   }
-  action_button(cc, NULL, "Cancel", ActionKind::Outline, 24, 268, 180, 46,
+  action_button(cc, NULL, "Annulla", ActionKind::Outline, 24, 268, 180, 46,
                 [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->close_color_dialog(false); }, this);
   action_button(cc, NULL, "OK", ActionKind::Primary, 216, 268, 180, 46,
                 [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->close_color_dialog(true); }, this);
@@ -434,13 +445,13 @@ void CfsPanel::refresh_slots() {
   }
   // The CFS moves the filament of each slot a little to see if a spool is there: never while printing.
   if (printing_now()) {
-    show_status("Cannot refresh slots while printing", COLOR_WARNING, 5000);
+    show_status("Non si puo' controllare durante la stampa", COLOR_WARNING, 5000);
     return;
   }
   // NUM=15 is "every slot", as the Creality interface sends it.
   ws.gcode_script(fmt::format("BOX_INFO_REFRESH ADDR={} NUM=15", state.box));
   spdlog::info("cfs: refresh of every slot requested (box {})", state.box);
-  show_status("Refreshing slots...", COLOR_MUTED, 10000);
+  show_status("Controllo filamenti...", COLOR_MUTED, 10000);
 }
 
 const cfs::Slot &CfsPanel::slot_at(int index) const {
@@ -450,7 +461,7 @@ const cfs::Slot &CfsPanel::slot_at(int index) const {
 void CfsPanel::load_external() {
   external = cfs::Slot();
   external.kind = cfs::SlotKind::Unset;
-  external.name = "Not set";
+  external.name = "Non impostato";
   Config *conf = Config::get_instance();
   const json id = conf->get_json("/external_spool/material_id");
   const json color = conf->get_json("/external_spool/color");
@@ -492,10 +503,12 @@ void CfsPanel::refresh() {
   if (connected) {
     lv_obj_clear_flag(slots_card, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(detail_card, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(slots[EXTERNAL_SLOT].card, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(empty, LV_OBJ_FLAG_HIDDEN);
   } else {
     lv_obj_add_flag(slots_card, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(detail_card, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(slots[EXTERNAL_SLOT].card, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(empty, LV_OBJ_FLAG_HIDDEN);
     return;
   }
@@ -511,7 +524,7 @@ void CfsPanel::refresh() {
     selected = pick >= 0 ? pick : 0;
   }
 
-  const std::string version = "Box firmware: " + (state.version.empty() ? std::string("unknown") : state.version);
+  const std::string version = "Box firmware: " + (state.version.empty() ? std::string("sconosciuto") : state.version);
   lv_label_set_text(version_label, version.c_str());
   if (refresh_btn != NULL) {
     if (printing_now()) {
@@ -528,7 +541,7 @@ void CfsPanel::refresh() {
     lv_label_set_text(w.name, s.name.c_str());
     lv_obj_set_style_text_color(w.name, lv_color_hex(s.kind == cfs::SlotKind::Empty ? COLOR_MUTED : COLOR_FG), 0);
     lv_label_set_text(w.sub, i == EXTERNAL_SLOT && s.kind != cfs::SlotKind::Defined ? "Bobina esterna" : slot_subtitle(s).c_str());
-    if (s.kind == cfs::SlotKind::Empty) {
+    if (s.kind == cfs::SlotKind::Empty || i == EXTERNAL_SLOT) {
       lv_obj_add_flag(w.pencil, LV_OBJ_FLAG_HIDDEN);
     } else {
       lv_obj_clear_flag(w.pencil, LV_OBJ_FLAG_HIDDEN);
@@ -547,10 +560,10 @@ void CfsPanel::refresh() {
   std::string info;
   switch (sel.kind) {
     case cfs::SlotKind::Empty:
-      info = "No spool in this slot";
+      info = "Nessuna bobina in questo slot";
       break;
     case cfs::SlotKind::Unset:
-      info = "A spool is loaded. Set its material and color with Edit slot.";
+      info = "Scegli materiale e colore con Modifica slot";
       break;
     case cfs::SlotKind::Defined:
       info = sel.brand;
@@ -560,7 +573,7 @@ void CfsPanel::refresh() {
       break;
   }
   lv_label_set_text(detail_info, info.c_str());
-  lv_label_set_text(detail_remain, sel.remain_len >= 0 ? (std::to_string(sel.remain_len) + " m remaining").c_str() : "");
+  lv_label_set_text(detail_remain, sel.remain_len >= 0 ? (std::to_string(sel.remain_len) + " m rimasti").c_str() : "");
   if (sel.kind == cfs::SlotKind::Empty) {
     lv_obj_add_flag(detail_edit_btn, LV_OBJ_FLAG_HIDDEN);
   } else {
@@ -650,11 +663,11 @@ void CfsPanel::open_edit(int index) {
     return;
   }
   if (printing_now()) {
-    show_status("Cannot edit slots while printing", COLOR_WARNING, 5000);
+    show_status("Non si puo' modificare durante la stampa", COLOR_WARNING, 5000);
     return;
   }
   if (cfs::materials().empty()) {
-    show_status("Material database not found on this printer", COLOR_WARNING, 6000);
+    show_status("Database materiali non trovato", COLOR_WARNING, 6000);
     return;
   }
   select_slot(index);
@@ -686,7 +699,7 @@ void CfsPanel::open_edit(int index) {
     }
   }
   update_color_ui();
-  lv_label_set_text(edit_title, ("Edit " + slot_title(index)).c_str());
+  lv_label_set_text(edit_title, ("Modifica " + slot_title(index)).c_str());
   lv_obj_clear_flag(edit_root, LV_OBJ_FLAG_HIDDEN);
   lv_obj_move_foreground(edit_root);
 }
@@ -768,7 +781,7 @@ void CfsPanel::save_edit() {
     return;
   }
   if (printing_now()) {
-    show_status("Cannot edit slots while printing", COLOR_WARNING, 5000);
+    show_status("Non si puo' modificare durante la stampa", COLOR_WARNING, 5000);
     close_edit();
     return;
   }
@@ -790,7 +803,7 @@ void CfsPanel::save_edit() {
   pending.tries = 1;
   send_color(edit_slot, pending.color, pending.format);
   close_edit();
-  show_status("Saving slot " + num + "...", COLOR_MUTED, 0);
+  show_status("Salvataggio slot " + num + "...", COLOR_MUTED, 0);
   if (verify_timer != NULL) {
     lv_timer_del(verify_timer);
   }
@@ -808,7 +821,7 @@ void CfsPanel::check_saved() {
   if (ok) {
     color_format = pending.format;  // remember the format the CFS accepted
     spdlog::info("cfs: slot {} saved, color format {} accepted", num, pending.format);
-    show_status("Slot " + num + " saved", COLOR_ACCENT, 6000);
+    show_status("Slot " + num + " salvato", COLOR_ACCENT, 6000);
     pending.slot = -1;
     return;
   }
@@ -819,7 +832,7 @@ void CfsPanel::check_saved() {
     pending.format = (pending.format + 1) % COLOR_FORMATS;
     ++pending.tries;
     send_color(pending.slot, pending.color, pending.format);
-    show_status("Retrying slot " + num + "...", COLOR_MUTED, 0);
+    show_status("Nuovo tentativo slot " + num + "...", COLOR_MUTED, 0);
     if (verify_timer != NULL) {
       lv_timer_del(verify_timer);
     }
@@ -827,7 +840,7 @@ void CfsPanel::check_saved() {
     lv_timer_set_repeat_count(verify_timer, 1);
     return;
   }
-  show_status("Slot " + num + ": the CFS has not reported the change", COLOR_WARNING, 8000);
+  show_status("Slot " + num + ": il CFS non ha confermato", COLOR_WARNING, 8000);
   pending.slot = -1;
 }
 
