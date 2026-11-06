@@ -554,7 +554,7 @@ void SysInfoPanel::create_tabs() {
   lv_obj_set_pos(info_card, px(12), px(134));
   lv_obj_t *info_title = label(info_card, "System", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_FG));
   lv_obj_set_pos(info_title, px(20), px(14));
-  const char *info_names[5] = {"ADL Screen", "CFS Power Script", "Klipper", "Moonraker", "K1C Firmware"};
+  const char *info_names[5] = {"ADL Screen", "ADL Script", "Klipper", "Moonraker", "K1C Firmware"};
   for (int i = 0; i < 5; ++i) {
     const int row_y = 46 + i * 49;
     lv_obj_t *line = plain(info_card);

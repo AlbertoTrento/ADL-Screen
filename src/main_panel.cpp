@@ -413,7 +413,7 @@ void MainPanel::send_camera_macro(bool turn_off) {
       std::lock_guard<std::mutex> guard(lv_lock);
       // The macros come with the Power Macros of the CFS Power Script.
       powerui::confirm_dialog("Camera macros not found",
-                              "Install the Power Macros again from the CFS Power Script (Install menu, option 6).", "OK",
+                              "Install the Power Macros again from ADL Script (Install menu, option 6).", "OK",
                               powerui::ActionKind::Outline, []() {});
     }
   });
