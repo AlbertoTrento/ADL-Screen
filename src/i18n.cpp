@@ -27,6 +27,9 @@ std::vector<std::pair<std::string, const char *>> prefixes;  // chiavi che finis
 std::vector<std::pair<std::string, const char *>> suffixes;  // chiavi che iniziano con uno spazio o con ":"
 
 const char *find_exact(const char *text) {
+  if (text == NULL) {
+    return NULL;
+  }
   auto it = exact.find(text);
   return it == exact.end() ? text : it->second;
 }
@@ -99,11 +102,19 @@ void __wrap_lv_label_set_text(lv_obj_t *obj, const char *text) {
 }
 
 void __wrap_lv_textarea_set_placeholder_text(lv_obj_t *obj, const char *text) {
+  if (text == NULL) {
+    __real_lv_textarea_set_placeholder_text(obj, text);
+    return;
+  }
   const std::string out = translate(text);
   __real_lv_textarea_set_placeholder_text(obj, out.c_str());
 }
 
 void __wrap_lv_dropdown_set_options(lv_obj_t *obj, const char *options) {
+  if (options == NULL) {
+    __real_lv_dropdown_set_options(obj, options);
+    return;
+  }
   std::string out;
   const char *start = options;
   while (true) {
@@ -120,13 +131,18 @@ void __wrap_lv_dropdown_set_options(lv_obj_t *obj, const char *options) {
 }
 
 void __wrap_lv_btnmatrix_set_map(lv_obj_t *obj, const char *map[]) {
+  if (map == NULL) {
+    __real_lv_btnmatrix_set_map(obj, map);
+    return;
+  }
   // LVGL tiene il puntatore alla mappa: la copia tradotta deve restare viva, una per ogni mappa.
   static std::map<const char **, std::vector<const char *>> copies;
   std::vector<const char *> &copy = copies[map];
   copy.clear();
   for (int i = 0;; ++i) {
+    // Una mappa finisce con "" oppure con NULL.
     copy.push_back(find_exact(map[i]));
-    if (map[i][0] == '\0') {
+    if (map[i] == NULL || map[i][0] == '\0') {
       break;
     }
   }
