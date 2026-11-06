@@ -1,4 +1,5 @@
 #include "cfs_panel.h"
+#include "config.h"
 #include "powerui.h"
 #include "state.h"
 #include "spdlog/spdlog.h"
@@ -70,9 +71,11 @@ void spool_set(lv_obj_t *spool, const cfs::Slot &slot, bool active) {
 
 namespace {
 
-constexpr int SLOT_W = 162;
+constexpr int SLOT_W = 128;
 constexpr int SLOT_H = 144;
 constexpr int SLOT_GAP = 10;
+constexpr int SLOT_COUNT = 5;  // i quattro slot del CFS piu' la bobina esterna
+constexpr int EXTERNAL_SLOT = 4;
 
 // Palette of the editor (same hues as the PowerUI sketch).
 const uint32_t PALETTE[12] = {0xFFFFFF, 0x2B2B2B, 0xEF4444, 0xF97316, 0xEAB308, 0x22C55E,
@@ -87,7 +90,9 @@ std::string color_data(uint32_t color, int format) {
   return std::string(buf);
 }
 
-std::string slot_letter(int i) { return std::string(1, static_cast<char>('A' + i)); }
+std::string slot_letter(int i) { return i == EXTERNAL_SLOT ? std::string("Ext") : std::string(1, static_cast<char>('A' + i)); }
+
+std::string slot_title(int i) { return i == EXTERNAL_SLOT ? std::string("External spool") : "Slot " + slot_letter(i); }
 
 std::string hex_text(uint32_t color) {
   char buf[16];
@@ -191,7 +196,7 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
   refresh_btn = action_button(slots_card, NULL, "Refresh", ActionKind::Outline, 712 - 20 - 132, 8, 132, 34,
                               [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->refresh_slots(); }, this);
 
-  for (int i = 0; i < 4; ++i) {
+  for (int i = 0; i < SLOT_COUNT; ++i) {
     SlotWidget &w = slots[i];
     handles[i] = {this, i};
     w.card = card(slots_card, 16 + i * (SLOT_W + SLOT_GAP), 48, SLOT_W, SLOT_H);
@@ -232,6 +237,8 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
     lv_label_set_long_mode(w.sub, LV_LABEL_LONG_DOT);
     lv_obj_align(w.sub, LV_ALIGN_TOP_MID, 0, px(114));
   }
+
+  load_external();
 
   // ---- Detail card of the selected slot.
   detail_card = card(cont, 12, 232, 712, 196);
@@ -416,7 +423,7 @@ void CfsPanel::handle_slot_click(int index) {
   user_selected = true;
   select_slot(index);
   // A spool that is loaded but not described yet: go straight to the editor.
-  if (state.connected && state.slots[index].kind == cfs::SlotKind::Unset) {
+  if (state.connected && slot_at(index).kind == cfs::SlotKind::Unset) {
     open_edit(index);
   }
 }
@@ -436,8 +443,41 @@ void CfsPanel::refresh_slots() {
   show_status("Refreshing slots...", COLOR_MUTED, 10000);
 }
 
+const cfs::Slot &CfsPanel::slot_at(int index) const {
+  return index == EXTERNAL_SLOT ? external : state.slots[index];
+}
+
+void CfsPanel::load_external() {
+  external = cfs::Slot();
+  external.kind = cfs::SlotKind::Unset;
+  external.name = "Not set";
+  Config *conf = Config::get_instance();
+  const json id = conf->get_json("/external_spool/material_id");
+  const json color = conf->get_json("/external_spool/color");
+  cfs::Material m;
+  if (id.is_string() && cfs::find_material(id.template get<std::string>(), m)) {
+    external.kind = cfs::SlotKind::Defined;
+    external.material_id = m.id;
+    external.name = m.name;
+    external.material = m.type;
+    external.brand = m.brand;
+  }
+  if (color.is_number()) {
+    external.has_color = true;
+    external.color = color.template get<uint32_t>() & 0xFFFFFF;
+  }
+}
+
+void CfsPanel::save_external() {
+  Config *conf = Config::get_instance();
+  conf->set<std::string>("/external_spool/material_id", edit_material_id);
+  conf->set<int>("/external_spool/color", static_cast<int>(edit_color & 0xFFFFFF));
+  conf->save();
+  load_external();
+}
+
 void CfsPanel::select_slot(int index) {
-  if (index < 0 || index > 3) {
+  if (index < 0 || index >= SLOT_COUNT) {
     return;
   }
   selected = index;
@@ -481,13 +521,13 @@ void CfsPanel::refresh() {
     }
   }
 
-  for (int i = 0; i < 4; ++i) {
-    const cfs::Slot &s = state.slots[i];
+  for (int i = 0; i < SLOT_COUNT; ++i) {
+    const cfs::Slot &s = slot_at(i);
     SlotWidget &w = slots[i];
     cfs_ui::spool_set(w.spool, s, state.active == i);
     lv_label_set_text(w.name, s.name.c_str());
     lv_obj_set_style_text_color(w.name, lv_color_hex(s.kind == cfs::SlotKind::Empty ? COLOR_MUTED : COLOR_FG), 0);
-    lv_label_set_text(w.sub, slot_subtitle(s).c_str());
+    lv_label_set_text(w.sub, i == EXTERNAL_SLOT && s.kind != cfs::SlotKind::Defined ? "External spool" : slot_subtitle(s).c_str());
     if (s.kind == cfs::SlotKind::Empty) {
       lv_obj_add_flag(w.pencil, LV_OBJ_FLAG_HIDDEN);
     } else {
@@ -499,9 +539,9 @@ void CfsPanel::refresh() {
     lv_obj_set_style_bg_color(w.card, lv_color_hex(sel ? COLOR_ACCENT_BG : COLOR_BG), 0);
   }
 
-  const cfs::Slot &sel = state.slots[selected];
+  const cfs::Slot &sel = slot_at(selected);
   cfs_ui::spool_set(detail_spool, sel, state.active == selected);
-  lv_label_set_text(detail_slot_label, ("Slot " + slot_letter(selected)).c_str());
+  lv_label_set_text(detail_slot_label, slot_title(selected).c_str());
   lv_label_set_text(detail_name, sel.name.c_str());
 
   std::string info;
@@ -606,7 +646,7 @@ void CfsPanel::update_color_ui() {
 }
 
 void CfsPanel::open_edit(int index) {
-  if (index < 0 || index > 3 || !state.connected) {
+  if (index < 0 || index >= SLOT_COUNT || !state.connected) {
     return;
   }
   if (printing_now()) {
@@ -619,7 +659,7 @@ void CfsPanel::open_edit(int index) {
   }
   select_slot(index);
   edit_slot = index;
-  const cfs::Slot &s = state.slots[index];
+  const cfs::Slot &s = slot_at(index);
 
   // Start from what the slot holds; a slot with nothing known starts as Generic PLA, white.
   cfs::Material current;
@@ -646,7 +686,7 @@ void CfsPanel::open_edit(int index) {
     }
   }
   update_color_ui();
-  lv_label_set_text(edit_title, ("Edit slot " + slot_letter(index)).c_str());
+  lv_label_set_text(edit_title, ("Edit " + slot_title(index)).c_str());
   lv_obj_clear_flag(edit_root, LV_OBJ_FLAG_HIDDEN);
   lv_obj_move_foreground(edit_root);
 }
@@ -730,6 +770,13 @@ void CfsPanel::save_edit() {
   if (printing_now()) {
     show_status("Cannot edit slots while printing", COLOR_WARNING, 5000);
     close_edit();
+    return;
+  }
+  if (edit_slot == EXTERNAL_SLOT) {
+    save_external();
+    close_edit();
+    refresh();
+    show_status("External spool saved", COLOR_ACCENT, 6000);
     return;
   }
   const std::string num(1, static_cast<char>('A' + edit_slot));

@@ -51,6 +51,11 @@ class CfsPanel {
  private:
   void select_slot(int index);
   void refresh();
+  // Slot del CFS (0..3) o bobina esterna (4).
+  const cfs::Slot &slot_at(int index) const;
+  // Il filamento della bobina esterna e' salvato nella configurazione del pannello: il CFS non lo conosce.
+  void load_external();
+  void save_external();
   void fill_brands();
   void fill_types();
   void fill_names();
@@ -88,8 +93,8 @@ class CfsPanel {
   lv_obj_t *version_label;
   lv_obj_t *status_label;
   lv_obj_t *refresh_btn;
-  SlotWidget slots[4];
-  SlotHandle handles[4];
+  SlotWidget slots[5];   // i quattro slot del CFS e la bobina esterna
+  SlotHandle handles[5];
   lv_obj_t *detail_spool;
   lv_obj_t *detail_slot_label;
   lv_obj_t *detail_name;
@@ -97,6 +102,7 @@ class CfsPanel {
   lv_obj_t *detail_remain;
   lv_obj_t *detail_edit_btn;
   cfs::State state;
+  cfs::Slot external;
   int selected;
   bool user_selected;
 
