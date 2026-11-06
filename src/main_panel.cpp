@@ -73,7 +73,7 @@ MainPanel::MainPanel(KWebSocketClient &websocket,
   , title_bar(lv_obj_create(lv_scr_act()))
   , title_label(lv_label_create(title_bar))
   , time_label(lv_label_create(title_bar))
-  , logo(lv_img_create(title_bar))
+  , logo(lv_obj_create(title_bar))
   , title_label_bold(NULL)
   , back_pill(NULL)
   , clock_timer(NULL)
@@ -117,7 +117,13 @@ MainPanel::MainPanel(KWebSocketClient &websocket,
     lv_obj_set_style_border_color(title_bar, lv_color_hex(COLOR_WHITE), LV_PART_MAIN);
     lv_obj_set_style_border_opa(title_bar, LV_OPA_10, LV_PART_MAIN);
 
-    lv_img_set_src(logo, &ui_logo);
+    // Nome del pannello: ADL bianco e Screen rosso.
+    lv_obj_remove_style_all(logo);
+    lv_obj_set_size(logo, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(logo, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_column(logo, px(6), 0);
+    powerui::label(logo, "ADL", &lv_font_montserrat_24, lv_color_hex(COLOR_WHITE));
+    powerui::label(logo, "Screen", &lv_font_montserrat_24, lv_color_hex(COLOR_MAT_RED));
     lv_obj_clear_flag(logo, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_align(logo, LV_ALIGN_LEFT_MID, px(16), 0);
 

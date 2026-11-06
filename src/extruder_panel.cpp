@@ -35,35 +35,13 @@ ExtruderPanel::ExtruderPanel(KWebSocketClient &websocket_client,
 		   {"1", "2", "5", "10", "25", "35", "50", ""}, 2, &ExtruderPanel::_handle_callback, this)
   , rightside_btns_cont(lv_obj_create(panel_cont))
   , leftside_btns_cont(lv_obj_create(panel_cont))
-  , load_btn(leftside_btns_cont, &load_filament_img, "Load", &ExtruderPanel::_handle_callback, this)
-  , unload_btn(leftside_btns_cont, &unload_filament_img, "Unload", &ExtruderPanel::_handle_callback, this)
-  , cooldown_btn(leftside_btns_cont, &extruder, "Cooldown", &ExtruderPanel::_handle_callback, this)
-  , manual_change_btn(leftside_btns_cont, NULL, "Manual color", &ExtruderPanel::_handle_callback, this)
-  , extrude_btn(rightside_btns_cont, &extrude_img, "Extrude", &ExtruderPanel::_handle_callback, this)
-  , retract_btn(rightside_btns_cont, &retract_img, "Retract", &ExtruderPanel::_handle_callback, this)
-  , load_filament_macro("LOAD_FILAMENT")
-  , unload_filament_macro("UNLOAD_FILAMENT")
-  , cooldown_macro("SET_HEATER_TEMPERATURE HEATER=extruder TARGET=0")
+  , load_btn(leftside_btns_cont, &load_filament_img, "Carica filamento", &ExtruderPanel::_handle_callback, this)
+  , unload_btn(leftside_btns_cont, &unload_filament_img, "Togli filamento", &ExtruderPanel::_handle_callback, this)
+  , cooldown_btn(leftside_btns_cont, &extruder, "Spegni ugello", &ExtruderPanel::_handle_callback, this)
+  , manual_change_btn(leftside_btns_cont, NULL, "Cambio in pausa", &ExtruderPanel::_handle_callback, this)
+  , extrude_btn(rightside_btns_cont, &extrude_img, "Spingi", &ExtruderPanel::_handle_callback, this)
+  , retract_btn(rightside_btns_cont, &retract_img, "Tira indietro", &ExtruderPanel::_handle_callback, this)
 {
-  Config *conf = Config::get_instance();
-  auto df = conf->get_json("/default_printer");
-  if (!df.empty()) {
-    auto v = conf->get_json(conf->df() + "default_macros/load_filament");
-    if (!v.is_null()) {
-      load_filament_macro = v.template get<std::string>();
-    }
-
-    v = conf->get_json(conf->df() + "default_macros/unload_filament");
-    if (!v.is_null()) {
-      unload_filament_macro = v.template get<std::string>();
-    }
-
-    v = conf->get_json(conf->df() + "default_macros/cooldown");
-    if (!v.is_null()) {
-      cooldown_macro = v.template get<std::string>();
-    }
-  }
-
   lv_obj_move_background(panel_cont);
   lv_obj_clear_flag(panel_cont, LV_OBJ_FLAG_SCROLLABLE);  
   lv_obj_set_size(panel_cont, LV_PCT(100), LV_PCT(100));
@@ -79,7 +57,7 @@ ExtruderPanel::ExtruderPanel(KWebSocketClient &websocket_client,
   lv_obj_set_style_bg_opa(title_bar, LV_OPA_COVER, 0);
   lv_obj_set_style_border_width(title_bar, 0, 0);
 
-  lv_label_set_text(title_label, "FILAMENT CONTROL");
+  lv_label_set_text(title_label, "FILAMENTO");
   lv_obj_set_width(title_label, LV_PCT(100));
   lv_label_set_long_mode(title_label, LV_LABEL_LONG_DOT);
   lv_obj_set_style_text_align(title_label, LV_TEXT_ALIGN_CENTER, 0);
@@ -107,80 +85,82 @@ ExtruderPanel::ExtruderPanel(KWebSocketClient &websocket_client,
   lv_obj_add_flag(rightside_btns_cont, LV_OBJ_FLAG_HIDDEN);
   lv_obj_clear_flag(panel_cont, LV_OBJ_FLAG_SCROLLABLE);
 
-  // Rail buttons: a small tinted icon above the label (the large image button is hidden; touches reach the container).
-  auto stack_icon = [](ButtonContainer &button, const lv_img_dsc_t *src, int icon_px, lv_color_t color,
-                       int icon_dy = 12, int label_dy = 12) {
-    lv_obj_add_flag(button.get_button(), LV_OBJ_FLAG_HIDDEN);
-    lv_obj_t *glyph = powerui::icon(button.get_container(), src, icon_px, color);
-    lv_obj_align(glyph, LV_ALIGN_CENTER, 0, -px(icon_dy));
-    lv_obj_align(button.get_label(), LV_ALIGN_BOTTOM_MID, 0, -px(label_dy));
-    return glyph;
-  };
-
   auto put = [this](ButtonContainer &button, int x, int y, int w, int h) {
     lv_obj_set_parent(button.get_container(), panel_cont);
     button.set_fixed_size(px(w), px(h));
     lv_obj_set_pos(button.get_container(), px(x), px(y));
   };
 
-  // Left rail (x 12, 140 wide, 12 px gaps): a short text-only MANUAL M600, large Load and Unload, a short Cooldown.
-  put(manual_change_btn, 12, 12, 140, 56);
-  put(load_btn, 12, 80, 140, 122);
-  put(unload_btn, 12, 214, 140, 122);
-  put(cooldown_btn, 12, 348, 140, 80);
-  // Right rail: two large buttons.
-  put(extrude_btn, 584, 12, 140, 200);
-  put(retract_btn, 584, 224, 140, 204);
+  // Ogni pulsante dice cosa fa: nome sopra e spiegazione sotto. Solo ASCII: i font non hanno le lettere accentate.
+  auto describe = [](ButtonContainer &button, const lv_font_t *font, const char *text) {
+    lv_obj_add_flag(button.get_button(), LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_style_text_font(button.get_label(), font, 0);
+    lv_obj_align(button.get_label(), LV_ALIGN_TOP_MID, 0, px(12));
+    lv_obj_t *info = label(button.get_container(), text, &lv_font_montserrat_12, lv_color_hex(powerui::COLOR_MUTED));
+    lv_obj_set_width(info, LV_PCT(92));
+    lv_label_set_long_mode(info, LV_LABEL_LONG_WRAP);
+    lv_obj_set_style_text_align(info, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_align(info, LV_ALIGN_BOTTOM_MID, 0, -px(10));
+  };
 
-  for (ButtonContainer *button : {&manual_change_btn, &load_btn, &unload_btn, &retract_btn}) {
+  // Pagina Filamento (736 x 440): temperatura, carica e togli, lunghezza, spingi, tira indietro e spegni ugello.
+  put(load_btn, 12, 122, 350, 108);
+  put(unload_btn, 374, 122, 350, 108);
+  put(extrude_btn, 12, 342, 228, 86);
+  put(retract_btn, 252, 342, 228, 86);
+  put(cooldown_btn, 492, 342, 232, 86);
+  put(manual_change_btn, 280, 18, 210, 36);
+
+  style_button(load_btn.get_container(), load_btn.get_button(), ButtonKind::Soft);
+  for (ButtonContainer *button : {&unload_btn, &extrude_btn, &retract_btn, &cooldown_btn, &manual_change_btn}) {
     style_button(button->get_container(), button->get_button(), ButtonKind::Outline);
   }
-  style_button(extrude_btn.get_container(), extrude_btn.get_button(), ButtonKind::Soft);
-  style_button(cooldown_btn.get_container(), cooldown_btn.get_button(), ButtonKind::Outline);
-  lv_obj_set_style_text_color(cooldown_btn.get_container(), lv_color_hex(powerui::COLOR_CHAMBER), LV_PART_MAIN);
 
-  // MANUAL M600 has no icon: only its label, centered.
+  describe(load_btn, &lv_font_montserrat_20, "Porta il filamento all'ugello, spurga e pulisce");
+  describe(unload_btn, &lv_font_montserrat_20, "Scalda e tira indietro: poi lo sfili a mano");
+  describe(extrude_btn, &lv_font_montserrat_16, "Spinge in avanti il filamento dei mm scelti");
+  describe(retract_btn, &lv_font_montserrat_16, "Tira indietro il filamento dei mm scelti");
+  describe(cooldown_btn, &lv_font_montserrat_16, "Spegne il riscaldamento dell'ugello");
+
+  // Il cambio filamento serve solo con la stampa in pausa: fuori dalla pausa il pulsante non si vede.
   lv_obj_add_flag(manual_change_btn.get_button(), LV_OBJ_FLAG_HIDDEN);
-  lv_label_set_text(manual_change_btn.get_label(), "MANUAL M600");
+  lv_obj_set_style_text_font(manual_change_btn.get_label(), &lv_font_montserrat_14, 0);
   lv_obj_align(manual_change_btn.get_label(), LV_ALIGN_CENTER, 0, 0);
-  stack_icon(load_btn, &load_filament_img, 52, lv_color_hex(powerui::COLOR_FG), 14, 14);
-  stack_icon(unload_btn, &unload_filament_img, 52, lv_color_hex(powerui::COLOR_FG), 14, 14);
-  lv_obj_set_style_text_font(load_btn.get_label(), &lv_font_montserrat_20, 0);
-  lv_obj_set_style_text_font(unload_btn.get_label(), &lv_font_montserrat_20, 0);
-  stack_icon(cooldown_btn, &extruder, 28, lv_color_hex(powerui::COLOR_CHAMBER), 12, 8);
-  stack_icon(extrude_btn, &extrude_img, 56, lv_color_hex(powerui::COLOR_ACCENT));
-  stack_icon(retract_btn, &retract_img, 56, lv_color_hex(powerui::COLOR_FG));
+  lv_obj_add_flag(manual_change_btn.get_container(), LV_OBJ_FLAG_HIDDEN);
 
-  // Option cards: title on top and a segmented selector below.
+  // La velocita' resta quella predefinita del selettore: nella pagina non serve sceglierla.
+  lv_obj_add_flag(speed_selector.get_container(), LV_OBJ_FLAG_HIDDEN);
+
+  // Riquadri con titolo sopra e selettore sotto.
   struct CardSpec { Selector *selector; const char *title; int y; int h; };
-  const CardSpec specs[3] = {{&speed_selector, "Extrude speed (mm/s)", 12, 130},
-                             {&length_selector, "Extrude length (mm)", 154, 130},
-                             {&temp_selector, "Extruder temperature (°C)", 296, 132}};
+  const CardSpec specs[2] = {{&temp_selector, "Temperatura ugello (°C)", 12, 100},
+                             {&length_selector, "Lunghezza per Spingi e Tira indietro (mm)", 240, 92}};
   lv_obj_t *temp_card = NULL;
   for (const CardSpec &spec : specs) {
-    lv_obj_t *option_card = card(panel_cont, 164, spec.y, 408, spec.h);
+    lv_obj_t *option_card = card(panel_cont, 12, spec.y, 712, spec.h);
     lv_obj_t *title = label(option_card, spec.title, &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
-    lv_obj_align(title, LV_ALIGN_TOP_LEFT, px(15), px(14));
+    lv_obj_align(title, LV_ALIGN_TOP_LEFT, px(15), px(10));
 
     lv_obj_t *selector_cont = spec.selector->get_container();
     lv_obj_set_parent(selector_cont, option_card);
     lv_obj_add_flag(spec.selector->get_label(), LV_OBJ_FLAG_HIDDEN);
-    lv_obj_set_size(selector_cont, px(374), px(52));
-    lv_obj_align(selector_cont, LV_ALIGN_BOTTOM_MID, 0, -px(16));
-    lv_obj_set_size(spec.selector->get_selector(), px(374), px(52));
+    lv_obj_set_size(selector_cont, px(682), px(44));
+    lv_obj_align(selector_cont, LV_ALIGN_BOTTOM_MID, 0, -px(8));
+    lv_obj_set_size(spec.selector->get_selector(), px(682), px(44));
     style_segmented(spec.selector->get_selector());
     if (spec.selector == &temp_selector) {
       temp_card = option_card;
     }
   }
+  lv_obj_move_foreground(manual_change_btn.get_container());
 
-  // Current extruder temperature next to the temperature card title.
+  // Temperatura attuale dell'ugello accanto al titolo.
   lv_obj_set_parent(extruder_temp.get_sensor(), temp_card);
   lv_obj_clear_flag(extruder_temp.get_sensor(), LV_OBJ_FLAG_FLOATING);
   lv_obj_set_size(extruder_temp.get_sensor(), px(120), px(32));
   extruder_temp.set_current_only(px(70), px(5));
   extruder_temp.set_image_zoom(100);
-  lv_obj_align(extruder_temp.get_sensor(), LV_ALIGN_TOP_RIGHT, -px(10), px(6));
+  lv_obj_align(extruder_temp.get_sensor(), LV_ALIGN_TOP_RIGHT, -px(10), px(2));
 
   ws.register_notify_update(this);    
 }
@@ -198,8 +178,20 @@ ExtruderPanel::~ExtruderPanel() {
 }
 
 void ExtruderPanel::foreground() {
+  auto &state = State::get_instance()->get_data("/printer_state/print_stats/state"_json_pointer);
+  if (state.is_string()) {
+    update_pause_button(state.template get<std::string>());
+  }
   lv_obj_move_foreground(panel_cont);
-  powerui::overlay_open("Filament", [this]() { lv_obj_move_background(panel_cont); });
+  powerui::overlay_open("Filamento", [this]() { lv_obj_move_background(panel_cont); });
+}
+
+void ExtruderPanel::update_pause_button(const std::string &state) {
+  if (state == "paused") {
+    lv_obj_clear_flag(manual_change_btn.get_container(), LV_OBJ_FLAG_HIDDEN);
+  } else {
+    lv_obj_add_flag(manual_change_btn.get_container(), LV_OBJ_FLAG_HIDDEN);
+  }
 }
 
 void ExtruderPanel::update_clock() {
@@ -233,6 +225,11 @@ void ExtruderPanel::consume(json& j) {
     int value = temp_value.template get<int>();
     extruder_temp.update_value(value);
   }
+
+  auto state_value = j["/params/0/print_stats/state"_json_pointer];
+  if (state_value.is_string()) {
+    update_pause_button(state_value.template get<std::string>());
+  }
 }
 
 void ExtruderPanel::handle_callback(lv_event_t *e) {
@@ -262,34 +259,27 @@ void ExtruderPanel::handle_callback(lv_event_t *e) {
   } else if (lv_event_get_code(e) == LV_EVENT_CLICKED) {
     lv_obj_t *btn = lv_event_get_current_target(e);
 
+    // Durante una stampa questi comandi non devono partire.
+    auto &state = State::get_instance()->get_data("/printer_state/print_stats/state"_json_pointer);
+    if (state.is_string() && state.template get<std::string>() == "printing") {
+      return;
+    }
+
+    const char *temp = lv_btnmatrix_get_btn_text(temp_selector.get_selector(), temp_selector.get_selected_idx());
+    const char *len = lv_btnmatrix_get_btn_text(length_selector.get_selector(), length_selector.get_selected_idx());
+    const char *speed = lv_btnmatrix_get_btn_text(speed_selector.get_selector(), speed_selector.get_selected_idx());
+
     if (btn == extrude_btn.get_container()) {
-      const char * temp = lv_btnmatrix_get_btn_text(temp_selector.get_selector(),
-						   temp_selector.get_selected_idx());
-      const char * len = lv_btnmatrix_get_btn_text(length_selector.get_selector(),
-						   length_selector.get_selected_idx());
-      const char *speed = lv_btnmatrix_get_btn_text(speed_selector.get_selector(),
-						    speed_selector.get_selected_idx());
       ws.gcode_script(fmt::format("M109 S{}\nM83\nG1 E{} F{}", temp, len, std::stoi(speed) * 60));
     }
 
     if (btn == retract_btn.get_container()) {
-      const char * temp = lv_btnmatrix_get_btn_text(temp_selector.get_selector(),
-						   temp_selector.get_selected_idx());
-      const char * len = lv_btnmatrix_get_btn_text(length_selector.get_selector(),
-						   length_selector.get_selected_idx());
-      const char *speed = lv_btnmatrix_get_btn_text(speed_selector.get_selector(),
-						    speed_selector.get_selected_idx());
       ws.gcode_script(fmt::format("M109 S{}\nM83\nG1 E-{} F{}", temp, len, std::stoi(speed) * 60));
     }
 
     if (btn == unload_btn.get_container()) {
-      if (unload_filament_macro == "_PS_QUIT_MATERIAL") {
-        const char *temp = lv_btnmatrix_get_btn_text(temp_selector.get_selector(),
-                                                     temp_selector.get_selected_idx());
-        ws.gcode_script(fmt::format("{} EXTRUDER_TEMP={}", unload_filament_macro, temp));
-      } else {
-        ws.gcode_script(unload_filament_macro);
-      }
+      // Niente taglio: scalda, tira indietro di 100 mm e spegne. Il filamento si sfila a mano.
+      ws.gcode_script(fmt::format("M109 S{}\nM83\nG1 E-100 F600\nM400\nM104 S0", temp));
     }
 
     if (btn == manual_change_btn.get_container()) {
@@ -297,29 +287,21 @@ void ExtruderPanel::handle_callback(lv_event_t *e) {
     }
 
     if (btn == load_btn.get_container()) {
-      std::string load_script = load_filament_macro;
-      if (load_filament_macro == "_PS_LOAD_MATERIAL") {
-        const char *temp = lv_btnmatrix_get_btn_text(temp_selector.get_selector(),
-                                                     temp_selector.get_selected_idx());
-        const char *len = lv_btnmatrix_get_btn_text(length_selector.get_selector(),
-                                                    length_selector.get_selected_idx());
-        load_script = fmt::format("{} EXTRUDER_TEMP={} EXTRUDE_LEN={}", load_filament_macro, temp, len);
-      }
-
+      const std::string load_script = fmt::format("_CARICA_BOBINA_ESTERNA TEMP={}", temp);
       if (KUtils::is_homed()) {
         ws.gcode_script(load_script);
       } else {
-        // The load macro aborts when the printer is not homed; offer to home first.
-        powerui::confirm_dialog("Homing required",
-                                "The printer is not homed. Home all axes now and then load the filament?",
-                                "Home & Load", powerui::ActionKind::Primary, [this, load_script]() {
+        // Il caricamento va al vassoio: serve l'home.
+        powerui::confirm_dialog("Serve l'home",
+                                "La stampante non ha fatto l'home. Faccio l'home e poi carico il filamento?",
+                                "Home e carica", powerui::ActionKind::Primary, [this, load_script]() {
           ws.gcode_script("G28\n" + load_script);
         });
       }
     }
 
     if (btn == cooldown_btn.get_container()) {
-      ws.gcode_script(cooldown_macro);
+      ws.gcode_script("SET_HEATER_TEMPERATURE HEATER=extruder TARGET=0");
     }
   }
 }
