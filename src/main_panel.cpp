@@ -143,7 +143,7 @@ MainPanel::MainPanel(KWebSocketClient &websocket,
     // Back button of the overlay panels, on the left of the title bar.
     back_pill = plain(title_bar);
     lv_obj_add_flag(back_pill, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_size(back_pill, px(96), px(32));
+    lv_obj_set_size(back_pill, px(124), px(32));
     lv_obj_align(back_pill, LV_ALIGN_LEFT_MID, px(8), 0);
     lv_obj_set_style_radius(back_pill, px(8), LV_PART_MAIN);
     lv_obj_set_style_bg_color(back_pill, lv_color_hex(powerui::COLOR_PRIMARY), LV_PART_MAIN);
@@ -152,7 +152,7 @@ MainPanel::MainPanel(KWebSocketClient &websocket,
     lv_obj_set_style_border_width(back_pill, 0, LV_PART_MAIN);
     lv_obj_set_style_border_color(back_pill, lv_color_hex(COLOR_WHITE), LV_PART_MAIN);
     lv_obj_set_style_border_opa(back_pill, LV_OPA_10, LV_PART_MAIN);
-    lv_obj_t *back_text = label(back_pill, LV_SYMBOL_LEFT "  Back", &lv_font_montserrat_16, lv_color_hex(COLOR_WHITE));
+    lv_obj_t *back_text = label(back_pill, LV_SYMBOL_LEFT "  Indietro", &lv_font_montserrat_16, lv_color_hex(COLOR_WHITE));
     lv_obj_center(back_text);
     lv_obj_add_event_cb(back_pill, &MainPanel::_handle_back_click_cb, LV_EVENT_CLICKED, this);
     lv_obj_add_flag(back_pill, LV_OBJ_FLAG_HIDDEN);
@@ -212,7 +212,7 @@ MainPanel::MainPanel(KWebSocketClient &websocket,
     ws.register_notify_update(this);
     setting_panel.set_cfs_opener([this]() { cfs_panel.foreground(); });
     led_panel.set_state_callback([this](bool active) {
-      set_quick_active(led_btn, active, active ? "LED On" : "LED Off");
+      set_quick_active(led_btn, active, active ? "LED acceso" : "LED spento");
     });
   print_status_panel.set_back_home_callback([this]() {
     print_panel.background();
@@ -694,14 +694,14 @@ void MainPanel::create_chart_card(lv_obj_t *parent) {
   const lv_color_t fg = lv_color_hex(COLOR_FG);
   const lv_color_t muted = lv_color_hex(COLOR_MUTED);
 
-  lv_obj_t *title = label(chart_card, "Temperatures", &lv_font_montserrat_16, fg);
+  lv_obj_t *title = label(chart_card, "Temperature", &lv_font_montserrat_16, fg);
   lv_obj_align(title, LV_ALIGN_TOP_LEFT, 0, 0);
-  lv_obj_t *subtitle = label(chart_card, "Last 5 minutes", &lv_font_montserrat_14, muted);
+  lv_obj_t *subtitle = label(chart_card, "Ultimi 5 minuti", &lv_font_montserrat_14, muted);
   lv_obj_align(subtitle, LV_ALIGN_TOP_LEFT, 0, px(23));
 
   chart_toggle = view_toggle(chart_card, &MainPanel::_handle_view_toggle_cb, this);
   lv_obj_align(chart_toggle, LV_ALIGN_TOP_RIGHT, 0, 0);
-  chart_badge = badge(chart_card, "Idle", muted);
+  chart_badge = badge(chart_card, "Ferma", muted);
   lv_obj_update_layout(chart_toggle);
   lv_obj_align_to(chart_badge, chart_toggle, LV_ALIGN_OUT_LEFT_MID, -px(8), 0);
 
@@ -736,7 +736,7 @@ void MainPanel::create_chart_card(lv_obj_t *parent) {
   lv_obj_scroll_to_x(temp_chart, LV_COORD_MAX, LV_ANIM_OFF);
 
   // Legend.
-  const char *names[3] = {"Extruder", "Bed", "Chamber"};
+  const char *names[3] = {"Ugello", "Piatto", "Camera"};
   const uint32_t colors[3] = {COLOR_EXTRUDER, COLOR_BED, COLOR_CHAMBER};
   const int offsets[3] = {0, 90, 144};
   for (int i = 0; i < 3; ++i) {
@@ -778,10 +778,10 @@ void MainPanel::create_main(lv_obj_t *parent)
     }, LV_EVENT_CLICKED, this);
     lv_obj_add_flag(cfs_pill, LV_OBJ_FLAG_HIDDEN);
 
-    homing_btn = create_quick_button(main_cont, 432, 264, 140, 76, &move, "Homing", &MainPanel::_handle_homing_cb);
-    extrude_btn = create_quick_button(main_cont, 584, 264, 140, 76, &ui_icon_filament, "Filament", &MainPanel::_handle_extrude_cb);
-    action_btn = create_quick_button(main_cont, 432, 352, 140, 76, &fan, "Fans", &MainPanel::_handle_fanpanel_cb);
-    led_btn = create_quick_button(main_cont, 584, 352, 140, 76, &light_img, "LED Off", &MainPanel::_handle_ledpanel_cb);
+    homing_btn = create_quick_button(main_cont, 432, 264, 140, 76, &move, "Movimento", &MainPanel::_handle_homing_cb);
+    extrude_btn = create_quick_button(main_cont, 584, 264, 140, 76, &ui_icon_filament, "Filamento", &MainPanel::_handle_extrude_cb);
+    action_btn = create_quick_button(main_cont, 432, 352, 140, 76, &fan, "Ventole", &MainPanel::_handle_fanpanel_cb);
+    led_btn = create_quick_button(main_cont, 584, 352, 140, 76, &light_img, "LED spento", &MainPanel::_handle_ledpanel_cb);
 
     // Print card <-> temperature chart switch.
     MiniPrintStatus &print_card = print_status_panel.get_mini_print_status();
@@ -818,13 +818,13 @@ void MainPanel::update_header() {
   const char *title = NULL;
   switch (lv_tabview_get_tab_act(tabview)) {
     case 1:
-      title = "Calibrations";
+      title = "Calibrazioni";
       break;
     case 2:
-      title = "Files";
+      title = "File";
       break;
     case 3:
-      title = "Settings";
+      title = "Impostazioni";
       break;
     default:
       break;
@@ -925,15 +925,15 @@ void MainPanel::create_sensors(json &temp_sensors) {
     const lv_img_dsc_t *sensor_img = &heater;
     std::string display_name = sensor.value()["display_name"].template get<std::string>();
     if (key == "extruder") {
-      display_name = "Extruder";
+      display_name = "Ugello";
       sensor_img = &extruder;
       color_code = lv_color_hex(COLOR_EXTRUDER);
     } else if (key == "heater_bed") {
-      display_name = "Bed";
+      display_name = "Piatto";
       sensor_img = &bed;
       color_code = lv_color_hex(COLOR_BED);
     } else if (key == "chamber_temp" || key == "temperature_sensor chamber_temp") {
-      display_name = "Chamber";
+      display_name = "Camera";
       sensor_img = &chamber;
       color_code = lv_color_hex(COLOR_CHAMBER);
     }

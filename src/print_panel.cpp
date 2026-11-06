@@ -58,7 +58,7 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
   , az_sort_btn(lv_btn_create(file_table_btns))
   , file_grid(lv_obj_create(left_cont))
   , file_view(lv_obj_create(files_cont))
-  , print_btn(file_view, NULL, "Print", &PrintPanel::_handle_print_callback, this)
+  , print_btn(file_view, NULL, "Stampa", &PrintPanel::_handle_print_callback, this)
   , delete_confirm_cont(lv_obj_create(files_cont))
   , delete_confirm_box(lv_obj_create(delete_confirm_cont))
   , delete_confirm_label(lv_label_create(delete_confirm_box))
@@ -1271,8 +1271,8 @@ struct PrintPanel::StartDialog {
 };
 
 namespace {
-const char *MESH_MAP[] = {"Off", "Adaptive", "Full", ""};
-const char *FILAMENT_MAP[] = {"CFS", "External spool", ""};
+const char *MESH_MAP[] = {"Spenta", "Adattiva", "Completa", ""};
+const char *FILAMENT_MAP[] = {"CFS", "Bobina esterna", ""};
 }
 
 void PrintPanel::begin_print_flow(const std::string &path) {
@@ -1334,7 +1334,7 @@ void PrintPanel::show_start_dialog(const std::string &path, bool has_mesh, int m
   lv_obj_center(dlg);
   lv_obj_set_style_border_opa(dlg, LV_OPA_30, 0);
 
-  lv_obj_t *title = label(dlg, "Start print", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
+  lv_obj_t *title = label(dlg, "Avvia stampa", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
   lv_obj_set_pos(title, px(24), px(18));
 
   // File card.
@@ -1358,7 +1358,7 @@ void PrintPanel::show_start_dialog(const std::string &path, bool has_mesh, int m
     lv_obj_set_pos(s, px(24), px(y + 30));
   };
   if (has_mesh) {
-    row_title("Bed mesh", "Adaptive meshes only the area of the part");
+    row_title("Mesh del piatto", "Adattiva misura solo la zona del pezzo");
     dialog->mesh_selector = lv_btnmatrix_create(dlg);
     lv_btnmatrix_set_map(dialog->mesh_selector, MESH_MAP);
     lv_btnmatrix_set_btn_ctrl_all(dialog->mesh_selector, LV_BTNMATRIX_CTRL_CHECKABLE);
@@ -1371,7 +1371,7 @@ void PrintPanel::show_start_dialog(const std::string &path, bool has_mesh, int m
     y += 62;
   }
   if (has_purge) {
-    row_title("Adaptive purge line", "Purges next to the part");
+    row_title("Spurgo adattivo", "Spurga accanto al pezzo");
     dialog->purge_switch = lv_switch_create(dlg);
     style_switch(dialog->purge_switch);
     lv_obj_set_pos(dialog->purge_switch, px(w - 24 - 46), px(y + 14));
@@ -1381,7 +1381,7 @@ void PrintPanel::show_start_dialog(const std::string &path, bool has_mesh, int m
     y += 62;
   }
   if (has_cfs) {
-    row_title("Filament", "External spool: load it by hand first");
+    row_title("Filamento", "Bobina esterna: infilala fino all'estrusore");
     dialog->filament_selector = lv_btnmatrix_create(dlg);
     lv_btnmatrix_set_map(dialog->filament_selector, FILAMENT_MAP);
     lv_btnmatrix_set_btn_ctrl_all(dialog->filament_selector, LV_BTNMATRIX_CTRL_CHECKABLE);
@@ -1394,8 +1394,8 @@ void PrintPanel::show_start_dialog(const std::string &path, bool has_mesh, int m
     y += 62;
   }
 
-  action_button(dlg, NULL, "Cancel", ActionKind::Outline, 24, h - 74, 196, 50, &PrintPanel::_start_dialog_event, dialog);
-  action_button(dlg, &ui_icon_play, "Start", ActionKind::Primary, w - 24 - 292, h - 74, 292, 50, &PrintPanel::_start_dialog_event, dialog);
+  action_button(dlg, NULL, "Annulla", ActionKind::Outline, 24, h - 74, 196, 50, &PrintPanel::_start_dialog_event, dialog);
+  action_button(dlg, &ui_icon_play, "Avvia", ActionKind::Primary, w - 24 - 292, h - 74, 292, 50, &PrintPanel::_start_dialog_event, dialog);
 }
 
 void PrintPanel::_start_dialog_event(lv_event_t *event) {

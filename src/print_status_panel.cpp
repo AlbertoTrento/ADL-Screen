@@ -533,7 +533,7 @@ PrintStatusPanel::~PrintStatusPanel() {
 void PrintStatusPanel::foreground() {
   // populate();
   lv_obj_move_foreground(status_cont);
-  powerui::overlay_open("Print Status", [this]() {
+  powerui::overlay_open("Stato stampa", [this]() {
     lv_obj_move_background(status_cont);
     if (back_home_callback) {
       back_home_callback();
@@ -557,7 +557,7 @@ void PrintStatusPanel::reset() {
   elapsed.update_label("0s");
   time_left.update_label("...");
   estimated_time_s = 0;
-  lv_label_set_text(file_label, "No active print");
+  lv_label_set_text(file_label, "Nessuna stampa");
   lv_obj_add_flag(file_cont, LV_OBJ_FLAG_HIDDEN);
   update_status_label("ready");
 

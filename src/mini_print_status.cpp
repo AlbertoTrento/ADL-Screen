@@ -13,7 +13,7 @@ LV_IMG_DECLARE(ui_icon_exclude);
 
 namespace {
 constexpr int SPEED_PRESETS[3] = {50, 100, 125};
-const char *const SPEED_NAMES[3] = {"Slow", "Standard", "Fast"};
+const char *const SPEED_NAMES[3] = {"Lenta", "Normale", "Veloce"};
 
 // Content area of the card is 366 x 374 design px (408 x 416 card, 20 padding, 1 border).
 constexpr int CONTENT_W = 366;
@@ -74,17 +74,17 @@ MiniPrintStatus::MiniPrintStatus(lv_obj_t *parent,
   const lv_color_t muted = lv_color_hex(COLOR_MUTED);
 
   // Header: file name + subtitle on the left, state badge and view toggle on the right.
-  title_label = label(cont, "No active print", &lv_font_montserrat_16, fg);
+  title_label = label(cont, "Nessuna stampa", &lv_font_montserrat_16, fg);
   lv_obj_set_width(title_label, px(190));
   lv_label_set_long_mode(title_label, LV_LABEL_LONG_DOT);
   lv_obj_align(title_label, LV_ALIGN_TOP_LEFT, 0, 0);
 
-  subtitle_label = label(cont, "Ready", &lv_font_montserrat_14, muted);
+  subtitle_label = label(cont, "Pronta", &lv_font_montserrat_14, muted);
   lv_obj_set_width(subtitle_label, px(190));
   lv_label_set_long_mode(subtitle_label, LV_LABEL_LONG_DOT);
   lv_obj_align(subtitle_label, LV_ALIGN_TOP_LEFT, 0, px(23));
 
-  // "Exclude objects" chip: a 40 px tile (the size of the extruder icon tile) with the icon, and the text.
+  // "Escludi oggetti" chip: a 40 px tile (the size of the extruder icon tile) with the icon, and the text.
   exclude_row = plain(cont);
   lv_obj_add_flag(exclude_row, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_size(exclude_row, px(190), px(40));
@@ -96,7 +96,7 @@ MiniPrintStatus::MiniPrintStatus(lv_obj_t *parent,
   lv_obj_set_style_bg_opa(exclude_tile, LV_OPA_COVER, 0);
   lv_obj_t *exclude_icon = icon(exclude_tile, &ui_icon_exclude, 26, fg);
   lv_obj_center(exclude_icon);
-  lv_obj_t *exclude_text = label(exclude_row, "Exclude objects", &lv_font_montserrat_14, muted);
+  lv_obj_t *exclude_text = label(exclude_row, "Escludi oggetti", &lv_font_montserrat_14, muted);
   lv_obj_align(exclude_text, LV_ALIGN_LEFT_MID, px(52), 0);
   lv_obj_add_event_cb(exclude_row, &MiniPrintStatus::_handle_action, LV_EVENT_CLICKED, this);
   lv_obj_add_flag(exclude_row, LV_OBJ_FLAG_HIDDEN);
@@ -104,7 +104,7 @@ MiniPrintStatus::MiniPrintStatus(lv_obj_t *parent,
   toggle = view_toggle(cont, NULL, NULL);
   lv_obj_align(toggle, LV_ALIGN_TOP_RIGHT, 0, 0);
 
-  state_badge = badge(cont, "Idle", muted);
+  state_badge = badge(cont, "Ferma", muted);
   lv_obj_update_layout(toggle);
   lv_obj_align_to(state_badge, toggle, LV_ALIGN_OUT_LEFT_MID, -px(8), 0);
 
@@ -160,7 +160,7 @@ MiniPrintStatus::MiniPrintStatus(lv_obj_t *parent,
   lv_obj_set_style_border_color(stats, lv_color_hex(COLOR_WHITE), 0);
   lv_obj_set_style_border_opa(stats, LV_OPA_10, 0);
 
-  const char *stat_names[3] = {"Elapsed", "Layer", "Speed"};
+  const char *stat_names[3] = {"Trascorso", "Strato", "Velocita'"};
   lv_obj_t **stat_values[3] = {&elapsed_value, &layer_value, &speed_value};
   const char *stat_defaults[3] = {"0s", "0 / 0", "100%"};
   for (int i = 0; i < 3; ++i) {
@@ -182,12 +182,12 @@ MiniPrintStatus::MiniPrintStatus(lv_obj_t *parent,
   const int btn_w = (CONTENT_W - 12) / 2;
   pause_btn = action_button(cont, 0, 314, btn_w, 60, COLOR_SECONDARY, COLOR_WHITE, LV_OPA_10);
   pause_icon = icon(pause_btn, &pause_img, 24, fg);
-  pause_label = label(pause_btn, "Pause", &lv_font_montserrat_16, fg);
+  pause_label = label(pause_btn, "Pausa", &lv_font_montserrat_16, fg);
   lv_obj_add_event_cb(pause_btn, &MiniPrintStatus::_handle_action, LV_EVENT_CLICKED, this);
 
   stop_btn = action_button(cont, btn_w + 12, 314, btn_w, 60, COLOR_CARD, COLOR_DESTRUCTIVE, LV_OPA_40);
   icon(stop_btn, &cancel, 22, lv_color_hex(COLOR_DESTRUCTIVE));
-  label(stop_btn, "Stop", &lv_font_montserrat_16, lv_color_hex(COLOR_DESTRUCTIVE));
+  label(stop_btn, "Ferma", &lv_font_montserrat_16, lv_color_hex(COLOR_DESTRUCTIVE));
   lv_obj_add_event_cb(stop_btn, &MiniPrintStatus::_handle_action, LV_EVENT_CLICKED, this);
 
   lv_obj_add_state(pause_btn, LV_STATE_DISABLED);
@@ -250,7 +250,7 @@ void MiniPrintStatus::set_exclude_action(std::function<void()> action) {
   exclude_action = action;
 }
 
-// Shows the "Exclude objects" chip only when the print has labeled objects.
+// Shows the "Escludi oggetti" chip only when the print has labeled objects.
 void MiniPrintStatus::set_exclude_available(bool available) {
   if (available) {
     lv_obj_clear_flag(exclude_row, LV_OBJ_FLAG_HIDDEN);
@@ -261,7 +261,7 @@ void MiniPrintStatus::set_exclude_available(bool available) {
 
 // "Standard 100%" when the speed matches a preset, "Custom 87%" otherwise.
 void MiniPrintStatus::refresh_speed_chip() {
-  const char *name = "Custom";
+  const char *name = "Personale";
   for (int i = 0; i < 3; ++i) {
     if (speed_percent == SPEED_PRESETS[i]) {
       name = SPEED_NAMES[i];
@@ -287,7 +287,7 @@ void MiniPrintStatus::handle_action(lv_event_t *event) {
         selected = i;
       }
     }
-    choice_dialog("Print speed", options, [this](int index) {
+    choice_dialog("Velocita' di stampa", options, [this](int index) {
       if (speed_action && index >= 0 && index < 3) {
         speed_action(SPEED_PRESETS[index]);
       }
@@ -330,17 +330,17 @@ void MiniPrintStatus::update_eta(uint32_t remaining_seconds) {
 }
 
 void MiniPrintStatus::refresh_subtitle() {
-  std::string text = "Ready";
+  std::string text = "Pronta";
   if (status == "printing") {
-    text = "Print in progress";
+    text = "Stampa in corso";
   } else if (status == "paused") {
-    text = "Paused";
+    text = "In pausa";
   } else if (status == "complete") {
-    text = "Print complete";
+    text = "Stampa finita";
   } else if (status == "cancelled") {
-    text = "Print cancelled";
+    text = "Stampa annullata";
   } else if (status == "error") {
-    text = "Print error";
+    text = "Errore di stampa";
   }
   if (!material.empty() && (status == "printing" || status == "paused")) {
     text += " - " + material;
@@ -352,19 +352,19 @@ void MiniPrintStatus::update_status(std::string &status_str) {
   status = status_str;
   refresh_subtitle();
 
-  const char *badge_text = "Idle";
+  const char *badge_text = "Ferma";
   lv_color_t dot = lv_color_hex(COLOR_MUTED);
   if (status == "printing") {
-    badge_text = "Printing";
+    badge_text = "In stampa";
     dot = lv_color_hex(COLOR_ACCENT);
   } else if (status == "paused") {
-    badge_text = "Paused";
+    badge_text = "In pausa";
     dot = lv_color_hex(COLOR_WARNING);
   } else if (status == "complete") {
-    badge_text = "Complete";
+    badge_text = "Finita";
     dot = lv_color_hex(COLOR_ACCENT);
   } else if (status == "cancelled" || status == "error") {
-    badge_text = status == "error" ? "Error" : "Cancelled";
+    badge_text = status == "error" ? "Errore" : "Annullata";
     dot = lv_color_hex(COLOR_DESTRUCTIVE);
   }
   badge_set(state_badge, badge_text, dot);
@@ -384,7 +384,7 @@ void MiniPrintStatus::update_status(std::string &status_str) {
   }
 
   const bool paused = status == "paused";
-  lv_label_set_text(pause_label, paused ? "Resume" : "Pause");
+  lv_label_set_text(pause_label, paused ? "Riprendi" : "Pausa");
   lv_img_set_src(lv_obj_get_child(pause_icon, 0), paused ? &resume : &pause_img);
 }
 
@@ -427,7 +427,7 @@ void MiniPrintStatus::reset() {
   lv_label_set_text(eta_label, "...");
   lv_label_set_text(elapsed_value, "0s");
   lv_label_set_text(layer_value, "0 / 0");
-  lv_label_set_text(title_label, "No active print");
+  lv_label_set_text(title_label, "Nessuna stampa");
   material.clear();
   std::string idle_status = "n/a";
   update_status(idle_status);

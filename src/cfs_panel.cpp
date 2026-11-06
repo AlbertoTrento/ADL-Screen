@@ -92,7 +92,7 @@ std::string color_data(uint32_t color, int format) {
 
 std::string slot_letter(int i) { return i == EXTERNAL_SLOT ? std::string("Ext") : std::string(1, static_cast<char>('A' + i)); }
 
-std::string slot_title(int i) { return i == EXTERNAL_SLOT ? std::string("External spool") : "Slot " + slot_letter(i); }
+std::string slot_title(int i) { return i == EXTERNAL_SLOT ? std::string("Bobina esterna") : "Slot " + slot_letter(i); }
 
 std::string hex_text(uint32_t color) {
   char buf[16];
@@ -527,7 +527,7 @@ void CfsPanel::refresh() {
     cfs_ui::spool_set(w.spool, s, state.active == i);
     lv_label_set_text(w.name, s.name.c_str());
     lv_obj_set_style_text_color(w.name, lv_color_hex(s.kind == cfs::SlotKind::Empty ? COLOR_MUTED : COLOR_FG), 0);
-    lv_label_set_text(w.sub, i == EXTERNAL_SLOT && s.kind != cfs::SlotKind::Defined ? "External spool" : slot_subtitle(s).c_str());
+    lv_label_set_text(w.sub, i == EXTERNAL_SLOT && s.kind != cfs::SlotKind::Defined ? "Bobina esterna" : slot_subtitle(s).c_str());
     if (s.kind == cfs::SlotKind::Empty) {
       lv_obj_add_flag(w.pencil, LV_OBJ_FLAG_HIDDEN);
     } else {
@@ -776,7 +776,7 @@ void CfsPanel::save_edit() {
     save_external();
     close_edit();
     refresh();
-    show_status("External spool saved", COLOR_ACCENT, 6000);
+    show_status("Bobina esterna salvata", COLOR_ACCENT, 6000);
     return;
   }
   const std::string num(1, static_cast<char>('A' + edit_slot));

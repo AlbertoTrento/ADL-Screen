@@ -39,8 +39,8 @@ ExtruderPanel::ExtruderPanel(KWebSocketClient &websocket_client,
   , unload_btn(leftside_btns_cont, &unload_filament_img, "Togli filamento", &ExtruderPanel::_handle_callback, this)
   , cooldown_btn(leftside_btns_cont, &extruder, "Spegni ugello", &ExtruderPanel::_handle_callback, this)
   , manual_change_btn(leftside_btns_cont, NULL, "Cambio in pausa", &ExtruderPanel::_handle_callback, this)
-  , extrude_btn(rightside_btns_cont, &extrude_img, "Spingi", &ExtruderPanel::_handle_callback, this)
-  , retract_btn(rightside_btns_cont, &retract_img, "Tira indietro", &ExtruderPanel::_handle_callback, this)
+  , extrude_btn(rightside_btns_cont, &extrude_img, "Carica mm", &ExtruderPanel::_handle_callback, this)
+  , retract_btn(rightside_btns_cont, &retract_img, "Scarica mm", &ExtruderPanel::_handle_callback, this)
 {
   lv_obj_move_background(panel_cont);
   lv_obj_clear_flag(panel_cont, LV_OBJ_FLAG_SCROLLABLE);  
@@ -134,7 +134,7 @@ ExtruderPanel::ExtruderPanel(KWebSocketClient &websocket_client,
   // Riquadri con titolo sopra e selettore sotto.
   struct CardSpec { Selector *selector; const char *title; int y; int h; };
   const CardSpec specs[2] = {{&temp_selector, "Temperatura ugello (°C)", 12, 100},
-                             {&length_selector, "Lunghezza per Spingi e Tira indietro (mm)", 240, 92}};
+                             {&length_selector, "Lunghezza per Carica mm e Scarica mm", 240, 92}};
   lv_obj_t *temp_card = NULL;
   for (const CardSpec &spec : specs) {
     lv_obj_t *option_card = card(panel_cont, 12, spec.y, 712, spec.h);
