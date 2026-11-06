@@ -73,7 +73,7 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
   macros_btn.set_subtitle("Run printer macros");
   sysinfo_btn.set_subtitle("Preferences and info");
   spoolman_btn.set_subtitle("Filament system");
-  powerscreen_update_btn.set_subtitle("PowerScreen and Script");
+  powerscreen_update_btn.set_subtitle("ADL Screen and Script");
 
   spoolman_btn.disable();
   spoolman_btn.set_pill("Offline", lv_color_hex(powerui::COLOR_DESTRUCTIVE));
@@ -117,7 +117,7 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
   lv_obj_clear_flag(mark_logo, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_style_img_opa(mark_logo, LV_OPA_10, 0);
   lv_obj_align(mark_logo, LV_ALIGN_CENTER, 0, -powerui::px(12));
-  lv_obj_t *mark_version = powerui::label(mark, fmt::format("PowerScreen {}", package_version()).c_str(),
+  lv_obj_t *mark_version = powerui::label(mark, fmt::format("ADL Screen {}", package_version()).c_str(),
                                           &lv_font_montserrat_12, lv_color_hex(powerui::COLOR_MUTED));
   lv_obj_set_style_text_opa(mark_version, LV_OPA_60, 0);
   lv_obj_align(mark_version, LV_ALIGN_BOTTOM_MID, 0, -powerui::px(14));
@@ -173,7 +173,7 @@ void SettingPanel::handle_callback(lv_event_t *event) {
 }
 
 void SettingPanel::show_restart_menu() {
-  powerui::choice_dialog("Restart", {"PowerScreen", "Klipper", "Firmware"}, [this](int index) {
+  powerui::choice_dialog("Restart", {"ADL Screen", "Klipper", "Firmware"}, [this](int index) {
     if (index == 0) {
       restart_powerscreen();
     } else if (index == 1) {

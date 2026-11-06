@@ -5,8 +5,8 @@ rm -rf $RELEASES_DIR
 mkdir -p $RELEASES_DIR
 
 ASSET_NAME="powerscreen-k1c"
-PROJECT_OWNER="borferkic"
-PROJECT_NAME="K1C-CFS-POWER-SCREEN"
+PROJECT_OWNER="AlbertoTrento"
+PROJECT_NAME="ADL-Screen"
 
 "$CROSS_COMPILE"strip ./build/bin/powerscreen
 cp ./build/bin/powerscreen $RELEASES_DIR/powerscreen

@@ -412,7 +412,7 @@ SysInfoPanel::SysInfoPanel()
   lv_obj_add_event_cb(channel_dd, &SysInfoPanel::_handle_callback,
                       LV_EVENT_VALUE_CHANGED, this);
 
-  lv_label_set_text(brand_label, "PowerScreen by Boris SdK");
+  lv_label_set_text(brand_label, "ADL Screen, from PowerScreen by Boris SdK");
   lv_obj_set_style_text_color(brand_label, lv_color_hex(powerui::COLOR_FG), LV_PART_MAIN);
   lv_obj_set_style_text_font(brand_label, &lv_font_montserrat_16, LV_PART_MAIN);
   lv_obj_set_pos(brand_label, 330, 292);
@@ -554,7 +554,7 @@ void SysInfoPanel::create_tabs() {
   lv_obj_set_pos(info_card, px(12), px(134));
   lv_obj_t *info_title = label(info_card, "System", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_FG));
   lv_obj_set_pos(info_title, px(20), px(14));
-  const char *info_names[5] = {"PowerScreen", "CFS Power Script", "Klipper", "Moonraker", "K1C Firmware"};
+  const char *info_names[5] = {"ADL Screen", "CFS Power Script", "Klipper", "Moonraker", "K1C Firmware"};
   for (int i = 0; i < 5; ++i) {
     const int row_y = 46 + i * 49;
     lv_obj_t *line = plain(info_card);
@@ -896,8 +896,8 @@ std::string phase_text(const std::string &status) {
   if (phase == "CHECKING") return "Checking for the latest version...";
   if (phase == "DOWNLOADING") return "Downloading " + detail + "...";
   if (phase == "EXTRACTING") return "Installing " + detail + "...";
-  if (phase == "RESTARTING") return "Restarting PowerScreen...";
-  if (phase == "UP_TO_DATE") return "PowerScreen is already up to date (" + detail + ").";
+  if (phase == "RESTARTING") return "Restarting ADL Screen...";
+  if (phase == "UP_TO_DATE") return "ADL Screen is already up to date (" + detail + ").";
   if (phase == "ERROR") return detail.empty() ? "Update failed." : detail;
   return "Preparing update...";
 }
@@ -972,7 +972,7 @@ void SysInfoPanel::start_update() {
 
   if (is_printing()) {
     show_update_overlay("Update not available",
-                        "PowerScreen cannot be updated while a print is in progress.", false);
+                        "ADL Screen cannot be updated while a print is in progress.", false);
     return;
   }
 
@@ -993,7 +993,7 @@ void SysInfoPanel::start_update() {
   update_running = true;
   update_step = -1;
   restart_since = 0;
-  show_update_overlay("Updating PowerScreen", "Preparing update...", true);
+  show_update_overlay("Updating ADL Screen", "Preparing update...", true);
 
   const std::string script_str = script.string();
   run_detached([this, script_str]() {
@@ -1078,7 +1078,7 @@ void SysInfoPanel::poll_update() {
   // Restarting: the script stops PowerScreen by itself. If we are still alive well after that, the restart failed.
   if (restart_since != 0 && std::time(nullptr) - restart_since > 30) {
     update_running = false;
-    show_update_overlay("Restart needed", "Restart PowerScreen to apply the new version.", false);
+    show_update_overlay("Restart needed", "Restart ADL Screen to apply the new version.", false);
     return;
   }
 
@@ -1100,7 +1100,7 @@ void SysInfoPanel::poll_update() {
   } else if (update_exit_code != 0) {
     show_update_overlay("Update failed", "The update script did not finish.", false);
   } else {
-    show_update_overlay("Restart needed", "Restart PowerScreen to apply the new version.", false);
+    show_update_overlay("Restart needed", "Restart ADL Screen to apply the new version.", false);
   }
 }
 
@@ -1265,7 +1265,7 @@ void SysInfoPanel::create_update_overlay() {
   update_icon_label = label(update_icon_tile, LV_SYMBOL_REFRESH, &lv_font_montserrat_24, lv_color_hex(powerui::COLOR_ACCENT));
   lv_obj_center(update_icon_label);
 
-  update_title = label(update_card, "Updating PowerScreen", &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_FG));
+  update_title = label(update_card, "Updating ADL Screen", &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_FG));
   lv_obj_set_pos(update_title, px(90), px(28));
   update_subtitle = label(update_card, "", &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
   lv_obj_set_pos(update_subtitle, px(90), px(56));
@@ -1276,7 +1276,7 @@ void SysInfoPanel::create_update_overlay() {
   lv_obj_set_style_bg_color(update_rule, lv_color_hex(powerui::COLOR_WHITE), 0);
   lv_obj_set_style_bg_opa(update_rule, LV_OPA_10, 0);
 
-  const char *step_names[3] = {"Download", "Install files", "Restart PowerScreen"};
+  const char *step_names[3] = {"Download", "Install files", "Restart ADL Screen"};
   for (int i = 0; i < 3; ++i) {
     update_marks[i] = plain(update_card);
     lv_obj_set_size(update_marks[i], px(24), px(24));
@@ -1430,7 +1430,7 @@ void SysInfoPanel::show_updated_notice() {
   lv_obj_t *mark_label = label(mark, LV_SYMBOL_OK, &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_WHITE));
   lv_obj_center(mark_label);
 
-  lv_obj_t *text = label(notice, "PowerScreen UPDATED!", &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_FG));
+  lv_obj_t *text = label(notice, "ADL Screen UPDATED!", &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_FG));
   lv_obj_align(text, LV_ALIGN_LEFT_MID, px(76), 0);
 
   lv_obj_del_delayed(notice, 6000);

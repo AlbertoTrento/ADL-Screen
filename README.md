@@ -7,6 +7,8 @@ Proyecto: `PowerScreen`
 Última modificación: `2026-10-04`
 -->
 
+> **ADL Screen** è la versione di [AlbertoTrento](https://github.com/AlbertoTrento/ADL-Screen) di PowerScreen, il progetto originale di [Boris SdK](https://github.com/borferkic/K1C-CFS-POWER-SCREEN). Il testo qui sotto è quello originale.
+
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/images/powerscreen-logo-dark.svg" />

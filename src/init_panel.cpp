@@ -49,7 +49,7 @@ InitPanel::InitPanel(MainPanel &mp, BedMeshPanel &bmp, std::mutex& l)
   }
 
   label = powerui::label(cont, waiting ? "Waiting for printer to initialize..."
-                                       : "Welcome to PowerScreen. Use the Setting Panel to add your printers.",
+                                       : "Welcome to ADL Screen. Use the Setting Panel to add your printers.",
                          &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
 }
 

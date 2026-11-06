@@ -1,5 +1,10 @@
 # Notice
 
+ADL Screen is a modified version of PowerScreen by Boris Fernández (Boris SdK), maintained by
+Alberto (AlbertoTrento) since 2026-11-06: https://github.com/AlbertoTrento/ADL-Screen
+Original project: https://github.com/borferkic/K1C-CFS-POWER-SCREEN
+Changes to the code and to PowerUI are listed in the Git history of this repository.
+
 PowerScreen for the Creality K1 series
 Copyright (c) 2026 Boris Fernández (Boris SdK)
 

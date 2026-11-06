@@ -8,7 +8,7 @@ white=`echo "\033[m"`
 BACKUP_DIR=/usr/data/powerscreen-backup
 K1_POWERSCREEN_DIR=/usr/data/powerscreen
 FT2FONT_PATH=/usr/lib/python3.8/site-packages/matplotlib/ft2font.cpython-38-mipsel-linux-gnu.so
-POWERSCREEN_REPOSITORY="borferkic/K1C-CFS-POWER-SCREEN"
+POWERSCREEN_REPOSITORY="AlbertoTrento/ADL-Screen"
 ASSET_NAME="powerscreen-k1c"
 # Creality screen and web binaries that PowerScreen disables (renamed to "<name>.disabled").
 # The installer assumes a clean printer: no previous touch screen replacement installed.
