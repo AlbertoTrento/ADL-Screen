@@ -1,0 +1,146 @@
+{
+  "categoria": "Stampa 3D — interfaccia touch e controllo stampante",
+  "copertina": "",
+  "documentazione": "## Scopo e destinatari\n\nADL_Screen sostituisce l'interfaccia del display originale della Creality K1C con un pannello touch collegato a Klipper e Moonraker. È pensato per chi usa il CFS e vuole gestire dalla stampante bobine, file, stampa e manutenzione, compreso il passaggio alla bobina esterna.\n\nIl vantaggio pratico è riunire sul display operazioni che altrimenti richiedono Fluidd o l'invio manuale di comandi: scegliere la sorgente del filamento, preparare una stampa, intervenire durante una pausa e accedere alle regolazioni. Il pannello non prepara i modelli 3D e non sostituisce lo slicer. Le operazioni fisiche sono eseguite da Klipper e dalle macro installate.\n\n## Compatibilità, requisiti e stato\n\n### Configurazione prevista\n\nL'autore dichiara come destinazione la Creality K1C con CFS, accesso root e schermo originale; riporta prove con firmware CFS `2.3.5.34`. Non sono dichiarate versioni per altre stampanti, Android o Raspberry Pi.\n\nOccorrono Klipper e Moonraker funzionanti. Per installare servono SSH attivo, indirizzo IP della stampante, password di root e accesso a Internet dalla stampante. Le funzioni del pannello dipendono dai dispositivi, moduli e comandi effettivamente presenti nella configurazione.\n\nIl README dell'autore indica distribuzioni nightly preliminari. Le note `v0.37.0` incluse nei materiali non consentono di assegnare con certezza quella versione alla distribuzione ADL_Screen corrente.\n\n### Integrazione con ADL Script\n\nIl progetto richiede [ADL Script](https://github.com/AlbertoTrento/ADL-Script) per completare i flussi che richiamano macro esterne. Dal suo menu installare almeno:\n\n```text\n[Install] Menu > 6) Install Power Macros\n[Install] Menu > 8) Install Klipper Adaptive Meshing & Purging\n```\n\nIl pulsante **Carica filamento** richiama `_CARICA_BOBINA_ESTERNA TEMP=...`. Il README dell'autore colloca la macro in `files/kamp/Start_Print.cfg` di ADL Script. Lo stesso documento attribuisce al flusso iniziale di stampa il caricamento della bobina esterna e alle Power Macros in `files/power-config/gcode_macro.cfg` il ripristino del CFS a fine lavoro.\n\nSenza queste macro il pannello può avviarsi, ma non può completare le operazioni che le richiedono. Anche i comandi della camera e varie funzioni di manutenzione richiedono integrazioni specifiche.\n\n## Installazione\n\n### Prima di iniziare\n\nInstallare a stampante inattiva: nessuna stampa, riscaldamento, home o calibrazione in corso.\n\nSecondo l'autore, l'installazione sostituisce l'interfaccia Creality disattivando `Monitor`, `display-server`, Creality Cloud, il collegamento LAN di Creality Print e gli aggiornamenti firmware OTA. L'installatore presenta un avviso e chiede conferma prima di applicare questi cambiamenti.\n\nGli script di installazione e ripristino non sono inclusi nei materiali locali disponibili. Le procedure qui riportate conservano le istruzioni dell'autore; non sono state eseguite né controllate via rete durante la preparazione editoriale.\n\n### Installare dal menu di ADL Script\n\nInstallare e aprire ADL Script seguendo la sua documentazione. Selezionare:\n\n```text\n[Customize & PowerScreen] Menu > 1) Install PowerScreen\n```\n\nLeggere l'avviso, confermare e scegliere `nightly`, il canale indicato dall'autore.\n\n### Installare direttamente da SSH\n\nCollegarsi alla K1C come root, sostituendo il segnaposto con l'indirizzo effettivo:\n\n```sh\nssh root@IP_DELLA_TUA_K1C\n```\n\nScaricare l'installatore indicato nel README e avviarlo:\n\n```sh\nwget --no-check-certificate -O /tmp/powerscreen-installer.sh https://raw.githubusercontent.com/AlbertoTrento/ADL-Screen/main/installer.sh\nsh /tmp/powerscreen-installer.sh nightly\n```\n\nNon è necessario clonare il repository secondo la procedura dell'autore.\n\n### File e modifiche documentati dall'autore\n\nL'installatore scarica `powerscreen-k1c.tar.gz` dalle [Release ADL-Screen](https://github.com/AlbertoTrento/ADL-Screen/releases) e installa il programma in `/usr/data/powerscreen`. Il README indica che conserva i file originali Creality in `/usr/data/powerscreen-backup`, configura servizio, moduli Klipper e macro, registra l'aggiornamento in Moonraker, salva il canale scelto e riavvia Klipper e pannello.\n\nI nomi interni `powerscreen`, `powerscreen-k1c.tar.gz` e `/usr/data/powerscreen` restano quelli usati dalle procedure esistenti. La descrizione della conservazione dei file originali riguarda il comportamento documentato dell'installatore; nessuna copia è stata creata in questa esecuzione editoriale.\n\n## Uso quotidiano\n\n### Leggere lo stato della stampante\n\nLa Home riunisce stato del lavoro e temperature. Il pannello mostra temperatura e target di ugello e piatto e la lettura della camera, secondo i sensori disponibili. Il sensore della camera non implica la presenza di un riscaldatore controllabile.\n\nDurante la stampa sono disponibili avanzamento, tempo trascorso, stima del tempo restante e altri dati restituiti da Klipper o dai metadati del file, come livelli e materiale. Le informazioni mancanti nel file o nel servizio non possono essere ricavate automaticamente dal pannello.\n\n### Scegliere e avviare un G-code\n\n1. Preparare il G-code nello slicer.\n2. Renderlo disponibile nell'archivio di Moonraker, per esempio caricandolo da Fluidd, oppure su una chiavetta USB riconosciuta e montata dalla stampante.\n3. Aprire la pagina dei file e scegliere **Local** o **USB**. Aggiornare l'elenco dopo l'inserimento della chiavetta.\n4. Selezionare il file, consultarne i dati disponibili e premere **Stampa**.\n5. Nella finestra **Avvia stampa**, impostare le opzioni disponibili e confermare **Avvia**.\n\nLa finestra propone mesh disattivata, adattiva o completa quando rileva `ADAPTIVE_BED_MESH` e `FULL_BED_MESH`; propone lo spurgo adattivo quando rileva `ADAPTIVE_PURGE_LINE`. La mesh adattiva riguarda la zona del pezzo, secondo l'integrazione installata. Se nessuna delle opzioni previste è disponibile, il codice avvia direttamente il file tramite Moonraker.\n\n### Scegliere CFS o bobina esterna\n\nQuando il CFS risulta collegato, la finestra di avvio offre **CFS** e **Bobina esterna**. Per la bobina esterna infilare prima il filamento fino all'estrusore.\n\nIl pannello invia `BOX_ENABLE_CFS_PRINT ENABLE=1` per il CFS oppure `BOX_ENABLE_CFS_PRINT ENABLE=0` per la bobina esterna, poi richiede l'avvio del file. Il caricamento e lo spurgo automatici descritti dall'autore dipendono dal flusso di avvio di ADL Script; non sono eseguiti autonomamente dal selettore del pannello.\n\n### Consultare e modificare le bobine\n\nAprire la pagina CFS e selezionare uno dei quattro slot. Il dettaglio presenta le informazioni disponibili sulla bobina, comprese materiale, colore e quantità residua comunicata dal sistema. **Modifica slot** consente di cambiare materiale e colore; **Controlla filamenti** invia una richiesta di aggiornamento al CFS.\n\nIl riconoscimento dei materiali gestisce anche codici con prefisso `1`, per esempio `106003`, cercando la corrispondenza nel catalogo. La disponibilità del nome dipende dalla presenza del materiale nel catalogo.\n\nLa quinta casella, **Bobina esterna**, permette di salvare materiale e colore nelle impostazioni del pannello. Queste informazioni sono inserite dall'utente: non equivalgono al rilevamento automatico o alla misura del residuo della bobina esterna.\n\n### Caricare e togliere filamento\n\nNella pagina Filamento impostare temperatura, lunghezza e velocità secondo l'operazione richiesta.\n\n- **Carica filamento:** richiama `_CARICA_BOBINA_ESTERNA TEMP=...`. Se gli assi non risultano referenziati, propone l'home prima del caricamento.\n- **Togli filamento:** attende la temperatura impostata, passa all'estrusione relativa, ritrae 100 mm a 600 mm/min e spegne l'ugello.\n- **Carica mm:** attende la temperatura e fa avanzare la lunghezza selezionata alla velocità scelta.\n- **Scarica mm:** attende la temperatura e ritrae la lunghezza selezionata alla velocità scelta.\n- **Spegni ugello:** imposta a zero il target dell'estrusore.\n\nIl comando di cambio manuale dedicato è visibile durante una pausa e richiama `_PS_MANUAL_CHANGE_PROMPT`.\n\n### Mettere in pausa, riprendere e interrompere\n\nUsare i controlli della schermata di stampa per pausa, ripresa e interruzione. Il progetto documenta il cambio filamento con `M600`. Nella finestra manuale i comandi finali sono `PS_RESUME` e `PS_CANCEL`; la schermata di stato usa `PS_RESUME_PRINT` per riprendere.\n\n**Avvertenza dell'autore:** dopo il caricamento manuale l'ugello resta nella vaschetta di spurgo. Il `RESUME` di fabbrica può riportarlo alla stampa in diagonale e urtare la spazzola. Usare il tasto di ripresa del pannello o `PS_RESUME_PRINT`, che secondo le macro documentate fanno uscire prima l'ugello in linea retta. Non inviare un semplice `RESUME` da Fluidd o console mentre l'ugello è nella vaschetta. Il percorso effettivo è responsabilità delle macro installate.\n\n### Escludere un oggetto\n\nAprire l'esclusione oggetti durante un lavoro che contiene più oggetti etichettati, scegliere quello da escludere e confermare. Il pannello richiede etichette degli oggetti nel G-code: abilitarle nello slicer. Un file privo di queste informazioni non permette di selezionare i singoli pezzi dal pannello.\n\n## Regolazioni e controllo macchina\n\n### Movimento, home e temperature\n\nI controlli degli assi permettono spostamenti per distanza selezionata, home e disattivazione dei motori. Sono presenti `G28 X Y Z`, `G28 X Y`, `G28 Z` e `M84`, oltre agli spostamenti relativi. L'arresto di emergenza usa la richiesta Moonraker `printer.emergency_stop`.\n\nImpostare i target termici dai controlli dei riscaldatori disponibili. Le letture dei soli sensori, come quello della camera nella configurazione documentata, restano informative.\n\n### Regolazione fine\n\nLa pagina **Fine Tune** permette di modificare:\n\n- offset Z tramite `SET_GCODE_OFFSET`;\n- velocità percentuale tramite `M220`;\n- flusso percentuale tramite `M221`;\n- Pressure Advance tramite `SET_PRESSURE_ADVANCE`.\n\nLa pagina **Limits** modifica i limiti esposti da Klipper tramite `SET_VELOCITY_LIMIT`, compresi velocità, accelerazione e velocità agli angoli. Questi comandi modificano lo stato operativo; non vanno presentati come salvataggio permanente automatico di un profilo.\n\n### Ventole, luce e camera\n\nI controlli delle ventole si adattano agli elementi configurati, usando i comandi previsti per ventole standard, generiche, controllate in temperatura o esposte come pin. I LED sono comandati tramite `SET_PIN` o `SET_LED`, secondo la configurazione.\n\nLa camera si attiva e disattiva attraverso macro esterne. Il pannello consulta lo stato del servizio e avverte che spegnere la camera interferisce con le fotografie del timelapse. La disponibilità del comando non equivale a un riproduttore video sul display.\n\n## Calibrazioni e manutenzione\n\n### Mesh del piatto\n\nAprire **Bed Mesh** per visualizzare la mappa e i profili. Avviare la misura con il relativo comando; se necessario il pannello esegue prima l'home. È possibile caricare, salvare ed eliminare profili e disattivare la mesh corrente.\n\nI comandi usati comprendono `BED_MESH_CALIBRATE`, `BED_MESH_CLEAR` e `BED_MESH_PROFILE LOAD=...`, `SAVE=...`, `REMOVE=...`. I salvataggi e le rimozioni previsti dal pannello includono `SAVE_CONFIG`, con riavvio di Klipper.\n\n### Input Shaper\n\nAprire **Input Shaper**, eseguire le misure degli assi e consultare i risultati disponibili. Il pannello usa `TEST_RESONANCES AXIS=X NAME=x` e `TEST_RESONANCES AXIS=Y NAME=y`, con elaborazione tramite lo script configurato come `ps_input_shaper`.\n\nIl salvataggio usa `PS_SAVE_INPUT_SHAPER` con frequenze e tipi selezionati, seguito da `SAVE_CONFIG`. Occorrono il sensore, la configurazione di misura e le integrazioni richieste: il solo pannello non li sostituisce.\n\n### Analisi delle cinghie\n\n**Belts / Shake** permette di avviare la procedura `PS_BELTS_SHAPER_CALIBRATION` e di eccitare un asse a frequenza scelta tramite `PS_EXCITATE_AXIS_AT_FREQ FREQUENCY=... AXIS=...`. Questi strumenti aiutano a esaminare il comportamento meccanico; non regolano fisicamente la tensione delle cinghie.\n\n### PID di ugello e piatto\n\nAprire **PID Tune**, scegliere il riscaldatore e la temperatura obiettivo, quindi confermare. Il pannello invia `PID_CALIBRATE HEATER=extruder TARGET=...` oppure `PID_CALIBRATE HEATER=heater_bed TARGET=...`. La procedura termina con `SAVE_CONFIG` e riavvio di Klipper. Non è disponibile durante la stampa.\n\n### Funzioni condizionali\n\nPulizia dell'ugello, TMC Autotune, metriche TMC e dispositivi di alimentazione sono mostrati secondo le macro, i moduli e i servizi rilevati. Le regolazioni TMC richiedono l'integrazione `autotune_tmc`; i salvataggi previsti includono `SAVE_CONFIG`. Non tutte le installazioni avranno gli stessi pulsanti.\n\n## File, cronologia e timelapse\n\n### Gestire i file\n\nLa pagina file permette di navigare fra archivio locale e USB, ordinare per nome o modifica, leggere i metadati disponibili ed eliminare uno o più file con conferma. La vista USB dipende da una chiavetta effettivamente montata e resa accessibile a Moonraker.\n\n### Consultare e ripetere lavori precedenti\n\n**History** richiede a Moonraker gli ultimi 30 lavori e i totali della cronologia. Selezionare un lavoro per leggerne i dati e usare **Print again** quando il G-code è ancora disponibile. L'azzeramento dei totali non elimina l'elenco dei lavori.\n\n### Gestire i video\n\n**Timelapse** elenca i video presenti nell'archivio dedicato di Moonraker, con anteprima quando disponibile. È possibile copiare un video sulla chiavetta USB o eliminarlo con conferma.\n\nIl pannello **non riproduce video**. Aprire il file da Fluidd oppure copiarlo e guardarlo su un altro dispositivo. Per produrre i video occorrono il modulo timelapse e la camera configurati separatamente.\n\n## Console, macro e integrazioni\n\n### Inviare comandi e macro\n\nLa console accetta comandi G-code e mostra le risposte ricevute. La pagina macro usa le macro esposte dalla stampante e permette di compilare i parametri previsti. Le azioni contenenti `SAVE_CONFIG` o riavvii richiedono conferma nel pannello.\n\nI comandi specifici usati dal flusso di avvio comprendono:\n\n| Comando | Funzione |\n| --- | --- |\n| `BOX_ENABLE_CFS_PRINT ENABLE=0` / `ENABLE=1` | Seleziona bobina esterna o CFS. |\n| `_BED_MESH_OFF` | Disattiva la scelta di mesh all'avvio secondo le macro installate. |\n| `_ADAPTIVE_BED_MESH_ON` / `_FULL_BED_MESH_ON` | Seleziona mesh adattiva o completa. |\n| `_ADAPTIVE_PURGE_LINE_ON` / `_ADAPTIVE_PURGE_LINE_OFF` | Attiva o disattiva lo spurgo adattivo. |\n| `_CARICA_BOBINA_ESTERNA TEMP=...` | Avvia il caricamento esterno alla temperatura indicata. |\n| `_PS_MANUAL_CHANGE_PROMPT` | Apre il flusso di cambio manuale. |\n| `PS_RESUME`, `PS_CANCEL`, `PS_RESUME_PRINT` | Comandi delle macro per terminare il cambio manuale o riprendere la stampa. |\n\nLa tabella descrive i comandi richiamati o documentati dal progetto; non implica che siano disponibili senza installare le relative macro.\n\n### Spoolman e Wi-Fi\n\nIl codice comprende una pagina Spoolman utilizzabile quando il servizio è disponibile tramite Moonraker. Permette di consultare e selezionare bobine; l'accesso dalla voce filamento dipende anche dalla presenza del CFS.\n\nLa pagina Wi-Fi permette di cercare reti, collegarsi inserendo le credenziali, selezionare reti salvate e dimenticarle. Richiede il servizio Wi-Fi previsto dalla piattaforma.\n\n### Lingua\n\nAprire **Impostazioni > Lingua** e scegliere italiano, inglese, tedesco, francese o spagnolo. L'italiano è il valore predefinito. Il pannello salva la preferenza e riavvia la propria interfaccia per applicarla; il codice non richiede il riavvio di Klipper per questa scelta.\n\n## Aggiornamento\n\nIl README dell'autore indica **Impostazioni > Aggiornamenti**; nei sorgenti il pulsante è denominato **Power Update**. Il pannello contiene l'accesso alla gestione degli aggiornamenti e ne blocca l'apertura quando rileva la macchina impegnata in stampa.\n\nIn alternativa, le istruzioni dell'autore indicano **Settings > Software Updates** in Fluidd, dopo la registrazione del programma nel gestore di aggiornamento Moonraker. Non è necessario rilanciare l'installatore secondo la procedura documentata. La disponibilità effettiva delle release e degli aggiornamenti esterni non è stata verificata via rete.\n\n## Disinstallazione e ripristino\n\nDal menu di ADL Script selezionare:\n\n```text\n[Customize & PowerScreen] Menu > 2) Remove PowerScreen\n```\n\nIn alternativa, collegarsi via SSH ed eseguire la procedura documentata:\n\n```sh\nsh /usr/data/powerscreen/reinstall-creality.sh\n```\n\nL'autore indica che questa procedura ripristina schermo e servizi Creality. Dopo la rimozione consiglia di riavviare la stampante. Lo script non è incluso nei materiali locali esaminati.\n\n## Risoluzione dei problemi e limiti\n\n### Un pulsante richiama un comando sconosciuto\n\nVerificare nella configurazione della propria installazione la presenza delle macro richieste da ADL Script. Il pannello non implementa internamente `_CARICA_BOBINA_ESTERNA` né il percorso di ripresa dalla vaschetta.\n\n### Non appare la scelta CFS o bobina esterna\n\nIl selettore compare quando il CFS comunica lo stato di collegamento previsto. Le opzioni di mesh e spurgo hanno condizioni separate e dipendono dai rispettivi elementi di configurazione.\n\n### Non sono disponibili oggetti, anteprime o dati del lavoro\n\nL'esclusione richiede oggetti etichettati nello slicer. Anteprime, materiale, livelli e stime dipendono dai metadati disponibili. I metri residui sono dati comunicati dal CFS, non misure indipendenti del pannello.\n\n### USB o timelapse non mostrano contenuti\n\nLa chiavetta deve essere riconosciuta e montata dalla stampante; aggiornare l'elenco dopo averla inserita. I timelapse richiedono il modulo dedicato e file già prodotti. Il display non è un lettore video.\n\n### Limiti della verifica editoriale\n\nLe funzioni descritte sono state confrontate con i sorgenti pertinenti. Non sono stati eseguiti test, installazioni, compilazioni o prove su hardware. Le procedure degli installer esterni e le informazioni sulle macro ADL Script sono conservate come indicazioni dell'autore. La disponibilità dei download non è stata verificata. Non vengono dichiarate prestazioni, qualità di stampa garantita o compatibilità ulteriori.\n\n## Crediti e licenze\n\nADL_Screen è una versione modificata di [PowerScreen](https://github.com/borferkic/K1C-CFS-POWER-SCREEN), creata da Boris Fernández (Boris SdK), mantenuta da Alberto (AlbertoTrento) dal 6 novembre 2026. PowerScreen deriva da [GuppyScreen](https://github.com/ballaswag/guppyscreen) di ballaswag.\n\nIl codice è dichiarato **GNU GPL-3.0**. Il README originale rimanda a `LICENSE`, che non è presente nei materiali locali disponibili.\n\nIl tema e il lavoro grafico **PowerUI** sono distribuiti con **Creative Commons Attribution-NonCommercial 4.0 International**, come specificato in `LICENSE-POWERUI.md`: sono richiesti attribuzione a Boris Fernández, collegamento alla licenza e indicazione delle modifiche. L'uso commerciale richiede il permesso dell'autore. Questa licenza riguarda il lavoro grafico PowerUI e non sostituisce quella del codice.\n\nPowerUI si basa su shadcn/ui; `NOTICE.md` riporta anche i crediti per GuppyScreen, Lucide, Z-Bolt e LVGL. Riferimento della licenza PowerUI: https://creativecommons.org/licenses/by-nc/4.0/.\n",
+  "feature": [
+    {
+      "descrizione": "Consulta i quattro slot del CFS, i materiali, i colori e i metri residui comunicati dal sistema. All'avvio scegli CFS o bobina esterna quando il CFS è collegato. Il caricamento automatico della bobina esterna richiede le macro ADL Script; materiale e colore esterni sono dati inseriti dall'utente.",
+      "titolo": "CFS e bobina esterna dallo stesso pannello"
+    },
+    {
+      "descrizione": "Seleziona un G-code locale o su USB e, quando le integrazioni sono presenti, scegli mesh disattivata, adattiva o completa e spurgo adattivo prima di avviare. Riunisce le scelte operative sul display; il file deve essere già preparato con uno slicer.",
+      "titolo": "Avvio della stampa con le opzioni utili"
+    },
+    {
+      "descrizione": "Segui avanzamento, tempi e temperature, metti in pausa, riprendi o interrompi il lavoro. Puoi escludere un pezzo senza annullare gli altri se il G-code contiene oggetti etichettati. Stime e dettagli dipendono dai dati disponibili.",
+      "titolo": "Controllo della stampa e dei singoli oggetti"
+    },
+    {
+      "descrizione": "Carica la bobina esterna, ritira il filamento, estrudi o ritrai una lunghezza scelta e spegni l'ugello. Durante la pausa accedi al cambio manuale. Le macro di ripresa previste dal progetto gestiscono l'uscita dalla vaschetta: non vanno sostituite con il RESUME di fabbrica in quella posizione.",
+      "titolo": "Caricamento e cambio filamento dal touch"
+    },
+    {
+      "descrizione": "Modifica offset Z, velocità, flusso e Pressure Advance e accedi ai limiti di movimento. È utile per intervenire davanti alla macchina senza digitare ogni comando; le modifiche operative non equivalgono automaticamente al salvataggio permanente di un profilo.",
+      "titolo": "Regolazioni durante il lavoro"
+    },
+    {
+      "descrizione": "Gestisci home, spostamenti per distanza, motori, temperature, ventole e LED. Il controllo della camera richiede le macro previste e segnala l'effetto dello spegnimento sul timelapse. I controlli dipendono dagli elementi configurati in Klipper.",
+      "titolo": "Comandi della macchina a portata di mano"
+    },
+    {
+      "descrizione": "Visualizza la mesh e gestisci i profili, esegui misure Input Shaper, analisi delle cinghie e calibrazione PID di ugello e piatto. Servono sensori, moduli e macro compatibili; i salvataggi con SAVE_CONFIG riavviano Klipper.",
+      "titolo": "Calibrazioni e manutenzione dal display"
+    },
+    {
+      "descrizione": "Naviga tra file locali e USB, ordina ed elimina anche più file, consulta gli ultimi 30 lavori richiesti a Moonraker e ristampa un G-code ancora disponibile. I dati della cronologia dipendono dal servizio configurato.",
+      "titolo": "File e ristampa dei lavori precedenti"
+    },
+    {
+      "descrizione": "Consulta i timelapse prodotti dal modulo dedicato, copiali su una chiavetta USB o eliminali con conferma. Il display non riproduce video: per guardarli occorre Fluidd o un altro dispositivo.",
+      "titolo": "Gestione dei timelapse"
+    },
+    {
+      "descrizione": "Invia G-code, leggi le risposte ed esegui macro con gli eventuali parametri. È utile per le operazioni non raccolte in un pulsante dedicato; le macro effettivamente disponibili sono quelle della stampante.",
+      "titolo": "Console e macro personalizzate"
+    },
+    {
+      "descrizione": "Scegli italiano, inglese, tedesco, francese o spagnolo; gestisci le reti Wi-Fi e consulta le informazioni di sistema. L'italiano è predefinito e il cambio lingua riavvia il pannello per applicare la scelta.",
+      "titolo": "Lingua e connessione configurabili"
+    },
+    {
+      "descrizione": "Il codice include accessi condizionali a Spoolman, regolazioni e metriche TMC, dispositivi di alimentazione e pulizia ugello. Questi strumenti compaiono o diventano utilizzabili in base ai servizi, moduli e macro rilevati.",
+      "titolo": "Strumenti aggiuntivi per le installazioni predisposte"
+    },
+    {
+      "descrizione": "Accedi alla pagina Power Update; la procedura dell'autore prevede anche gli aggiornamenti da Fluidd tramite Moonraker. Il pannello limita l'accesso durante la stampa. Download e procedure esterne sono documentati dall'autore e non sono stati eseguiti in questa preparazione editoriale.",
+      "titolo": "Accesso agli aggiornamenti"
+    }
+  ],
+  "formato_installer": "Script shell .sh con pacchetto powerscreen-k1c.tar.gz, secondo la procedura dell'autore",
+  "identita": {
+    "id": "",
+    "repository": "",
+    "slug": ""
+  },
+  "link_acquisto": "",
+  "link_download": "",
+  "nome": "ADL_Screen",
+  "presentazione": {
+    "media": [
+      {
+        "alt": "Media di ADL_Screen",
+        "didascalia": "",
+        "fonte": {
+          "file_origine": "images/screenshots/01.png",
+          "nel_set_approvato": true,
+          "origine": "set_approvato",
+          "percorso": "images/screenshots/01.png",
+          "set_approvato_sha256": "432e4040501d81570ec521ef06de49b37359b6358b40ccfbffe7b2fb6435644b",
+          "sha256": "9d5c69f94db06975f9d19d46970e198fefd027e5d0b481684b126c07124817dd"
+        },
+        "motivo": "",
+        "ordine": 10,
+        "percorso": "images/screenshots/01.png",
+        "ruolo": "hero_ui",
+        "stato": "confermato",
+        "tipo": "image"
+      },
+      {
+        "alt": "Icona di ADL_Screen",
+        "didascalia": "",
+        "fonte": {
+          "file_origine": "ADL-Screen-home.png",
+          "nel_set_approvato": false,
+          "operazione": "copia_gitcode",
+          "origine": "import_manuale",
+          "percorso": "images/product-icon.png",
+          "set_approvato_sha256": "432e4040501d81570ec521ef06de49b37359b6358b40ccfbffe7b2fb6435644b",
+          "sha256": "9d5c69f94db06975f9d19d46970e198fefd027e5d0b481684b126c07124817dd",
+          "sha256_origine": "9d5c69f94db06975f9d19d46970e198fefd027e5d0b481684b126c07124817dd"
+        },
+        "motivo": "",
+        "ordine": 18,
+        "percorso": "images/product-icon.png",
+        "ruolo": "product_icon",
+        "stato": "confermato",
+        "tipo": "image"
+      }
+    ],
+    "riferimenti_media": {
+      "copertina": "",
+      "hero_ui": "images/screenshots/01.png",
+      "icona": "images/product-icon.png",
+      "social": "images/screenshots/01.png"
+    }
+  },
+  "prezzo": "",
+  "requisiti": [
+    "Creality K1C con CFS e display originale; firmware CFS 2.3.5.34 indicato dall'autore come provato.",
+    "Accesso root e SSH attivo; indirizzo IP e password di root per l'installazione.",
+    "Klipper e Moonraker installati e funzionanti.",
+    "ADL Script con Power Macros e Klipper Adaptive Meshing & Purging per i flussi di filamento e le opzioni dipendenti dalle macro.",
+    "Connessione di rete e accesso a Internet dalla stampante per installazione e aggiornamenti.",
+    "Stampante inattiva durante l'installazione.",
+    "Servizi, sensori e moduli specifici per le funzioni opzionali, fra cui timelapse, Spoolman, Input Shaper e strumenti TMC."
+  ],
+  "schema_version": 2,
+  "screenshot": [
+    "images/screenshots/01.png",
+    "images/screenshots/02.png",
+    "images/screenshots/03.png"
+  ],
+  "sottotitolo": "Gestisci stampe, CFS e bobina esterna dal display touch della Creality K1C.",
+  "stato_sviluppo": "Versioni preliminari nightly secondo il README dell'autore; versione corrente non determinabile dai materiali disponibili.",
+  "tag": [
+    "stampa 3D",
+    "Creality K1C",
+    "CFS",
+    "Klipper",
+    "Moonraker",
+    "display touch",
+    "bobina esterna",
+    "gestione filamento"
+  ],
+  "tipo_distribuzione": "",
+  "visibilita": ""
+}

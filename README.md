@@ -1,391 +1,167 @@
-<!--
-METADATOS DEL DOCUMENTO
-Nombre: `README.md`
-Fecha de creación: `2026-09-10`
-Descripción: Presentación pública, alcance e instrucciones de PowerScreen para la Creality K1C.
-Proyecto: `PowerScreen`
-Última modificación: `2026-10-04`
--->
+# ADL_Screen
 
-> **ADL Screen** è la versione di [AlbertoTrento](https://github.com/AlbertoTrento/ADL-Screen) di PowerScreen, il progetto originale di [Boris SdK](https://github.com/borferkic/K1C-CFS-POWER-SCREEN). Il testo qui sotto è quello originale.
+Il pannello touch per gestire stampe, CFS e bobina esterna sulla Creality K1C.
 
-<div align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/powerscreen-logo-dark.svg" />
-    <img src="docs/images/powerscreen-logo-light.svg" alt="PowerScreen" width="460" />
-  </picture>
-  <br /><br />
-</div>
+## A chi serve
 
-<div align="center">
-  <a href="https://github.com/borferkic/K1C-CFS-POWER-SCREEN/releases/latest"><img src="https://img.shields.io/github/v/release/borferkic/K1C-CFS-POWER-SCREEN?style=flat-square&color=2ea44f" alt="Latest release" /></a>
-  <a href="https://github.com/borferkic/K1C-CFS-POWER-SCREEN/releases"><img src="https://img.shields.io/github/downloads/borferkic/K1C-CFS-POWER-SCREEN/total?style=flat-square&color=555" alt="Downloads" /></a>
-  <img src="https://img.shields.io/badge/Printer-Creality%20K1C-0078D6?style=flat-square" alt="Printer: Creality K1C" />
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0%20%2B%20PowerUI%20NC-blue?style=flat-square" alt="License: GPL-3.0 + PowerUI non-commercial" /></a>
-</div>
+ADL_Screen è destinato a chi usa una **Creality K1C con CFS, accesso root, Klipper e Moonraker** e vuole controllare la stampante dal display originale. Sostituisce l'interfaccia Creality e riunisce scelta del filamento, avvio dei file, temperature, movimento, regolazioni e manutenzione.
 
-[English](#english) | [Español](#espanol)
+È utile quando si alternano CFS e bobina esterna, si cambia filamento durante una pausa o si interviene sulla macchina mentre si è davanti alla stampante. Il vantaggio pratico è avere sul touch operazioni che altrimenti richiedono l'interfaccia web o l'invio manuale di comandi e macro. Il pannello usa le funzioni di Klipper e le macro installate: non sostituisce lo slicer e non aggiunge da solo le funzioni mancanti nel firmware.
 
----
+## Compatibilità e stato
 
-<a name="english"></a>
+La configurazione dichiarata dall'autore è **Creality K1C con firmware CFS**, provato dall'autore su `2.3.5.34`, accesso root e schermo originale. Non sono dichiarate distribuzioni per altre stampanti, Android o Raspberry Pi.
 
-# K1C CFS POWER SCREEN
+Il README dell'autore indica il canale **nightly**, con versioni preliminari. Le note `v0.37.0` presenti nel progetto non identificano con certezza una versione corrente della distribuzione ADL_Screen.
 
-This is a personal modification of PowerScreen focused exclusively on the Creality K1C. It keeps the touch interface base for Klipper/Moonraker and adds features specific to the CFS workflow and manual filament changes.
+## Funzioni principali
 
-## Scope
+| Funzione | Utilità e limiti |
+| --- | --- |
+| CFS e bobina esterna | Consulta i quattro slot, materiale, colore e metri residui comunicati dal CFS. Modifica materiale e colore e registra quelli della bobina esterna. La scelta CFS/bobina esterna appare all'avvio quando il CFS risulta collegato. |
+| Avvio della stampa | Scegli un G-code locale o su USB e avvialo dal display. Quando le relative macro sono disponibili puoi scegliere mesh disattivata, adattiva o completa e attivare lo spurgo adattivo. |
+| Controllo del lavoro | Segui avanzamento, tempi, temperature e dati disponibili del file; metti in pausa, riprendi o interrompi. L'esclusione di un singolo oggetto richiede oggetti etichettati nel G-code. |
+| Gestione filamento | Carica la bobina esterna, ritira il filamento, estrudi o ritrai una quantità in millimetri e spegni l'ugello. Il cambio manuale dedicato compare durante la pausa. |
+| Regolazioni e comandi macchina | Regola velocità, flusso, offset Z e Pressure Advance; gestisci movimento, home, motori, ventole e LED. La camera richiede le macro di controllo previste. |
+| Calibrazioni | Accedi a mesh del piatto e profili, Input Shaper, analisi delle cinghie e PID. I comandi richiedono hardware, moduli e macro compatibili; i salvataggi con `SAVE_CONFIG` riavviano Klipper. |
+| File e lavori precedenti | Ordina ed elimina file, consulta gli ultimi 30 lavori restituiti dalla cronologia e ristampa quelli ancora disponibili. Consulta i timelapse, copiali su USB o eliminali; il pannello non riproduce video. |
+| Console e macro | Invia G-code, consulta le risposte ed esegui macro, anche con parametri. Le macro disponibili dipendono dalla configurazione della stampante. |
+| Impostazioni e strumenti opzionali | Scegli tra italiano, inglese, tedesco, francese e spagnolo; gestisci Wi-Fi e informazioni di sistema. Spoolman, strumenti TMC e dispositivi di alimentazione dipendono dai servizi rilevati. |
 
-This repository is intended only for:
+I codici materiale CFS con prefisso `1`, come `106003`, vengono ricondotti al catalogo quando esiste una corrispondenza: questo evita di mostrare soltanto un codice al posto del nome del materiale.
 
-- Creality K1C.
-- The original K1C screen.
-- MIPS builds compatible with K1C hardware.
-- Custom CFS macros and scripts.
+## Installazione
 
-There are no builds, instructions, or support for Android, Raspberry Pi, `PowerScreenDroid`, or other printer models.
+### Requisiti
 
-## Screenshots
+- K1C con firmware CFS, root e display originale.
+- SSH attivo, indirizzo IP della stampante e password di root.
+- Klipper e Moonraker installati e funzionanti.
+- Connessione di rete e accesso a Internet dalla stampante per il download e gli aggiornamenti.
+- [ADL Script](https://github.com/AlbertoTrento/ADL-Script), con le macro necessarie alle operazioni descritte sotto.
 
-![PowerScreen interface overview: Home, Print Status, Filament, Movement, Bed Mesh, Fine Tune, System, Power Update, Fans, Wi-Fi, Calibrations, Settings and Files](screenshots/GITSCREEN.png)
+Installare solo a macchina inattiva: nessuna stampa, riscaldamento, home o calibrazione in corso.
 
-## Installation / Update on a K1C
+### Preparare ADL Script
 
-PowerScreen is installed from an SSH shell on the printer while logged in as `root`, either with the [CFS Power Script](https://github.com/borferkic/K1C-CFS-Power-Script) (recommended) or directly with the PowerScreen installer. Do not install while printing, heating, homing, or running a calibration.
-
-> [!IMPORTANT]
-> PowerScreen replaces the Creality touch screen. Installing it **disables** the Creality screen (`Monitor`, `display-server`) and the Creality services: Creality Cloud, Creality Print LAN connection and OTA firmware updates. Everything is backed up and restored if PowerScreen is removed. The installer shows this warning and asks for confirmation before changing anything.
-
-### Requirements
-
-- A Creality K1C with SSH access enabled and reachable on the local network.
-- Internet access from the printer to GitHub.
-- Moonraker running on the printer.
-- The root password of the printer.
-
-The only supported package is `powerscreen-k1c.tar.gz`, the MIPS Z-Bolt package for the K1C.
-
-### 1. Connect to the printer
-
-Connect to the printer through SSH as `root`:
-
-```sh
-ssh -p 22 root@YOUR_K1C_IP
-```
-
-All remaining commands in this section must be executed inside the printer shell.
-
-Verify the platform and available space:
-
-```sh
-uname -m
-df -h /usr/data
-```
-
-The K1C must report `mips`.
-
-### 2. Install PowerScreen
-
-#### Option A — with the CFS Power Script (recommended)
-
-Install and open the [CFS Power Script](https://github.com/borferkic/K1C-CFS-Power-Script) as described in its README, then select:
+Dal menu di ADL Script installare almeno:
 
 ```text
-[Customize & PowerScreen] Menu → 1) Install PowerScreen
+[Install] Menu > 6) Install Power Macros
+[Install] Menu > 8) Install Klipper Adaptive Meshing & Purging
 ```
 
-The script shows the warning above, asks for confirmation and asks which build to install (`stable` or `nightly`). It then runs the PowerScreen installer without further questions.
+**Carica filamento** richiama `_CARICA_BOBINA_ESTERNA TEMP=...`. Il README dell'autore colloca questa macro in `files/kamp/Start_Print.cfg` di ADL Script e attribuisce alle Power Macros in `files/power-config/gcode_macro.cfg` il ripristino del CFS a fine stampa. Senza queste integrazioni il pannello può aprirsi, ma le operazioni dipendenti dalle macro non sono complete.
 
-#### Option B — with the PowerScreen installer
+### Effetti dell'installazione
 
-Download only the installer (there is no need to clone this repository) and run it:
+Secondo le istruzioni dell'autore, l'installatore disattiva lo schermo Creality (`Monitor`, `display-server`), Creality Cloud, il collegamento LAN di Creality Print e gli aggiornamenti firmware OTA. Mostra un avviso e chiede conferma prima di procedere.
 
-```sh
-wget --no-check-certificate -O /tmp/powerscreen-installer.sh https://raw.githubusercontent.com/borferkic/K1C-CFS-POWER-SCREEN/main/installer.sh
-sh /tmp/powerscreen-installer.sh
+L'installatore e lo script di ripristino non sono inclusi nei materiali locali disponibili: le procedure seguenti conservano le istruzioni dell'autore e non sono state eseguite né verificate tramite rete.
+
+### Metodo A: menu di ADL Script
+
+Installare e aprire ADL Script seguendo la sua documentazione, quindi scegliere:
+
+```text
+[Customize & PowerScreen] Menu > 1) Install PowerScreen
 ```
 
-The installer shows the warning, asks for confirmation and asks which build to install. The build can also be passed as an argument:
+Leggere l'avviso, confermare e selezionare `nightly`, il canale indicato nel README dell'autore.
+
+### Metodo B: installatore diretto
+
+Collegarsi in SSH sostituendo il segnaposto con l'indirizzo della K1C:
 
 ```sh
-sh /tmp/powerscreen-installer.sh stable
+ssh root@IP_DELLA_TUA_K1C
+```
+
+Scaricare ed eseguire l'installatore indicato dall'autore:
+
+```sh
+wget --no-check-certificate -O /tmp/powerscreen-installer.sh https://raw.githubusercontent.com/AlbertoTrento/ADL-Screen/main/installer.sh
 sh /tmp/powerscreen-installer.sh nightly
 ```
 
-#### What the installer does
+Secondo il README originale, l'installatore scarica `powerscreen-k1c.tar.gz` dalle [Release ADL-Screen](https://github.com/AlbertoTrento/ADL-Screen/releases), installa in `/usr/data/powerscreen`, conserva gli originali Creality in `/usr/data/powerscreen-backup`, configura servizio, moduli e macro, registra l'aggiornamento in Moonraker e riavvia Klipper e pannello. Questi sono comportamenti documentati dell'installatore, non operazioni svolte durante questa preparazione editoriale.
 
-- Downloads `powerscreen-k1c.tar.gz` from this repository's GitHub Releases (the latest stable release, or the latest nightly pre-release) and extracts it under `/usr/data/powerscreen`.
-- Backs up the original Creality files in `/usr/data/powerscreen-backup` and disables the Creality screen and services.
-- Configures the service, the Klipper modules and the PowerScreen macros.
-- Registers PowerScreen in Moonraker's Update Manager so it appears in Fluidd. The registered repository is `borferkic/K1C-CFS-POWER-SCREEN`.
-- Saves the chosen build as the update channel, restarts Klipper and starts PowerScreen.
+I nomi interni `powerscreen`, `powerscreen-k1c.tar.gz` e `/usr/data/powerscreen` restano quelli usati dalle procedure esistenti.
 
-### 3. Update PowerScreen
+## Uso
 
-Updates do not require running the installer again:
+### Preparare e avviare un file
 
-- On the printer screen: **System → Updates**. The update channel (`Nightly` or `Stable`) can be changed there.
-- In Fluidd: **Settings → Software Updates**.
+1. Preparare il G-code con lo slicer e renderlo disponibile a Moonraker, per esempio caricandolo da Fluidd, oppure usare una chiavetta USB riconosciuta dalla stampante.
+2. Aprire la pagina dei file, scegliere **Local** o **USB**, aggiornare l'elenco e selezionare il file.
+3. Premere **Stampa**. Se disponibili, scegliere mesh, spurgo adattivo e alimentazione **CFS** o **Bobina esterna**.
+4. Per la bobina esterna, inserire prima il filamento fino all'estrusore. Il caricamento e lo spurgo automatici descritti dall'autore dipendono dalle macro ADL Script.
+5. Confermare **Avvia** e seguire lo stato del lavoro.
 
-### 4. Remove PowerScreen
+Il pannello imposta la sorgente tramite `BOX_ENABLE_CFS_PRINT ENABLE=0` per la bobina esterna o `ENABLE=1` per il CFS. Le opzioni di mesh e spurgo appaiono solo se vengono rilevati i rispettivi elementi di configurazione.
 
-- With the CFS Power Script: `[Customize & PowerScreen] Menu → 2) Remove PowerScreen`.
-- Manually, to restore the Creality screen and services:
+### Gestire CFS e filamento
+
+Nella pagina CFS scegliere uno dei quattro slot, leggere i dettagli e usare **Modifica slot** per materiale e colore. **Controlla filamenti** richiede una rilettura al CFS. La casella **Bobina esterna** permette di salvare materiale e colore nelle impostazioni del pannello; non costituisce una misura automatica della bobina esterna.
+
+Nella pagina Filamento impostare una temperatura adatta al materiale. **Carica filamento** usa la macro di caricamento e, quando necessario, propone prima l'home. **Togli filamento** riscalda, ritrae 100 mm e spegne l'ugello. **Carica mm** e **Scarica mm** usano lunghezza e velocità selezionate. **Spegni ugello** azzera il target dell'estrusore.
+
+### Pausa e cambio manuale
+
+Durante una pausa è disponibile il cambio manuale. Il progetto documenta il flusso con `M600`; la finestra manuale usa `PS_RESUME` e `PS_CANCEL`, mentre la schermata di stato richiama `PS_RESUME_PRINT` per riprendere.
+
+**Dopo il caricamento manuale l'ugello può rimanere nella vaschetta di spurgo.** Le istruzioni dell'autore avvertono che il `RESUME` di fabbrica può rientrare diagonalmente e urtare la spazzola. Usare il tasto di ripresa del pannello o `PS_RESUME_PRINT`; non inviare un semplice `RESUME` da Fluidd o console mentre l'ugello è nella vaschetta. Il movimento effettivo dipende dalle macro installate.
+
+### Regolazioni, calibrazioni e strumenti
+
+Dalla pagina di regolazione intervenire su offset Z, velocità, flusso e Pressure Advance. I controlli di movimento consentono home, spostamenti per distanza e disattivazione dei motori. Usare ventole, LED e camera secondo i dispositivi e le macro disponibili.
+
+Per la manutenzione aprire la funzione desiderata: **Bed Mesh** mostra la superficie e gestisce i profili; **Input Shaper** esegue misure sugli assi e permette di salvare i parametri; **Belts / Shake** offre analisi ed eccitazione delle cinghie; **PID Tune** calibra ugello o piatto alla temperatura scelta. Le operazioni con `SAVE_CONFIG` comportano il riavvio di Klipper. Pulizia ugello, TMC e alimentazione compaiono secondo le integrazioni rilevate.
+
+La console invia comandi alla stampante e mostra le risposte; la pagina macro permette di selezionare una macro e compilare gli eventuali parametri.
+
+### Cronologia, timelapse e lingua
+
+**History** mostra i lavori recenti e permette di ristampare un file ancora disponibile. L'azzeramento dei totali non cancella l'elenco dei lavori. **Timelapse** elenca i video prodotti dal modulo dedicato: è possibile copiarli su USB o eliminarli, ma per guardarli occorre aprirli da Fluidd o da un altro dispositivo.
+
+Da **Impostazioni > Lingua** scegliere italiano, inglese, tedesco, francese o spagnolo. L'italiano è il valore predefinito; la scelta viene salvata e il pannello viene riavviato per applicarla.
+
+## Aggiornamento e rimozione
+
+Il README dell'autore indica l'aggiornamento dal pannello, in **Impostazioni > Aggiornamenti**; nei sorgenti il pulsante è denominato **Power Update**. In alternativa, usare **Settings > Software Updates** in Fluidd, con la registrazione Moonraker prevista dall'installazione. Il pannello disabilita l'accesso all'aggiornamento quando rileva la macchina occupata in stampa.
+
+Per rimuovere ADL_Screen, la procedura documentata è:
+
+```text
+[Customize & PowerScreen] Menu > 2) Remove PowerScreen
+```
+
+Oppure, da SSH:
 
 ```sh
 sh /usr/data/powerscreen/reinstall-creality.sh
 ```
 
-It is recommended to restart the printer after removing PowerScreen.
+Secondo l'autore questa procedura ripristina schermo e servizi Creality. Dopo la rimozione è consigliato riavviare la stampante.
 
-## Inherited features
+## Schermate
 
-- Console and macro shell.
-- Bed Mesh.
-- Input Shaper.
-- Print status.
-- Spoolman integration.
-- Extrusion and retraction.
-- Temperature control.
-- Fan, LED, and movement control.
-- Fine tuning for speed, flow, Z-offset, and Pressure Advance.
-- Velocity and acceleration limits.
-- File browser.
-- TMC metrics.
+I riferimenti seguenti conservano i percorsi del manifesto. Le immagini non sono state ispezionate e non vengono attribuite loro funzioni specifiche.
 
-## Additional features in this modification
+| Riferimento | Immagine |
+| --- | --- |
+| Schermata 1 | ![ADL_Screen — schermata 1](images/screenshots/01.png) |
+| Schermata 2 | ![ADL_Screen — schermata 2](images/screenshots/02.png) |
+| Schermata 3 | ![ADL_Screen — schermata 3](images/screenshots/03.png) |
 
-- `MANUAL M600` button in the extrusion panel.
-- Manual filament change dialog adapted to the K1C screen.
-- `PS_UNLOAD_FILAMENT` and `PS_LOAD_FILAMENT` actions.
-  - The filament cut uses the cutter X position and speed of the `[box]` section of `box.cfg` (`cut_pos_x`, `cut_velocity`), so it hits as softly as the CFS's own cut. If those values are missing it falls back to X42 and 8000 mm/min. The cut stays at Y225.2.
-  - The bed lowers at 10 mm/s (`F600`) before cutting or loading, the speed the CFS module uses.
-  - After a pause, once the nozzle is wiped, `PS_LOAD_FILAMENT` heats the nozzle to 10 °C under the print temperature saved by the pause and waits there. If no temperature was saved, it does nothing.
-- Green `RESUME` action (`PS_RESUME`): heats to the print temperature, purges 5 mm in the purge tray, leaves the tray in a straight line and resumes the print.
-- Red `STOP` action (`PS_CANCEL`), which cancels with `CANCEL_PRINT`.
-- Nozzle temperature card (actual / target, state and progress bar) and an X button that closes the dialog at once, without waiting for Klipper.
-- Icons for load, unload, resume, and stop actions.
-- Button layout reorganized for comfortable touchscreen use on the K1C.
-- **[PowerUI](https://github.com/borferkic/PowerUI)** visual theme on every screen, created by Boris Fernández (Boris SdK) and based on [shadcn/ui](https://github.com/shadcn-ui/ui). Its design guidelines and implementation instructions live in the [PowerUI](https://github.com/borferkic/PowerUI) repository.
+## Crediti e licenze
 
-> [!IMPORTANT]
-> **The nozzle stays in the purge tray after `PS_LOAD_FILAMENT`.** The factory `RESUME` goes to the print position in one straight X, Y and Z move, so from the tray it would cross the brush in a diagonal and could hit it. Resume with the **RESUME** button of the manual filament change dialog (`PS_RESUME`), the **Resume** button of Print Status or `PS_RESUME_PRINT`; all of them leave the tray in a straight line first. `PS_CANCEL` does the same before cancelling.
->
-> **Do not resume with a plain `RESUME` (Fluidd or the console) while the nozzle is in the purge tray.** Use `PS_RESUME_PRINT` there. Keep a hand near the emergency stop the first time you try it.
+ADL_Screen è una versione modificata di [PowerScreen](https://github.com/borferkic/K1C-CFS-POWER-SCREEN) di Boris Fernández (Boris SdK), mantenuta da Alberto (AlbertoTrento) dal 6 novembre 2026. PowerScreen deriva da [GuppyScreen](https://github.com/ballaswag/guppyscreen) di ballaswag.
 
-## Pending work
+- **Codice:** GNU GPL-3.0, come dichiarato dal progetto; il riferimento originale è [LICENSE](LICENSE), non presente nei materiali locali disponibili.
+- **PowerUI:** [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), con attribuzione a Boris Fernández, collegamento alla licenza e indicazione delle modifiche. L'uso commerciale richiede il permesso dell'autore. Vedere [LICENSE-POWERUI.md](LICENSE-POWERUI.md).
+- PowerUI si basa su shadcn/ui; ulteriori attribuzioni, comprese Lucide, Z-Bolt e LVGL, sono conservate in [NOTICE.md](NOTICE.md).
 
-Internal change logs, pending work and release history are kept in private project documentation outside the public repository.
+## Ambito della preparazione editoriale
 
-## Support the project
-
-If this project is useful to you, you can support its development through [PayPal](https://paypal.me/borissdk).
-
-## Credits and thanks
-
-This repository is maintained as K1C CFS POWER SCREEN and contains project-specific modifications for the Creality K1C.
-
-The projects and resources used by the original foundation are also acknowledged:
-
-- [GuppyScreen](https://github.com/ballaswag/guppyscreen) — native touchscreen UI for Klipper/Moonraker, created by [ballaswag](https://github.com/ballaswag).
-- [shadcn/ui](https://github.com/shadcn-ui/ui) — created by [shadcn](https://github.com/shadcn) (MIT); thank you for its UI guidelines, which made it possible to build PowerUI.
-- [Lucide](https://lucide.dev/) — general line icons.
-- [LVGL](https://github.com/lvgl/lvgl)
-- [Z-Bolt Icons](https://github.com/Z-Bolt/OctoScreen)
-- [k1-discovery](https://github.com/ballaswag/k1-discovery) — MIPS toolchain and compatible `curl` helper used by the K1C workflow; thanks to `ballaswag`.
-- [Moonraker](https://github.com/Arksine/moonraker)
-- [KlipperScreen](https://github.com/KlipperScreen/KlipperScreen)
-- [Fluidd](https://github.com/fluidd-core/fluidd)
-- [Klippain Shake&Tune](https://github.com/Frix-x/klippain-shaketune)
-
-### AI assistance
-
-Part of this project was developed with the help of Claude (Anthropic): roughly 30% of the QA work, the performance tests and simulations, and about 60% of the documentation writing. Design decisions, code review, and testing on the printer were done by the author.
-
-## License and credits
-
-- **Source code:** GNU GPL-3.0 (see [LICENSE](LICENSE)). PowerScreen is a modification of [GuppyScreen](https://github.com/ballaswag/guppyscreen) by ballaswag.
-- **[PowerUI](https://github.com/borferkic/PowerUI)** (design system, visual guide, mockups, line icons and theme) was structured, created and standardized for 3D printing by **Boris Fernández (Boris SdK)**. It is intended for **Creality K1 series** printers with root access, is free to use by people and **not for commercial purposes** (use by companies for commercial purposes requires the author's permission). Keep the credit when you reuse it (see [NOTICE.md](NOTICE.md) and [LICENSE-POWERUI.md](LICENSE-POWERUI.md)).
-- [PowerUI](https://github.com/borferkic/PowerUI) is based on [shadcn/ui](https://github.com/shadcn-ui/ui) by [shadcn](https://github.com/shadcn) (MIT).
-
----
-
-<a name="espanol"></a>
-
-# K1C CFS POWER SCREEN
-
-Esta es una modificación personal de PowerScreen orientada exclusivamente a la Creality K1C. Mantiene la base de la interfaz táctil para Klipper/Moonraker y añade características específicas para el flujo CFS y el cambio manual de filamento.
-
-## Alcance
-
-Este repositorio está destinado únicamente a:
-
-- Creality K1C.
-- Pantalla original de la K1C.
-- Compilación MIPS compatible con el hardware de la K1C.
-- Macros y scripts personalizados para CFS.
-
-No se incluyen builds, instrucciones ni soporte para Android, Raspberry Pi, `PowerScreenDroid` u otros modelos de impresora.
-
-## Capturas de pantalla
-
-![Vista general de la interfaz de PowerScreen](screenshots/GITSCREEN.png)
-
-## Instalación / actualización en una K1C
-
-PowerScreen se instala desde una consola SSH de la impresora iniciada como `root`, con el [CFS Power Script](https://github.com/borferkic/K1C-CFS-Power-Script) (recomendado) o directamente con el instalador de PowerScreen. No instales mientras la impresora esté imprimiendo, calentando, haciendo homing o ejecutando una calibración.
-
-> [!IMPORTANT]
-> PowerScreen sustituye la pantalla táctil de Creality. Al instalarlo se **desactivan** la pantalla de Creality (`Monitor`, `display-server`) y los servicios de Creality: Creality Cloud, la conexión LAN de Creality Print y las actualizaciones de firmware OTA. Todo se respalda y se restaura si se quita PowerScreen. El instalador muestra este aviso y pide confirmación antes de cambiar nada.
-
-### Requisitos
-
-- Una Creality K1C con SSH habilitado y accesible desde la red local.
-- Acceso a Internet desde la impresora hacia GitHub.
-- Moonraker ejecutándose en la impresora.
-- La contraseña root de la impresora.
-
-El único paquete compatible es `powerscreen-k1c.tar.gz`, el paquete MIPS Z-Bolt para la K1C.
-
-### 1. Conectarse a la impresora
-
-Conéctate a la impresora mediante SSH como `root`:
-
-```sh
-ssh -p 22 root@IP_DE_TU_K1C
-```
-
-Todos los comandos restantes de esta sección deben ejecutarse dentro de la consola de la impresora.
-
-Verifica la plataforma y el espacio disponible:
-
-```sh
-uname -m
-df -h /usr/data
-```
-
-La K1C debe responder `mips`.
-
-### 2. Instalar PowerScreen
-
-#### Opción A — con el CFS Power Script (recomendada)
-
-Instala y abre el [CFS Power Script](https://github.com/borferkic/K1C-CFS-Power-Script) como se indica en su README y selecciona:
-
-```text
-[Customize & PowerScreen] Menu → 1) Install PowerScreen
-```
-
-El script muestra el aviso anterior, pide confirmación y pregunta qué versión instalar (`stable` o `nightly`). Después ejecuta el instalador de PowerScreen sin más preguntas.
-
-#### Opción B — con el instalador de PowerScreen
-
-Descarga solo el instalador (no hace falta clonar este repositorio) y ejecútalo:
-
-```sh
-wget --no-check-certificate -O /tmp/powerscreen-installer.sh https://raw.githubusercontent.com/borferkic/K1C-CFS-POWER-SCREEN/main/installer.sh
-sh /tmp/powerscreen-installer.sh
-```
-
-El instalador muestra el aviso, pide confirmación y pregunta qué versión instalar. La versión también se puede indicar como argumento:
-
-```sh
-sh /tmp/powerscreen-installer.sh stable
-sh /tmp/powerscreen-installer.sh nightly
-```
-
-#### Qué hace el instalador
-
-- Descarga `powerscreen-k1c.tar.gz` desde las GitHub Releases de este repositorio (la última release estable o la última nightly) y lo extrae en `/usr/data/powerscreen`.
-- Respalda los archivos originales de Creality en `/usr/data/powerscreen-backup` y desactiva la pantalla y los servicios de Creality.
-- Configura el servicio, los módulos de Klipper y las macros de PowerScreen.
-- Registra PowerScreen en el Update Manager de Moonraker para que aparezca en Fluidd. El repositorio registrado es `borferkic/K1C-CFS-POWER-SCREEN`.
-- Guarda la versión elegida como canal de actualización, reinicia Klipper y arranca PowerScreen.
-
-### 3. Actualizar PowerScreen
-
-Las actualizaciones no requieren volver a ejecutar el instalador:
-
-- En la pantalla de la impresora: **System → Updates**. Ahí también se puede cambiar el canal (`Nightly` o `Stable`).
-- En Fluidd: **Settings → Software Updates**.
-
-### 4. Quitar PowerScreen
-
-- Con el CFS Power Script: `[Customize & PowerScreen] Menu → 2) Remove PowerScreen`.
-- Manualmente, para restaurar la pantalla y los servicios de Creality:
-
-```sh
-sh /usr/data/powerscreen/reinstall-creality.sh
-```
-
-Se recomienda reiniciar la impresora después de quitar PowerScreen.
-
-## Características heredadas
-
-- Consola y shell de macros.
-- Bed Mesh.
-- Input Shaper.
-- Estado de impresión.
-- Integración con Spoolman.
-- Extrusión y retracción.
-- Control de temperaturas.
-- Control de ventiladores, LED y movimiento.
-- Ajuste fino de velocidad, flujo, Z-offset y Pressure Advance.
-- Límites de velocidad y aceleración.
-- Explorador de archivos.
-- Métricas TMC.
-
-## Características adicionales de esta modificación
-
-- Botón `MANUAL M600` en el panel de extrusión.
-- Diálogo de cambio manual de filamento adaptado a la pantalla de la K1C.
-- Acciones `PS_UNLOAD_FILAMENT` y `PS_LOAD_FILAMENT`.
-  - El corte del filamento usa la posición X y la velocidad del cortador de la sección `[box]` de `box.cfg` (`cut_pos_x`, `cut_velocity`), así que golpea tan suave como el corte propio del CFS. Si faltan esos valores usa X42 y 8000 mm/min. El corte se mantiene en Y225.2.
-  - La cama baja a 10 mm/s (`F600`) antes de cortar o cargar, la velocidad que usa el módulo del CFS.
-  - Tras una pausa, y una vez limpiada la boquilla, `PS_LOAD_FILAMENT` calienta la boquilla a 10 °C por debajo de la temperatura de impresión que guardó la pausa y espera ahí. Si no hay temperatura guardada, no hace nada.
-- Acción `RESUME` en color verde (`PS_RESUME`): calienta a la temperatura de impresión, purga 5 mm en la bandeja, sale de la bandeja en línea recta y reanuda la impresión.
-- Acción `STOP` en color rojo (`PS_CANCEL`), que cancela con `CANCEL_PRINT`.
-- Tarjeta con la temperatura de la boquilla (actual / objetivo, estado y barra de progreso) y un botón X que cierra el diálogo al instante, sin esperar a Klipper.
-- Iconos para las acciones de carga, descarga, reanudación y detención.
-- Botones reorganizados para facilitar el uso táctil en la K1C.
-- Tema visual **[PowerUI](https://github.com/borferkic/PowerUI)** en todas las pantallas, creado por Boris Fernández (Boris SdK) y basado en [shadcn/ui](https://github.com/shadcn-ui/ui). Sus lineamientos de diseño y las instrucciones de implementación están en el repositorio [PowerUI](https://github.com/borferkic/PowerUI).
-
-> [!IMPORTANT]
-> **La boquilla se queda en la bandeja de purga tras `PS_LOAD_FILAMENT`.** El `RESUME` de fábrica va a la posición de impresión en un solo movimiento recto de X, Y y Z, así que desde la bandeja cruzaría la brocha en diagonal y podría golpearla. Reanuda con el botón **RESUME** del diálogo de cambio manual de filamento (`PS_RESUME`), el botón **Resume** de Print Status o `PS_RESUME_PRINT`; todos salen de la bandeja en línea recta antes. `PS_CANCEL` hace lo mismo antes de cancelar.
->
-> **No reanudes con un `RESUME` simple (Fluidd o la consola) mientras la boquilla está en la bandeja de purga.** Usa `PS_RESUME_PRINT`. La primera vez que lo pruebes, ten una mano cerca del paro de emergencia.
-
-## Pendientes
-
-Los registros internos de cambios, pendientes e historial de versiones se conservan en documentación privada fuera del repositorio público.
-
-## Apoyo al proyecto
-
-Si este proyecto te resulta útil, puedes apoyar su desarrollo mediante [PayPal](https://paypal.me/borissdk).
-
-## Créditos y agradecimientos
-
-Este repositorio se mantiene como K1C CFS POWER SCREEN e incluye modificaciones específicas para la Creality K1C.
-
-También se reconocen los proyectos y recursos utilizados por la base original:
-
-- [GuppyScreen](https://github.com/ballaswag/guppyscreen) — interfaz táctil nativa para Klipper/Moonraker, creada por [ballaswag](https://github.com/ballaswag).
-- [shadcn/ui](https://github.com/shadcn-ui/ui) — creada por [shadcn](https://github.com/shadcn) (MIT); gracias por sus lineamientos de UI, que permitieron construir PowerUI.
-- [Lucide](https://lucide.dev/) — iconos de línea generales.
-- [LVGL](https://github.com/lvgl/lvgl)
-- [Z-Bolt Icons](https://github.com/Z-Bolt/OctoScreen)
-- [k1-discovery](https://github.com/ballaswag/k1-discovery) — toolchain MIPS y helper `curl` compatible usados por el flujo de la K1C; agradecimiento a `ballaswag`.
-- [Moonraker](https://github.com/Arksine/moonraker)
-- [KlipperScreen](https://github.com/KlipperScreen/KlipperScreen)
-- [Fluidd](https://github.com/fluidd-core/fluidd)
-- [Klippain Shake&Tune](https://github.com/Frix-x/klippain-shaketune)
-
-### Asistencia de IA
-
-Parte de este proyecto se desarrolló con ayuda de Claude (Anthropic): aproximadamente el 30 % del trabajo de QA, las pruebas de rendimiento y simulaciones, y cerca del 60 % de la redacción de la documentación. Las decisiones de diseño, la revisión del código y las pruebas en la impresora las hizo el autor.
-
-## Licencia y créditos
-
-- **Código fuente:** GNU GPL-3.0 (ver [LICENSE](LICENSE)). PowerScreen es una modificación de [GuppyScreen](https://github.com/ballaswag/guppyscreen) de ballaswag.
-- **[PowerUI](https://github.com/borferkic/PowerUI)** (sistema de diseño, guía visual, bocetos, iconos de línea y tema) fue estructurado, creado y estandarizado para impresión 3D por **Boris Fernández (Boris SdK)**. Está pensado para impresoras de la **serie K1 de Creality** con root, es de libre uso para las personas y **sin fines comerciales** (el uso por empresas con fines comerciales requiere el permiso del autor). Conserva el crédito si lo reutilizas (ver [NOTICE.md](NOTICE.md) y [LICENSE-POWERUI.md](LICENSE-POWERUI.md)).
-- [PowerUI](https://github.com/borferkic/PowerUI) se basa en [shadcn/ui](https://github.com/shadcn-ui/ui) de [shadcn](https://github.com/shadcn) (MIT).
+Testi rielaborati dal README, dalle note e licenze disponibili e dai sorgenti pertinenti. Non sono stati eseguiti test, installazioni, compilazioni, accessi di rete o prove sulla stampante. Le istruzioni degli installer esterni e delle macro ADL Script sono riportate come informazioni dell'autore, senza attestazione del loro funzionamento in questa esecuzione.
