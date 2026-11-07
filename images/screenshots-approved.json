@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "approved_at": 1794064854,
+  "order": [
+    "01.png",
+    "02.png",
+    "03.png"
+  ],
+  "cover": "images/cover.png",
+  "hashes": {
+    "images/cover.png": "9d5c69f94db06975f9d19d46970e198fefd027e5d0b481684b126c07124817dd",
+    "images/screenshots/01.png": "9d5c69f94db06975f9d19d46970e198fefd027e5d0b481684b126c07124817dd",
+    "images/screenshots/02.png": "5440bcaf0eaec86ab2c0e6a226302cfa25b0b4e9360bea0867574dee5568bdce",
+    "images/screenshots/03.png": "1b423e539030f7fe40b5c1f5bc8006d3fc207b3e7e077e9b2d0f9f74880703cb"
+  }
+}
