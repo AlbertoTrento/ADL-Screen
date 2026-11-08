@@ -159,11 +159,12 @@ fi
 
 set_moonraker_channel "$CHANNEL"
 
-## nome ADL della voce di aggiornamento in Fluidd: [update_manager powerscreen] diventa [update_manager ADL-Screen].
-## Il servizio resta "powerscreen" (managed_services e moonraker.asvc). Moonraker si riavvia con la sua API.
-if [ -f "$MOONRAKER_UPDATE_CONF" ] && grep -q "^\[update_manager powerscreen\]" "$MOONRAKER_UPDATE_CONF"; then
-    sed -i "s/^\[update_manager powerscreen\]/[update_manager ADL-Screen]/" "$MOONRAKER_UPDATE_CONF"
-    echo "Moonraker update entry renamed to ADL-Screen"
+## la voce di aggiornamento in Fluidd torna [update_manager powerscreen]: con il nome ADL-Screen
+## Moonraker segnava errore su "managed_services: powerscreen" (accetta solo klipper, moonraker
+## o il nome della voce). Moonraker si riavvia con la sua API.
+if [ -f "$MOONRAKER_UPDATE_CONF" ] && grep -q "^\[update_manager ADL-Screen\]" "$MOONRAKER_UPDATE_CONF"; then
+    sed -i "s/^\[update_manager ADL-Screen\]/[update_manager powerscreen]/" "$MOONRAKER_UPDATE_CONF"
+    echo "Moonraker update entry renamed back to powerscreen"
     $CURL -s -X POST http://localhost:7125/server/restart > /dev/null 2>&1 &
 fi
 
