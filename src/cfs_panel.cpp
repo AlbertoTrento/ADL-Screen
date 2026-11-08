@@ -9,11 +9,23 @@
 #include <string>
 
 LV_IMG_DECLARE(ui_cfs_img);
+LV_IMG_DECLARE(ui_bobina_filamento_36);
+LV_IMG_DECLARE(ui_bobina_ombre_36);
+LV_IMG_DECLARE(ui_bobina_telaio_36);
+LV_IMG_DECLARE(ui_bobina_filamento_56);
+LV_IMG_DECLARE(ui_bobina_ombre_56);
+LV_IMG_DECLARE(ui_bobina_telaio_56);
+LV_IMG_DECLARE(ui_bobina_filamento_72);
+LV_IMG_DECLARE(ui_bobina_ombre_72);
+LV_IMG_DECLARE(ui_bobina_telaio_72);
 
 using namespace powerui;
 
 namespace cfs_ui {
 
+// Bobina disegnata con tre immagini sovrapposte (assets/icone_bobina): il filamento bianco colorato
+// dal codice con il colore dello slot, le ombre sopra il filamento e il telaio sopra a tutto.
+// Le immagini esistono a 36, 56 e 72 pixel: si usa quella giusta, le altre misure si ottengono con lo zoom.
 lv_obj_t *spool_create(lv_obj_t *parent, int size, lv_color_t hole_bg, int number) {
   lv_obj_t *spool = lv_obj_create(parent);
   lv_obj_remove_style_all(spool);
@@ -21,25 +33,53 @@ lv_obj_t *spool_create(lv_obj_t *parent, int size, lv_color_t hole_bg, int numbe
   lv_obj_clear_flag(spool, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_size(spool, px(size), px(size));
   lv_obj_set_style_radius(spool, LV_RADIUS_CIRCLE, 0);
-  lv_obj_set_style_bg_opa(spool, LV_OPA_COVER, 0);
-  lv_obj_set_style_border_width(spool, px(2), 0);
-  lv_obj_set_style_border_opa(spool, LV_OPA_TRANSP, 0);
   lv_obj_set_style_outline_width(spool, px(2), 0);
   lv_obj_set_style_outline_pad(spool, px(2), 0);
   lv_obj_set_style_outline_color(spool, lv_color_hex(COLOR_ACCENT), 0);
   lv_obj_set_style_outline_opa(spool, LV_OPA_TRANSP, 0);
 
-  lv_obj_t *hole = lv_obj_create(spool);
-  lv_obj_remove_style_all(hole);
-  lv_obj_clear_flag(hole, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_clear_flag(hole, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_set_size(hole, px(size / 2), px(size / 2));
-  lv_obj_set_style_radius(hole, LV_RADIUS_CIRCLE, 0);
-  lv_obj_set_style_bg_color(hole, hole_bg, 0);
-  lv_obj_set_style_bg_opa(hole, LV_OPA_COVER, 0);
-  lv_obj_center(hole);
+  const lv_img_dsc_t *layers[3];
+  int source = 72;
+  if (size <= 36) {
+    source = 36;
+    layers[0] = &ui_bobina_filamento_36;
+    layers[1] = &ui_bobina_ombre_36;
+    layers[2] = &ui_bobina_telaio_36;
+  } else if (size <= 56) {
+    source = 56;
+    layers[0] = &ui_bobina_filamento_56;
+    layers[1] = &ui_bobina_ombre_56;
+    layers[2] = &ui_bobina_telaio_56;
+  } else {
+    layers[0] = &ui_bobina_filamento_72;
+    layers[1] = &ui_bobina_ombre_72;
+    layers[2] = &ui_bobina_telaio_72;
+  }
+  for (const lv_img_dsc_t *layer : layers) {
+    lv_obj_t *img = lv_img_create(spool);
+    lv_obj_clear_flag(img, LV_OBJ_FLAG_CLICKABLE);
+    lv_img_set_src(img, layer);
+    if (px(size) != source) {
+      lv_img_set_zoom(img, static_cast<uint16_t>(256 * px(size) / source));
+      lv_img_set_antialias(img, true);
+    }
+    lv_obj_center(img);
+  }
+  // Il filamento prende il colore dello slot.
+  lv_obj_set_style_img_recolor_opa(lv_obj_get_child(spool, 0), LV_OPA_COVER, 0);
+  lv_obj_set_style_img_recolor(lv_obj_get_child(spool, 0), lv_color_hex(COLOR_NEUTRAL), 0);
 
+  // Numero dello slot (Home): su un tondo scuro al centro, cosi' si legge sopra il mozzo chiaro.
   if (number > 0) {
+    lv_obj_t *hole = lv_obj_create(spool);
+    lv_obj_remove_style_all(hole);
+    lv_obj_clear_flag(hole, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(hole, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(hole, px(size / 2), px(size / 2));
+    lv_obj_set_style_radius(hole, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_bg_color(hole, hole_bg, 0);
+    lv_obj_set_style_bg_opa(hole, LV_OPA_COVER, 0);
+    lv_obj_center(hole);
     lv_obj_t *n = label(hole, std::to_string(number).c_str(), size >= 36 ? &lv_font_montserrat_14 : &lv_font_montserrat_12,
                         lv_color_hex(COLOR_FG));
     lv_obj_center(n);
@@ -51,18 +91,19 @@ void spool_set(lv_obj_t *spool, const cfs::Slot &slot, bool active) {
   if (spool == NULL) {
     return;
   }
-  switch (slot.kind) {
-    case cfs::SlotKind::Empty:
-      lv_obj_set_style_bg_opa(spool, LV_OPA_TRANSP, 0);
-      lv_obj_set_style_border_color(spool, lv_color_hex(COLOR_NEUTRAL), 0);
-      lv_obj_set_style_border_opa(spool, LV_OPA_COVER, 0);
-      break;
-    case cfs::SlotKind::Unset:
-    case cfs::SlotKind::Defined:
-      lv_obj_set_style_bg_opa(spool, LV_OPA_COVER, 0);
-      lv_obj_set_style_bg_color(spool, lv_color_hex(slot.has_color ? slot.color : COLOR_NEUTRAL), 0);
-      lv_obj_set_style_border_opa(spool, LV_OPA_TRANSP, 0);
-      break;
+  lv_obj_t *filament = lv_obj_get_child(spool, 0);
+  lv_obj_t *shading = lv_obj_get_child(spool, 1);
+  // Slot vuoto: solo il telaio. Altrimenti il filamento del colore dello slot (grigio se non e' noto).
+  const bool empty = slot.kind == cfs::SlotKind::Empty;
+  for (lv_obj_t *layer : {filament, shading}) {
+    if (empty) {
+      lv_obj_add_flag(layer, LV_OBJ_FLAG_HIDDEN);
+    } else {
+      lv_obj_clear_flag(layer, LV_OBJ_FLAG_HIDDEN);
+    }
+  }
+  if (!empty) {
+    lv_obj_set_style_img_recolor(filament, lv_color_hex(slot.has_color ? slot.color : COLOR_NEUTRAL), 0);
   }
   lv_obj_set_style_outline_opa(spool, active ? LV_OPA_COVER : LV_OPA_TRANSP, 0);
 }
