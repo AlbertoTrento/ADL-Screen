@@ -188,12 +188,13 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
 
   // ---- Slots card.
   slots_card = card(cont, 12, 12, 712, 208);
-  header_label = label(slots_card, "CFS", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(header_label, px(20), px(16));
-  status_label = label(slots_card, "", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(status_label, px(76), px(18));
-  version_label = label(slots_card, "", &lv_font_montserrat_12, lv_color_hex(COLOR_ACCENT));
-  lv_obj_align(version_label, LV_ALIGN_TOP_RIGHT, -px(20 + 190 + 12), px(18));
+  // Scritte grandi in tutta la pagina: si devono leggere da davanti alla stampante.
+  header_label = label(slots_card, "CFS", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(header_label, px(20), px(12));
+  status_label = label(slots_card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_pos(status_label, px(80), px(16));
+  version_label = label(slots_card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_ACCENT));
+  lv_obj_align(version_label, LV_ALIGN_TOP_RIGHT, -px(20 + 190 + 12), px(16));
   // Same command as the refresh button of the Creality screen; disabled while printing (see refresh()).
   refresh_btn = action_button(slots_card, NULL, "Controlla filamenti", ActionKind::Outline, 712 - 20 - 190, 8, 190, 34,
                               [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->refresh_slots(); }, this);
@@ -213,15 +214,15 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
       h->panel->handle_slot_click(h->index);
     }, LV_EVENT_CLICKED, &handles[i]);
 
-    w.letter = label(w.card, slot_letter(i).c_str(), &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-    lv_obj_set_pos(w.letter, px(12), px(8));
+    w.letter = label(w.card, slot_letter(i).c_str(), &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
+    lv_obj_set_pos(w.letter, px(12), px(6));
 
     // Pencil: opens the editor of this slot.
     w.pencil = plain(w.card);
-    lv_obj_set_size(w.pencil, px(34), px(30));
-    lv_obj_set_pos(w.pencil, px(card_w - 38), px(2));
+    lv_obj_set_size(w.pencil, px(44), px(40));
+    lv_obj_set_pos(w.pencil, px(card_w - 46), px(0));
     lv_obj_add_flag(w.pencil, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_t *pencil_icon = label(w.pencil, LV_SYMBOL_EDIT, &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
+    lv_obj_t *pencil_icon = label(w.pencil, LV_SYMBOL_EDIT, &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
     lv_obj_center(pencil_icon);
     lv_obj_add_event_cb(w.pencil, [](lv_event_t *e) {
       SlotHandle *h = static_cast<SlotHandle *>(e->user_data);
@@ -229,19 +230,19 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
     }, LV_EVENT_CLICKED, &handles[i]);
 
     w.spool = cfs_ui::spool_create(w.card, 56, lv_color_hex(COLOR_BG), 0);
-    lv_obj_align(w.spool, LV_ALIGN_TOP_MID, 0, px(22));
+    lv_obj_align(w.spool, LV_ALIGN_TOP_MID, 0, px(20));
 
-    w.name = label(w.card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_FG));
+    w.name = label(w.card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
     lv_obj_set_width(w.name, px(card_w - 16));
     lv_obj_set_style_text_align(w.name, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(w.name, LV_LABEL_LONG_DOT);
-    lv_obj_align(w.name, LV_ALIGN_TOP_MID, 0, px(92));
+    lv_obj_align(w.name, LV_ALIGN_TOP_MID, 0, px(82));
 
-    w.sub = label(w.card, "", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
+    w.sub = label(w.card, "", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
     lv_obj_set_width(w.sub, px(card_w - 16));
     lv_obj_set_style_text_align(w.sub, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(w.sub, LV_LABEL_LONG_DOT);
-    lv_obj_align(w.sub, LV_ALIGN_TOP_MID, 0, px(114));
+    lv_obj_align(w.sub, LV_ALIGN_TOP_MID, 0, px(108));
     if (esterna) {
       action_button(w.card, NULL, "Modifica", ActionKind::Outline, 40, 144, 160, 40, [](lv_event_t *e) {
         static_cast<CfsPanel *>(e->user_data)->open_edit(EXTERNAL_SLOT);
@@ -255,18 +256,18 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
   detail_card = card(cont, 12, 232, 460, 196);
   detail_spool = cfs_ui::spool_create(detail_card, 72, lv_color_hex(COLOR_CARD), 0);
   lv_obj_set_pos(detail_spool, px(20), px(44));
-  detail_slot_label = label(detail_card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(detail_slot_label, px(110), px(18));
+  detail_slot_label = label(detail_card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_pos(detail_slot_label, px(110), px(14));
   detail_name = label(detail_card, "", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
   lv_obj_set_width(detail_name, px(330));
   lv_label_set_long_mode(detail_name, LV_LABEL_LONG_DOT);
   lv_obj_set_pos(detail_name, px(110), px(40));
-  detail_info = label(detail_card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
+  detail_info = label(detail_card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
   lv_obj_set_width(detail_info, px(330));
-  lv_obj_set_pos(detail_info, px(110), px(78));
-  detail_remain = label(detail_card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_pos(detail_info, px(110), px(74));
+  detail_remain = label(detail_card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
   lv_obj_set_width(detail_remain, px(330));
-  lv_obj_set_pos(detail_remain, px(110), px(102));
+  lv_obj_set_pos(detail_remain, px(110), px(100));
   detail_edit_btn = action_button(detail_card, NULL, "Modifica slot", ActionKind::Outline, 110, 138, 190, 44,
                                   [](lv_event_t *e) {
                                     CfsPanel *p = static_cast<CfsPanel *>(e->user_data);

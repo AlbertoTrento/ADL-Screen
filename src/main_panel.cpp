@@ -777,7 +777,7 @@ void MainPanel::create_main(lv_obj_t *parent)
     // and quick actions. The positions here are the ones without the CFS; apply_home_layout() moves them.
     cfs_pill = card(main_cont, 432, 228, 292, 56);
     lv_obj_set_style_radius(cfs_pill, LV_RADIUS_CIRCLE, 0);
-    lv_obj_t *cfs_title = label(cfs_pill, "CFS", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
+    lv_obj_t *cfs_title = label(cfs_pill, "CFS", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
     lv_obj_align(cfs_title, LV_ALIGN_LEFT_MID, px(22), 0);
     for (int i = 0; i < 4; ++i) {
       cfs_spools[i] = cfs_ui::spool_create(cfs_pill, 36, lv_color_hex(COLOR_CARD), i + 1);

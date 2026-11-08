@@ -132,7 +132,7 @@
 {"Z (mm) / PA step", {"Passo Z (mm) / PA", "Z (mm) / PA step", "Z (mm) / PA-Schritt", "Pas Z (mm) / PA", "Paso Z (mm) / PA"}},
 {"Z offset", {"Offset Z", "Z offset", "Z-Versatz", "Décalage Z", "Desfase Z"}},
 {"Distance (mm)", {"Distanza (mm)", "Distance (mm)", "Strecke (mm)", "Distance (mm)", "Distancia (mm)"}},
-{"Emergency Stop", {"Arresto di emergenza", "Emergency Stop", "Nothalt", "Arrêt d'urgence", "Parada de emergencia"}},
+{"Emergency Stop", {"Arresto emergenza", "Emergency Stop", "Nothalt", "Arrêt d'urgence", "Parada de emergencia"}},
 {"Home All", {"Home tutti", "Home All", "Alle referenzieren", "Origine tout", "Origen todos"}},
 {"Home XY", {"Home XY", "Home XY", "XY referenzieren", "Origine XY", "Origen XY"}},
 {"Home Z", {"Home Z", "Home Z", "Z referenzieren", "Origine Z", "Origen Z"}},
@@ -398,3 +398,4 @@
 {"In corso...", {"In corso...", "In progress...", "Läuft...", "En cours...", "En curso..."}},
 {"Recenti", {"Recenti", "Recent", "Neueste", "Récents", "Recientes"}},
 {"Temperature and fans", {"Temperature e ventole", "Temperature and fans", "Temperatur und Lüfter", "Température et ventilateurs", "Temperatura y ventiladores"}},
+{"Distanza", {"Distanza", "Distance", "Strecke", "Distance", "Distancia"}},

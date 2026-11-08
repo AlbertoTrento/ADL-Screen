@@ -104,10 +104,17 @@ HomingPanel::HomingPanel(KWebSocketClient &websocket_client, std::mutex &lock)
   style_button(home_all_btn.get_container(), home_all_btn.get_button(), ButtonKind::Soft);
   style_button(home_z_btn.get_container(), home_z_btn.get_button(), ButtonKind::Soft);
   style_button(emergency_btn.get_container(), emergency_btn.get_button(), ButtonKind::Destructive);
+  // "Arresto emergenza" su una riga sola: con il carattere 20 andava a capo e veniva tagliato.
+  lv_obj_set_style_text_font(emergency_btn.get_label(), &lv_font_montserrat_18, LV_PART_MAIN);
+  lv_label_set_long_mode(emergency_btn.get_label(), LV_LABEL_LONG_CLIP);
+  lv_obj_set_width(emergency_btn.get_label(), LV_SIZE_CONTENT);
 
   // Move distance bar: label on the left, segmented selector on the right.
-  lv_obj_t *distance_label = label(distance_card, "Distance (mm)", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
-  lv_obj_align(distance_label, LV_ALIGN_LEFT_MID, px(14), 0);
+  // "Distanza" grande e sotto "(mm)", invece di una riga sola piccola.
+  lv_obj_t *distance_label = label(distance_card, "Distanza", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(distance_label, px(14), px(6));
+  lv_obj_t *distance_unit = label(distance_card, "(mm)", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_pos(distance_unit, px(14), px(32));
 
   lv_obj_t *selector_cont = distance_selector.get_container();
   lv_obj_set_parent(selector_cont, distance_card);
