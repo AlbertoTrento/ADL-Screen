@@ -321,25 +321,35 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
   lv_obj_add_flag(empty, LV_OBJ_FLAG_HIDDEN);
 
   // ---- Slot editor (modal over the screen).
+  // Tre colonne con scritte grandi: a sinistra le tendine, al centro i colori, a destra il colore
+  // scelto e i pulsanti, centrati in altezza.
   edit_root = dim_overlay(cont);
-  lv_obj_t *ec = card(edit_root, 24, 12, 688, 416);
-  edit_title = label(ec, "Modifica slot", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(edit_title, px(24), px(16));
-  lv_obj_t *edit_sub = label(ec, "Scegli il filamento caricato", &lv_font_montserrat_12,
+  lv_obj_t *ec = card(edit_root, 12, 8, 712, 424);
+  edit_title = label(ec, "Modifica slot", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(edit_title, px(24), px(14));
+  lv_obj_t *edit_sub = label(ec, "Scegli il filamento caricato", &lv_font_montserrat_16,
                              lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(edit_sub, px(24), px(46));
+  lv_obj_set_pos(edit_sub, px(24), px(48));
 
+  // Colonna sinistra: marca, materiale, filamento.
   const char *captions[3] = {"MARCA", "MATERIALE", "FILAMENTO"};
   lv_obj_t **dds[3] = {&brand_dd, &type_dd, &name_dd};
   for (int i = 0; i < 3; ++i) {
-    const int y = 76 + i * 76;
-    lv_obj_t *cap = label(ec, captions[i], &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
+    const int y = 80 + i * 100;
+    lv_obj_t *cap = label(ec, captions[i], &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
     lv_obj_set_pos(cap, px(24), px(y));
     lv_obj_t *dd = lv_dropdown_create(ec);
     *dds[i] = dd;
-    lv_obj_set_pos(dd, px(24), px(y + 20));
-    lv_obj_set_size(dd, px(304), px(42));
+    lv_obj_set_pos(dd, px(24), px(y + 24));
+    lv_obj_set_size(dd, px(250), px(56));
     style_select(dd);
+    // Testo grande sia nella tendina chiusa sia nell'elenco che si apre.
+    lv_obj_set_style_text_font(dd, &lv_font_montserrat_20, LV_PART_MAIN);
+    lv_obj_t *dd_list = lv_dropdown_get_list(dd);
+    if (dd_list != NULL) {
+      lv_obj_set_style_text_font(dd_list, &lv_font_montserrat_20, LV_PART_MAIN);
+      lv_obj_set_style_text_line_space(dd_list, px(22), LV_PART_MAIN);
+    }
     choice_handles[i] = {this, i};
     lv_obj_add_event_cb(dd, [](lv_event_t *e) {
       SlotHandle *h = static_cast<SlotHandle *>(e->user_data);
@@ -349,26 +359,29 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
     lv_obj_add_event_cb(dd, [](lv_event_t *e) {
       lv_obj_t *list = lv_dropdown_get_list(lv_event_get_target(e));
       if (list != NULL) {
-        lv_obj_set_style_max_height(list, px(190), LV_PART_MAIN);
+        lv_obj_set_style_max_height(list, px(280), LV_PART_MAIN);
+        lv_obj_set_style_text_font(list, &lv_font_montserrat_20, LV_PART_MAIN);
+        lv_obj_set_style_text_line_space(list, px(22), LV_PART_MAIN);
       }
     }, LV_EVENT_READY, NULL);
   }
 
-  lv_obj_t *color_cap = label(ec, "COLOR", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(color_cap, px(360), px(76));
+  // Colonna centrale: 12 colori grandi, 4 file da 3.
+  lv_obj_t *color_cap = label(ec, "COLOR", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_pos(color_cap, px(296), px(80));
   for (int i = 0; i < 12; ++i) {
     lv_obj_t *sw = lv_obj_create(ec);
     swatches[i] = sw;
     lv_obj_remove_style_all(sw);
     lv_obj_clear_flag(sw, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(sw, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_size(sw, px(36), px(36));
-    lv_obj_set_pos(sw, px(364 + (i % 6) * 48), px(100 + (i / 6) * 48));
+    lv_obj_set_size(sw, px(64), px(64));
+    lv_obj_set_pos(sw, px(296 + (i % 3) * 82), px(106 + (i / 3) * 76));
     lv_obj_set_style_radius(sw, LV_RADIUS_CIRCLE, 0);
     lv_obj_set_style_bg_color(sw, lv_color_hex(PALETTE[i]), 0);
     lv_obj_set_style_bg_opa(sw, LV_OPA_COVER, 0);
-    lv_obj_set_style_outline_width(sw, px(2), 0);
-    lv_obj_set_style_outline_pad(sw, px(2), 0);
+    lv_obj_set_style_outline_width(sw, px(3), 0);
+    lv_obj_set_style_outline_pad(sw, px(3), 0);
     lv_obj_set_style_outline_color(sw, lv_color_hex(COLOR_ACCENT), 0);
     lv_obj_set_style_outline_opa(sw, LV_OPA_TRANSP, 0);
     swatch_handles[i] = {this, PALETTE[i]};
@@ -378,25 +391,48 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
     }, LV_EVENT_CLICKED, &swatch_handles[i]);
   }
 
-  hex_preview = lv_obj_create(ec);
+  // Colonna destra, centrata in altezza: colore scelto, personalizzato, Annulla, Salva.
+  const int right_x = 544;
+  const int right_w = 144;
+  lv_obj_t *chosen_box = plain(ec);
+  lv_obj_set_size(chosen_box, px(right_w), px(100));
+  lv_obj_set_pos(chosen_box, px(right_x), px(39));
+  lv_obj_set_style_radius(chosen_box, px(10), 0);
+  lv_obj_set_style_bg_color(chosen_box, lv_color_hex(COLOR_SECONDARY), 0);
+  lv_obj_set_style_bg_opa(chosen_box, LV_OPA_COVER, 0);
+  hex_preview = lv_obj_create(chosen_box);
   lv_obj_remove_style_all(hex_preview);
   lv_obj_clear_flag(hex_preview, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_size(hex_preview, px(34), px(34));
-  lv_obj_set_pos(hex_preview, px(364), px(212));
+  lv_obj_set_size(hex_preview, px(48), px(48));
+  lv_obj_align(hex_preview, LV_ALIGN_TOP_MID, 0, px(12));
   lv_obj_set_style_radius(hex_preview, LV_RADIUS_CIRCLE, 0);
   lv_obj_set_style_bg_opa(hex_preview, LV_OPA_COVER, 0);
   lv_obj_set_style_border_width(hex_preview, 1, 0);
   lv_obj_set_style_border_color(hex_preview, lv_color_hex(COLOR_WHITE), 0);
   lv_obj_set_style_border_opa(hex_preview, LV_OPA_30, 0);
-  hex_label = label(ec, "#FFFFFF", &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(hex_label, px(410), px(220));
-  action_button(ec, NULL, "Colore personalizzato", ActionKind::Outline, 364, 262, 288, 44,
-                [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->open_color_dialog(); }, this);
+  hex_label = label(chosen_box, "#FFFFFF", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
+  lv_obj_align(hex_label, LV_ALIGN_TOP_MID, 0, px(66));
 
-  action_button(ec, NULL, "Annulla", ActionKind::Outline, 24, 344, 304, 48,
-                [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->close_edit(); }, this);
-  action_button(ec, NULL, "Salva", ActionKind::Primary, 364, 344, 288, 48,
-                [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->save_edit(); }, this);
+  // Il testo dei pulsanti e' l'ultimo figlio: lo ingrandisco qui.
+  auto big_text = [](lv_obj_t *btn, const lv_font_t *font) {
+    lv_obj_t *l = lv_obj_get_child(btn, lv_obj_get_child_cnt(btn) - 1);
+    lv_obj_set_style_text_font(l, font, 0);
+    return l;
+  };
+  lv_obj_t *custom_btn = action_button(ec, NULL, "Colore personalizzato", ActionKind::Outline, right_x, 157,
+                                       right_w, 64,
+                                       [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->open_color_dialog(); },
+                                       this);
+  lv_obj_t *custom_text = big_text(custom_btn, &lv_font_montserrat_16);
+  lv_label_set_long_mode(custom_text, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(custom_text, px(right_w - 12));
+  lv_obj_set_style_text_align(custom_text, LV_TEXT_ALIGN_CENTER, 0);
+  big_text(action_button(ec, NULL, "Annulla", ActionKind::Outline, right_x, 239, right_w, 60,
+                         [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->close_edit(); }, this),
+           &lv_font_montserrat_20);
+  big_text(action_button(ec, NULL, "Salva", ActionKind::Primary, right_x, 317, right_w, 68,
+                         [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->save_edit(); }, this),
+           &lv_font_montserrat_20);
 
   // ---- Custom color dialog (three sliders), above the editor.
   color_root = dim_overlay(cont);
