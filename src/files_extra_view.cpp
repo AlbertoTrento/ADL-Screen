@@ -171,19 +171,7 @@ void FilesExtraView::hide() {
 void FilesExtraView::refresh() {
   const Mode requested = mode;
   if (requested == Mode::History) {
-    ws.send_jsonrpc("server.history.totals", json::object(), [this](json &j) {
-      std::lock_guard<std::mutex> lock(lv_lock);
-      auto totals = j.find("result");
-      if (totals != j.end() && totals->contains("job_totals")) {
-        auto &t = (*totals)["job_totals"];
-        totals_text = fmt::format("{} prints  -  {}  -  {}", t.value("total_jobs", 0),
-                                  format_duration(t.value("total_time", 0.0)), format_length(t.value("total_filament_used", 0.0)));
-      }
-      if (shown && mode == Mode::History) {
-        rebuild_toolbar();
-      }
-    });
-    ws.send_jsonrpc("server.history.list", json{{"limit", 30}, {"order", "desc"}}, [this](json &j) {
+    ws.send_jsonrpc("server.history.list", json{{"limit", 100}, {"order", "desc"}}, [this](json &j) {
       std::lock_guard<std::mutex> lock(lv_lock);
       jobs.clear();
       auto result = j.find("result");
@@ -202,7 +190,15 @@ void FilesExtraView::refresh() {
           jobs.push_back(h);
         }
       }
+      // Il totale si calcola dalle stampe della lista: il contatore di Moonraker si puo' azzerare e resta a zero.
+      double total_time = 0, total_filament = 0;
+      for (const HistoryJob &h : jobs) {
+        total_time += h.duration;
+        total_filament += h.filament_mm;
+      }
+      totals_text = fmt::format("{} stampe  -  {}  -  {}", jobs.size(), format_duration(total_time), format_length(total_filament));
       if (shown && mode == Mode::History) {
+        rebuild_toolbar();
         rebuild_list();
         rebuild_detail();
       }
@@ -241,7 +237,10 @@ void FilesExtraView::rebuild_toolbar() {
   if (mode == Mode::History) {
     lv_label_set_text(stats_label, totals_text.c_str());
     lv_obj_set_style_text_color(stats_label, lv_color_hex(COLOR_FG), 0);
-    lv_obj_center(icon(toolbar_btn, &ui_icon_trash, 18, lv_color_hex(COLOR_DESTRUCTIVE)));
+    // Niente tasto per azzerare: qui si ricarica e basta, come nei Timelapse.
+    lv_obj_t *l = lv_label_create(toolbar_btn);
+    lv_label_set_text(l, LV_SYMBOL_REFRESH);
+    lv_obj_center(l);
   } else {
     double total = 0;
     for (auto &v : videos) {
@@ -482,14 +481,7 @@ void FilesExtraView::handle_action(lv_event_t *event) {
   lv_obj_t *btn = lv_event_get_current_target(event);
 
   if (btn == toolbar_btn) {
-    if (mode == Mode::History) {
-      confirm_dialog("Reset totals?", "The counters go back to zero. The list of prints is not deleted.", "Reset",
-                     ActionKind::Destructive, [this]() {
-        ws.send_jsonrpc("server.history.reset_totals", json::object(), [this](json &) { refresh(); });
-      });
-    } else {
-      refresh();
-    }
+    refresh();
     return;
   }
 

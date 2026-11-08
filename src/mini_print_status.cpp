@@ -74,13 +74,14 @@ MiniPrintStatus::MiniPrintStatus(lv_obj_t *parent,
   const lv_color_t muted = lv_color_hex(COLOR_MUTED);
 
   // Header: file name + subtitle on the left, state badge and view toggle on the right.
+  // Senza lo stato a destra (ora e' nella barra in alto) nome e sottotitolo hanno piu' spazio.
   title_label = label(cont, "Nessuna stampa", &lv_font_montserrat_16, fg);
-  lv_obj_set_width(title_label, px(190));
+  lv_obj_set_width(title_label, px(240));
   lv_label_set_long_mode(title_label, LV_LABEL_LONG_DOT);
   lv_obj_align(title_label, LV_ALIGN_TOP_LEFT, 0, 0);
 
   subtitle_label = label(cont, "Pronta", &lv_font_montserrat_14, muted);
-  lv_obj_set_width(subtitle_label, px(190));
+  lv_obj_set_width(subtitle_label, px(240));
   lv_label_set_long_mode(subtitle_label, LV_LABEL_LONG_DOT);
   lv_obj_align(subtitle_label, LV_ALIGN_TOP_LEFT, 0, px(23));
 
@@ -104,9 +105,9 @@ MiniPrintStatus::MiniPrintStatus(lv_obj_t *parent,
   toggle = view_toggle(cont, NULL, NULL);
   lv_obj_align(toggle, LV_ALIGN_TOP_RIGHT, 0, 0);
 
+  // Lo stato della stampa si vede nella barra in alto, accanto ad ADL Screen.
   state_badge = badge(cont, "Ferma", muted);
-  lv_obj_update_layout(toggle);
-  lv_obj_align_to(state_badge, toggle, LV_ALIGN_OUT_LEFT_MID, -px(8), 0);
+  lv_obj_add_flag(state_badge, LV_OBJ_FLAG_HIDDEN);
 
   // Speed preset chip: soft green pill under the state badge.
   speed_chip = plain(cont);
@@ -269,7 +270,7 @@ void MiniPrintStatus::refresh_speed_chip() {
   }
   lv_label_set_text(speed_chip_label, fmt::format("{} {}%", name, speed_percent).c_str());
   lv_obj_update_layout(speed_chip);
-  lv_obj_align(speed_chip, LV_ALIGN_TOP_RIGHT, 0, px(48));
+  lv_obj_align(speed_chip, LV_ALIGN_TOP_RIGHT, 0, px(58));
 }
 
 void MiniPrintStatus::set_speed_action(std::function<void(int)> action) {
@@ -372,7 +373,6 @@ void MiniPrintStatus::update_status(std::string &status_str) {
   if (status_callback) {
     status_callback(badge_text, dot);
   }
-  lv_obj_align_to(state_badge, toggle, LV_ALIGN_OUT_LEFT_MID, -px(8), 0);
 
   const bool running = status == "printing" || status == "paused";
   if (running) {

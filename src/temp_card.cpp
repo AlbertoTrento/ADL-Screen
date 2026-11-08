@@ -49,8 +49,9 @@ TempCard::TempCard(KWebSocketClient &c,
   lv_obj_t *ic = icon(tile, icon_src, 26, color);
   lv_obj_center(ic);
 
-  name_label = label(cont, name, &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_width(name_label, px(100));
+  // Nome (Ugello, Piatto, Camera) grande e bianco, per leggerlo da lontano.
+  name_label = label(cont, name, &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
+  lv_obj_set_width(name_label, px(84));
   lv_label_set_long_mode(name_label, LV_LABEL_LONG_DOT);
   lv_obj_align(name_label, LV_ALIGN_LEFT_MID, px(81), 0);
 

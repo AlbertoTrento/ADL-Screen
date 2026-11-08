@@ -396,3 +396,4 @@
 {"Si raffredda", {"Si raffredda", "Cooling", "Kühlt ab", "Refroidit", "Enfriando"}},
 {"Spento", {"Spento", "Off", "Aus", "Éteinte", "Apagada"}},
 {"In corso...", {"In corso...", "In progress...", "Läuft...", "En cours...", "En curso..."}},
+{"Recenti", {"Recenti", "Recent", "Neueste", "Récents", "Recientes"}},

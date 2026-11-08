@@ -195,6 +195,7 @@ class MainPanel : public NotifyConsumer {
   lv_obj_t *chart_card;
   lv_obj_t *chart_toggle;
   lv_obj_t *chart_badge;
+  lv_obj_t *header_badge = NULL;
   lv_obj_t *temp_chart;
   bool print_view;
 

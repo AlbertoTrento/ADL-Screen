@@ -155,6 +155,11 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
 
   lv_obj_set_size(select_btn, powerui::px(88), powerui::px(40));
 
+  // Un solo tasto per l'ordine dei file: a ogni tocco passa da "Recenti" (data, piu' recenti prima) ad "A-Z".
+  // Il vecchio tasto "Modificato" non serve piu'.
+  lv_obj_add_flag(modified_sort_btn, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_set_size(az_sort_btn, powerui::px(100), powerui::px(40));
+
   // Refresh stands out: larger, with a green outline and icon.
   lv_obj_set_size(refresh_btn, powerui::px(48), powerui::px(40));
   lv_obj_set_style_bg_color(refresh_btn, lv_color_hex(powerui::COLOR_CARD), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -534,6 +539,9 @@ void PrintPanel::show_dir(Tree *dir, uint32_t sort_type) {
   delete_target = NULL;
   file_cards.clear();
   lv_obj_clean(file_grid);
+  if (sort_type != SORTED_BY_NAME) {
+    sort_type = SORTED_BY_MODIFIED;
+  }
   sort_modified = (sort_type == SORTED_BY_MODIFIED);
   update_sort_buttons();
   lv_label_set_text(count_label, usb_missing ? "" : fmt::format("{} - {} files", usb_view ? "USB" : "Local", dir->children.size()).c_str());
@@ -660,7 +668,8 @@ void PrintPanel::show_dir(Tree *dir, uint32_t sort_type) {
     }
   };
 
-  bool reversed = sorted_by & sort_type;
+  // Niente ordine al contrario: Recenti mette i piu' nuovi in alto, A-Z in ordine alfabetico.
+  const bool reversed = false;
   std::vector<Tree> sorted_files;
   if (sort_type == SORTED_BY_MODIFIED) {
     KUtils::sort_map_values<std::string, Tree>(dir->children, sorted_files, [reversed](Tree &x, Tree &y) {
@@ -684,7 +693,7 @@ void PrintPanel::show_dir(Tree *dir, uint32_t sort_type) {
       });
   }
 
-  sorted_by = (sorted_by ^ sort_type) & sort_type;
+  sorted_by = sort_type;
   for (const auto &c : sorted_files) {
     if (!usb_view && dir == &root && c.name == USB_DIR_NAME) {
       continue;  // the USB link is only shown in the USB view
@@ -1008,11 +1017,8 @@ void PrintPanel::handle_btns(lv_event_t *event) {
     } else if (btn == refresh_btn) {
       subscribe();
       
-    } else if (btn == modified_sort_btn) {
-      show_dir(cur_dir, SORTED_BY_MODIFIED);
-
     } else if (btn == az_sort_btn) {
-      show_dir(cur_dir, SORTED_BY_NAME);
+      show_dir(cur_dir, sort_modified ? SORTED_BY_NAME : SORTED_BY_MODIFIED);
     }
   }
 }
@@ -1240,10 +1246,15 @@ void PrintPanel::delete_next_in_batch(size_t index) {
 }
 
 void PrintPanel::update_sort_buttons() {
+  // Il tasto scrive l'ordine in uso.
+  lv_obj_t *sort_label = lv_obj_get_child(az_sort_btn, 0);
+  if (sort_label != NULL) {
+    lv_label_set_text(sort_label, sort_modified ? "Recenti" : "A-Z");
+  }
   const lv_color_t accent = lv_color_hex(powerui::COLOR_ACCENT);
-  lv_obj_t *buttons[2] = {modified_sort_btn, az_sort_btn};
-  for (int i = 0; i < 2; ++i) {
-    const bool selected = (i == 0) == sort_modified;
+  lv_obj_t *buttons[1] = {az_sort_btn};
+  for (int i = 0; i < 1; ++i) {
+    const bool selected = true;
     lv_obj_set_style_bg_color(buttons[i], selected ? accent : lv_color_hex(powerui::COLOR_SECONDARY), LV_PART_MAIN);
     lv_obj_set_style_bg_opa(buttons[i], selected ? LV_OPA_20 : LV_OPA_COVER, LV_PART_MAIN);
     lv_obj_set_style_border_width(buttons[i], 1, LV_PART_MAIN);

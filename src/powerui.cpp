@@ -130,7 +130,8 @@ void badge_set(lv_obj_t *b, const char *text, lv_color_t dot_color) {
 
 lv_obj_t *view_toggle(lv_obj_t *parent, lv_event_cb_t cb, void *user_data) {
   lv_obj_t *t = plain(parent);
-  lv_obj_set_size(t, px(76), px(36));
+  // Tasti Stampa / Grafico grandi: si devono centrare con il dito.
+  lv_obj_set_size(t, px(112), px(48));
   lv_obj_set_style_radius(t, px(10), 0);
   lv_obj_set_style_bg_color(t, lv_color_hex(COLOR_SECONDARY), 0);
   lv_obj_set_style_bg_opa(t, LV_OPA_COVER, 0);
@@ -142,11 +143,11 @@ lv_obj_t *view_toggle(lv_obj_t *parent, lv_event_cb_t cb, void *user_data) {
   for (int i = 0; i < 2; ++i) {
     lv_obj_t *btn = plain(t);
     lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_size(btn, px(34), px(30));
-    lv_obj_set_pos(btn, px(2 + i * 36), px(2));
+    lv_obj_set_size(btn, px(52), px(42));
+    lv_obj_set_pos(btn, px(3 + i * 54), px(3));
     lv_obj_set_style_radius(btn, px(8), 0);
     lv_obj_set_style_bg_color(btn, lv_color_hex(COLOR_ACCENT), 0);
-    lv_obj_t *ic = icon(btn, icons[i], 20, lv_color_hex(COLOR_MUTED));
+    lv_obj_t *ic = icon(btn, icons[i], 28, lv_color_hex(COLOR_MUTED));
     lv_obj_center(ic);
     if (cb != NULL) {
       lv_obj_add_event_cb(btn, cb, LV_EVENT_CLICKED, user_data);

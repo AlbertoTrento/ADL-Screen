@@ -8,7 +8,7 @@ LV_IMG_DECLARE(ui_icon_filament);
 LV_IMG_DECLARE(network_img);
 
 namespace {
-const lv_point_t slash_points[2] = {{3, 3}, {19, 19}};
+const lv_point_t slash_points[2] = {{4, 4}, {26, 26}};
 
 // The touch must reach the wrapper: its children (icon, slash) are not clickable.
 void make_children_untouchable(lv_obj_t *parent) {
@@ -46,9 +46,10 @@ StatusIcons::StatusIcons(lv_obj_t *bar, lv_obj_t *anchor) {
 StatusIcons::Item StatusIcons::create_item(lv_obj_t *bar, const lv_img_dsc_t *src) {
   Item item;
   item.wrapper = plain(bar);
-  lv_obj_set_size(item.wrapper, px(22), px(22));
+  // Icone grandi, per vederle bene da davanti alla stampante.
+  lv_obj_set_size(item.wrapper, px(30), px(30));
 
-  lv_obj_t *ic = icon(item.wrapper, src, 18, lv_color_hex(COLOR_MUTED));
+  lv_obj_t *ic = icon(item.wrapper, src, 26, lv_color_hex(COLOR_MUTED));
   lv_obj_center(ic);
 
   // The slash is drawn twice: a wide stroke in the bar color cuts the icon, a thin muted stroke sits on top.

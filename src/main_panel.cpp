@@ -128,6 +128,16 @@ MainPanel::MainPanel(KWebSocketClient &websocket,
     lv_img_set_src(adl_logo, &ui_adl_logo);
     powerui::label(logo, "ADL", &lv_font_montserrat_24, lv_color_hex(COLOR_WHITE));
     powerui::label(logo, "Screen", &lv_font_montserrat_24, lv_color_hex(COLOR_MAT_RED));
+    // Stato della stampa (In stampa, Annullata...) nella barra in alto, subito dopo ADL Screen.
+    lv_obj_t *badge_gap = plain(logo);
+    lv_obj_set_size(badge_gap, px(18), 1);
+    header_badge = badge(logo, "Ferma", lv_color_hex(COLOR_MUTED));
+    lv_obj_set_height(header_badge, px(30));
+    lv_obj_set_style_pad_left(header_badge, px(12), 0);
+    lv_obj_set_style_pad_right(header_badge, px(14), 0);
+    lv_obj_set_style_pad_column(header_badge, px(8), 0);
+    lv_obj_set_size(lv_obj_get_child(header_badge, 0), px(10), px(10));
+    lv_obj_set_style_text_font(lv_obj_get_child(header_badge, 1), &lv_font_montserrat_16, 0);
     lv_obj_clear_flag(logo, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_align(logo, LV_ALIGN_LEFT_MID, px(16), 0);
 
@@ -670,8 +680,8 @@ MainPanel::QuickButton MainPanel::create_quick_button(lv_obj_t *parent, int x, i
   lv_obj_set_flex_align(button.btn, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
   lv_obj_set_style_pad_row(button.btn, px(5), 0);
 
-  button.icon = icon(button.btn, icon_src, 22, lv_color_hex(COLOR_FG));
-  button.label = label(button.btn, text, &lv_font_montserrat_14, lv_color_hex(COLOR_FG));
+  button.icon = icon(button.btn, icon_src, 26, lv_color_hex(COLOR_FG));
+  button.label = label(button.btn, text, &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
   lv_obj_add_event_cb(button.btn, cb, LV_EVENT_CLICKED, this);
   return button;
 }
@@ -701,9 +711,9 @@ void MainPanel::create_chart_card(lv_obj_t *parent) {
 
   chart_toggle = view_toggle(chart_card, &MainPanel::_handle_view_toggle_cb, this);
   lv_obj_align(chart_toggle, LV_ALIGN_TOP_RIGHT, 0, 0);
+  // Lo stato della stampa e' nella barra in alto: qui non serve.
   chart_badge = badge(chart_card, "Ferma", muted);
-  lv_obj_update_layout(chart_toggle);
-  lv_obj_align_to(chart_badge, chart_toggle, LV_ALIGN_OUT_LEFT_MID, -px(8), 0);
+  lv_obj_add_flag(chart_badge, LV_OBJ_FLAG_HIDDEN);
 
   // The chart is created by the constructor (series are attached by the temperature cards) and moved here.
   lv_obj_set_parent(temp_chart, chart_card);
@@ -791,13 +801,14 @@ void MainPanel::create_main(lv_obj_t *parent)
     }
     print_card.set_state_callback([this](bool active) { set_home_view(active); });
     print_card.set_status_callback([this](const char *text, lv_color_t dot) {
-      badge_set(chart_badge, text, dot);
-      lv_obj_update_layout(chart_badge);
-      lv_obj_align_to(chart_badge, chart_toggle, LV_ALIGN_OUT_LEFT_MID, -px(8), 0);
+      if (header_badge != NULL) {
+        badge_set(header_badge, text, dot);
+      }
     });
     // "Exclude objects" chip of the print card: opens the Exclude Object screen when the print has labeled objects.
     print_card.set_exclude_action([this]() { exclude_object_panel.foreground(); });
-    exclude_object_panel.set_availability_callback([&print_card](bool available) { print_card.set_exclude_available(available); });
+    // "Escludi oggetti" resta solo nella pagina Stato stampa: nella Home non si mostra.
+    exclude_object_panel.set_availability_callback([&print_card](bool) { print_card.set_exclude_available(false); });
     // "Exclude objects" button of Print Status: needs two or more labeled objects.
     print_status_panel.set_exclude_action([this]() { exclude_object_panel.foreground(); });
     exclude_object_panel.set_count_callback([this](size_t count) { print_status_panel.set_exclude_count(count); });
