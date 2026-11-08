@@ -704,10 +704,11 @@ void MainPanel::create_chart_card(lv_obj_t *parent) {
   const lv_color_t fg = lv_color_hex(COLOR_FG);
   const lv_color_t muted = lv_color_hex(COLOR_MUTED);
 
-  lv_obj_t *title = label(chart_card, "Temperature", &lv_font_montserrat_16, fg);
+  // Scritte grandi: si leggono da davanti alla stampante.
+  lv_obj_t *title = label(chart_card, "Temperature", &lv_font_montserrat_20, fg);
   lv_obj_align(title, LV_ALIGN_TOP_LEFT, 0, 0);
-  lv_obj_t *subtitle = label(chart_card, "Ultimi 5 minuti", &lv_font_montserrat_14, muted);
-  lv_obj_align(subtitle, LV_ALIGN_TOP_LEFT, 0, px(23));
+  lv_obj_t *subtitle = label(chart_card, "Ultimi 5 minuti", &lv_font_montserrat_18, muted);
+  lv_obj_align(subtitle, LV_ALIGN_TOP_LEFT, 0, px(26));
 
   chart_toggle = view_toggle(chart_card, &MainPanel::_handle_view_toggle_cb, this);
   lv_obj_align(chart_toggle, LV_ALIGN_TOP_RIGHT, 0, 0);
@@ -717,9 +718,9 @@ void MainPanel::create_chart_card(lv_obj_t *parent) {
 
   // The chart is created by the constructor (series are attached by the temperature cards) and moved here.
   lv_obj_set_parent(temp_chart, chart_card);
-  // The axis labels are drawn outside the chart object, in the 34 px column on its left.
-  lv_obj_set_size(temp_chart, px(332), px(272));
-  lv_obj_align(temp_chart, LV_ALIGN_TOP_LEFT, px(34), px(60));
+  // I numeri dell'asse stanno fuori dal grafico, nella colonna di 44 px alla sua sinistra.
+  lv_obj_set_size(temp_chart, px(322), px(272));
+  lv_obj_align(temp_chart, LV_ALIGN_TOP_LEFT, px(44), px(60));
   lv_obj_set_scrollbar_mode(temp_chart, LV_SCROLLBAR_MODE_OFF);
   lv_obj_clear_flag(temp_chart, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_style_bg_opa(temp_chart, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -734,12 +735,12 @@ void MainPanel::create_chart_card(lv_obj_t *parent) {
   lv_obj_set_style_line_width(temp_chart, 2, LV_PART_ITEMS);
   lv_obj_set_style_line_rounded(temp_chart, true, LV_PART_ITEMS);
   lv_obj_set_style_size(temp_chart, 0, LV_PART_INDICATOR);
-  lv_obj_set_style_text_font(temp_chart, &lv_font_montserrat_12, LV_PART_TICKS);
-  lv_obj_set_style_text_color(temp_chart, muted, LV_PART_TICKS);
+  lv_obj_set_style_text_font(temp_chart, &lv_font_montserrat_16, LV_PART_TICKS);
+  lv_obj_set_style_text_color(temp_chart, fg, LV_PART_TICKS);
 
   lv_chart_set_type(temp_chart, LV_CHART_TYPE_LINE);
   lv_chart_set_range(temp_chart, LV_CHART_AXIS_PRIMARY_Y, 0, 300);
-  lv_chart_set_axis_tick(temp_chart, LV_CHART_AXIS_PRIMARY_Y, 0, 0, 6, 1, true, px(34));
+  lv_chart_set_axis_tick(temp_chart, LV_CHART_AXIS_PRIMARY_Y, 0, 0, 6, 1, true, px(44));
   lv_chart_set_div_line_count(temp_chart, 4, 0);
   lv_chart_set_point_count(temp_chart, 5000);
   lv_chart_set_zoom_x(temp_chart, 8533);
@@ -748,16 +749,16 @@ void MainPanel::create_chart_card(lv_obj_t *parent) {
   // Legend.
   const char *names[3] = {"Ugello", "Piatto", "Camera"};
   const uint32_t colors[3] = {COLOR_EXTRUDER, COLOR_BED, COLOR_CHAMBER};
-  const int offsets[3] = {0, 90, 144};
+  const int offsets[3] = {0, 104, 200};
   for (int i = 0; i < 3; ++i) {
     lv_obj_t *dot = plain(chart_card);
-    lv_obj_set_size(dot, px(4), px(14));
+    lv_obj_set_size(dot, px(5), px(18));
     lv_obj_set_style_radius(dot, px(2), 0);
     lv_obj_set_style_bg_color(dot, lv_color_hex(colors[i]), 0);
     lv_obj_set_style_bg_opa(dot, LV_OPA_COVER, 0);
     lv_obj_align(dot, LV_ALIGN_TOP_LEFT, px(offsets[i]), px(352));
-    lv_obj_t *name = label(chart_card, names[i], &lv_font_montserrat_12, muted);
-    lv_obj_align(name, LV_ALIGN_TOP_LEFT, px(offsets[i] + 12), px(351));
+    lv_obj_t *name = label(chart_card, names[i], &lv_font_montserrat_18, fg);
+    lv_obj_align(name, LV_ALIGN_TOP_LEFT, px(offsets[i] + 14), px(349));
   }
 }
 

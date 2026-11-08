@@ -75,15 +75,15 @@ MiniPrintStatus::MiniPrintStatus(lv_obj_t *parent,
 
   // Header: file name + subtitle on the left, state badge and view toggle on the right.
   // Senza lo stato a destra (ora e' nella barra in alto) nome e sottotitolo hanno piu' spazio.
-  title_label = label(cont, "Nessuna stampa", &lv_font_montserrat_16, fg);
+  title_label = label(cont, "Nessuna stampa", &lv_font_montserrat_20, fg);
   lv_obj_set_width(title_label, px(240));
   lv_label_set_long_mode(title_label, LV_LABEL_LONG_DOT);
   lv_obj_align(title_label, LV_ALIGN_TOP_LEFT, 0, 0);
 
-  subtitle_label = label(cont, "Pronta", &lv_font_montserrat_14, muted);
+  subtitle_label = label(cont, "Pronta", &lv_font_montserrat_18, muted);
   lv_obj_set_width(subtitle_label, px(240));
   lv_label_set_long_mode(subtitle_label, LV_LABEL_LONG_DOT);
-  lv_obj_align(subtitle_label, LV_ALIGN_TOP_LEFT, 0, px(23));
+  lv_obj_align(subtitle_label, LV_ALIGN_TOP_LEFT, 0, px(26));
 
   // "Escludi oggetti" chip: a 40 px tile (the size of the extruder icon tile) with the icon, and the text.
   exclude_row = plain(cont);
@@ -133,13 +133,14 @@ MiniPrintStatus::MiniPrintStatus(lv_obj_t *parent,
 
   percent_label = label(cont, "%", &lv_font_montserrat_40, muted);
 
-  lv_obj_t *eta_icon = icon(cont, &clock_img, 14, muted);
-  lv_obj_align(eta_icon, LV_ALIGN_TOP_RIGHT, -px(34), px(114));
-  lv_obj_t *eta_text = label(cont, "ETA", &lv_font_montserrat_14, muted);
-  lv_obj_align(eta_text, LV_ALIGN_TOP_RIGHT, 0, px(112));
+  // Tempo che manca: scritta e valore grandi.
+  lv_obj_t *eta_icon = icon(cont, &clock_img, 18, muted);
+  lv_obj_align(eta_icon, LV_ALIGN_TOP_RIGHT, -px(46), px(100));
+  lv_obj_t *eta_text = label(cont, "ETA", &lv_font_montserrat_18, muted);
+  lv_obj_align(eta_text, LV_ALIGN_TOP_RIGHT, 0, px(98));
 
-  eta_label = label(cont, "...", &lv_font_montserrat_24, fg);
-  lv_obj_align(eta_label, LV_ALIGN_TOP_RIGHT, 0, px(132));
+  eta_label = label(cont, "...", &lv_font_montserrat_40, fg);
+  lv_obj_align(eta_label, LV_ALIGN_TOP_RIGHT, 0, px(122));
 
   progress_bar = lv_bar_create(cont);
   lv_bar_set_range(progress_bar, 0, 100);
@@ -154,8 +155,8 @@ MiniPrintStatus::MiniPrintStatus(lv_obj_t *parent,
 
   // Statistics box: Elapsed / Layer / Speed.
   lv_obj_t *stats = plain(cont);
-  lv_obj_set_size(stats, px(CONTENT_W), px(68));
-  lv_obj_align(stats, LV_ALIGN_TOP_LEFT, 0, px(216));
+  lv_obj_set_size(stats, px(CONTENT_W), px(80));
+  lv_obj_align(stats, LV_ALIGN_TOP_LEFT, 0, px(206));
   lv_obj_set_style_radius(stats, px(10), 0);
   lv_obj_set_style_border_width(stats, 1, 0);
   lv_obj_set_style_border_color(stats, lv_color_hex(COLOR_WHITE), 0);
@@ -166,13 +167,14 @@ MiniPrintStatus::MiniPrintStatus(lv_obj_t *parent,
   const char *stat_defaults[3] = {"0s", "0 / 0", "100%"};
   for (int i = 0; i < 3; ++i) {
     const int cell_x = i * (CONTENT_W - 2) / 3;
-    lv_obj_t *name_label = label(stats, stat_names[i], &lv_font_montserrat_12, muted);
-    lv_obj_set_pos(name_label, px(cell_x + 15), px(12));
-    *stat_values[i] = label(stats, stat_defaults[i], &lv_font_montserrat_18, fg);
-    lv_obj_set_pos(*stat_values[i], px(cell_x + 15), px(31));
+    // Nomi e valori grandi (Trascorso, Strato, Velocita').
+    lv_obj_t *name_label = label(stats, stat_names[i], &lv_font_montserrat_16, muted);
+    lv_obj_set_pos(name_label, px(cell_x + 12), px(10));
+    *stat_values[i] = label(stats, stat_defaults[i], &lv_font_montserrat_24, fg);
+    lv_obj_set_pos(*stat_values[i], px(cell_x + 12), px(36));
     if (i > 0) {
       lv_obj_t *sep = plain(stats);
-      lv_obj_set_size(sep, 1, px(66));
+      lv_obj_set_size(sep, 1, px(78));
       lv_obj_set_pos(sep, px(cell_x), 0);
       lv_obj_set_style_bg_color(sep, lv_color_hex(COLOR_WHITE), 0);
       lv_obj_set_style_bg_opa(sep, LV_OPA_10, 0);
@@ -182,13 +184,13 @@ MiniPrintStatus::MiniPrintStatus(lv_obj_t *parent,
   // Actions: Pause/Resume and Stop.
   const int btn_w = (CONTENT_W - 12) / 2;
   pause_btn = action_button(cont, 0, 314, btn_w, 60, COLOR_SECONDARY, COLOR_WHITE, LV_OPA_10);
-  pause_icon = icon(pause_btn, &pause_img, 24, fg);
-  pause_label = label(pause_btn, "Pausa", &lv_font_montserrat_16, fg);
+  pause_icon = icon(pause_btn, &pause_img, 28, fg);
+  pause_label = label(pause_btn, "Pausa", &lv_font_montserrat_20, fg);
   lv_obj_add_event_cb(pause_btn, &MiniPrintStatus::_handle_action, LV_EVENT_CLICKED, this);
 
   stop_btn = action_button(cont, btn_w + 12, 314, btn_w, 60, COLOR_CARD, COLOR_DESTRUCTIVE, LV_OPA_40);
-  icon(stop_btn, &cancel, 22, lv_color_hex(COLOR_DESTRUCTIVE));
-  label(stop_btn, "Ferma", &lv_font_montserrat_16, lv_color_hex(COLOR_DESTRUCTIVE));
+  icon(stop_btn, &cancel, 26, lv_color_hex(COLOR_DESTRUCTIVE));
+  label(stop_btn, "Ferma", &lv_font_montserrat_20, lv_color_hex(COLOR_DESTRUCTIVE));
   lv_obj_add_event_cb(stop_btn, &MiniPrintStatus::_handle_action, LV_EVENT_CLICKED, this);
 
   lv_obj_add_state(pause_btn, LV_STATE_DISABLED);
