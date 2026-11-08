@@ -73,13 +73,13 @@ void FanPanel::consume(json &j) {
     auto fan_value = j[json::json_pointer(fmt::format("/params/0/{}/value", f.first))];
     if (!fan_value.is_null()) {
       int v = static_cast<int>(fan_value.template get<double>() * 100);
-      f.second->update_value(v);
+      show_fan(f.first, v);
     }
 
     fan_value = j[json::json_pointer(fmt::format("/params/0/{}/speed", f.first))];
     if (!fan_value.is_null()) {
       int v = static_cast<int>(fan_value.template get<double>() * 100);
-      f.second->update_value(v);
+      show_fan(f.first, v);
     }
   }
 }
@@ -164,10 +164,12 @@ void FanPanel::create_target(const std::string &object, const char *title, const
   lv_obj_t *c = card(fans_cont, 12, y, 712, 84);
   lv_obj_t *name = label(c, title, &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
   lv_obj_set_pos(name, px(20), px(16));
-  t->now_label = label(c, "", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(t->now_label, px(20), px(46));
+  // Sotto il titolo la temperatura della camera, grande. I gradi scelti non si ripetono:
+  // il pulsante scelto e' gia' verde.
+  t->now_label = label(c, "", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_pos(t->now_label, px(20), px(44));
   t->target_label = label(c, "--", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(t->target_label, px(232), px(26));
+  lv_obj_add_flag(t->target_label, LV_OBJ_FLAG_HIDDEN);
 
   t->btnm = lv_btnmatrix_create(c);
   lv_btnmatrix_set_map(t->btnm, t->map.data());
@@ -176,15 +178,36 @@ void FanPanel::create_target(const std::string &object, const char *title, const
   lv_obj_set_size(t->btnm, px(384), px(40));
   lv_obj_align(t->btnm, LV_ALIGN_RIGHT_MID, -px(16), 0);
   style_segmented(t->btnm);
-  lv_obj_set_style_text_font(t->btnm, &lv_font_montserrat_14, LV_PART_ITEMS);
+  lv_obj_set_style_text_font(t->btnm, &lv_font_montserrat_18, LV_PART_ITEMS);
   lv_obj_add_event_cb(t->btnm, &FanPanel::_handle_target_selected, LV_EVENT_VALUE_CHANGED, this);
   targets.push_back(t);
+}
+
+void FanPanel::show_fan(const std::string &key, int value) {
+  auto it = fans.find(key);
+  if (it == fans.end()) {
+    return;
+  }
+  if (key == "output_pin fan1") {
+    rear_manual = value;
+    value = std::max(rear_manual, chamber_auto);
+  }
+  it->second->update_value(value);
 }
 
 void FanPanel::update_target(TargetCard &t, const json &state) {
   auto temperature = state.find("temperature");
   if (temperature != state.end() && temperature->is_number()) {
-    lv_label_set_text(t.now_label, fmt::format("now {:.0f}\xC2\xB0", temperature->template get<double>()).c_str());
+    lv_label_set_text(t.now_label, fmt::format("Adesso {:.0f}\xC2\xB0", temperature->template get<double>()).c_str());
+  }
+  // Velocita' data dal controllo automatico: fa girare anche la ventola posteriore.
+  auto speed = state.find("speed");
+  if (t.object == "temperature_fan chamber_fan" && speed != state.end() && speed->is_number()) {
+    chamber_auto = static_cast<int>(std::lround(speed->template get<double>() * 100));
+    auto rear = fans.find("output_pin fan1");
+    if (rear != fans.end()) {
+      rear->second->update_value(std::max(rear_manual, chamber_auto));
+    }
   }
   auto target = state.find("target");
   if (target != state.end() && target->is_number()) {
@@ -226,14 +249,14 @@ void FanPanel::foreground() {
       ->get_data(json::json_pointer(fmt::format("/printer_state/{}/value", f.first)));
     if (!fan_value.is_null()) {
       int v = static_cast<int>(fan_value.template get<double>() * 100);
-      f.second->update_value(v);
+      show_fan(f.first, v);
     }
 
     fan_value = State::get_instance()
       ->get_data(json::json_pointer(fmt::format("/printer_state/{}/speed", f.first)));
     if (!fan_value.is_null()) {
       int v = static_cast<int>(fan_value.template get<double>() * 100);
-      f.second->update_value(v);
+      show_fan(f.first, v);
     }
   }
   
@@ -272,12 +295,18 @@ void FanPanel::handle_fan_update(lv_event_t *event) {
       	spdlog::trace("turning off fan {}", fan_name);
 	ws.gcode_script(fmt::format("SET_PIN PIN={} VALUE=0", fan_name));
 	f.second->update_value(0);
+	if (f.first == "output_pin fan1") {
+	  rear_manual = 0;
+	}
 	break;
       } else if (obj == f.second->get_max()) {
 	std::string fan_name = KUtils::get_obj_name(f.first);
 	spdlog::trace("turning fan to max {}", fan_name);
 	ws.gcode_script(fmt::format("SET_PIN PIN={} VALUE=255", fan_name));
 	f.second->update_value(100);
+	if (f.first == "output_pin fan1") {
+	  rear_manual = 100;
+	}
 	break;
       }
     }
@@ -305,10 +334,16 @@ void FanPanel::handle_fan_update_part_fan(lv_event_t *event) {
       if (obj == f.second->get_off()) {
 	ws.gcode_script("M106 S0");
 	f.second->update_value(0);
+	if (f.first == "output_pin fan1") {
+	  rear_manual = 0;
+	}
 	break;
       } else if (obj == f.second->get_max()) {
 	ws.gcode_script("M106 S255");
 	f.second->update_value(100);
+	if (f.first == "output_pin fan1") {
+	  rear_manual = 100;
+	}
 	break;
       }
     }
@@ -339,12 +374,18 @@ void FanPanel::handle_fan_update_generic(lv_event_t *event) {
       	spdlog::trace("turning off fan {}", fan_name);
 	ws.gcode_script(fmt::format("SET_FAN_SPEED FAN={} SPEED=0", fan_name));
 	f.second->update_value(0);
+	if (f.first == "output_pin fan1") {
+	  rear_manual = 0;
+	}
 	break;
       } else if (obj == f.second->get_max()) {
 	std::string fan_name = KUtils::get_obj_name(f.first);
 	spdlog::trace("turning fan to max {}", fan_name);
 	ws.gcode_script(fmt::format("SET_FAN_SPEED FAN={} SPEED=1", fan_name));
 	f.second->update_value(100);
+	if (f.first == "output_pin fan1") {
+	  rear_manual = 100;
+	}
 	break;
       }
     }

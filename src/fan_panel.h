@@ -84,6 +84,12 @@ class FanPanel : public NotifyConsumer {
   std::vector<std::shared_ptr<TargetCard>> targets;
 
   void create_target(const std::string &object, const char *title, const std::vector<int> &options, int y);
+
+  // La ventola posteriore (output_pin fan1) e il controllo automatico della camera (temperature_fan chamber_fan)
+  // usano lo stesso filo (PC0): la scheda mostra il piu' alto dei due, cosi' se la ventola gira lo si vede.
+  int rear_manual = 0;
+  int chamber_auto = 0;
+  void show_fan(const std::string &key, int value);
   void update_target(TargetCard &t, const json &state);
 };
 

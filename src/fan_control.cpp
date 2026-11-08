@@ -24,12 +24,13 @@ FanControl::FanControl(lv_obj_t *parent, const char *name, int y, int height, lv
 
   name_label = label(cont, name, &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
   lv_obj_set_pos(name_label, px(76), px(compact ? top - 2 : 16));
-  state_label = label(cont, "Off", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
+  // Acceso / spento grande: verde quando la ventola gira.
+  state_label = label(cont, "Off", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
   lv_obj_set_pos(state_label, px(76), px(compact ? top + 24 : 42));
 
   value_label = label(cont, "0%", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
   if (compact) {
-    lv_obj_align(value_label, LV_ALIGN_TOP_RIGHT, -px(218), px(top + 2));
+    lv_obj_align(value_label, LV_ALIGN_TOP_RIGHT, -px(212), px(top + 2));
   } else {
     lv_obj_align(value_label, LV_ALIGN_TOP_RIGHT, -px(20), px(16));
   }
@@ -37,8 +38,9 @@ FanControl::FanControl(lv_obj_t *parent, const char *name, int y, int height, lv
   const int controls_y = height - 52;
   slider = lv_slider_create(cont);
   lv_slider_set_range(slider, 0, 100);
-  lv_obj_set_size(slider, px(compact ? 190 : 444), px(14));
-  lv_obj_set_pos(slider, px(compact ? 226 : 22), px(compact ? height / 2 - 7 : controls_y + 15));
+  // Barra piu' a destra: il pallino a 0 non tocca il nome della ventola.
+  lv_obj_set_size(slider, px(compact ? 160 : 444), px(14));
+  lv_obj_set_pos(slider, px(compact ? 262 : 22), px(compact ? height / 2 - 7 : controls_y + 15));
   lv_obj_set_style_bg_color(slider, lv_color_hex(COLOR_SECONDARY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(slider, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_bg_color(slider, lv_color_hex(COLOR_ACCENT), LV_PART_INDICATOR);
@@ -87,5 +89,6 @@ void FanControl::update_value(int value) {
   lv_slider_set_value(slider, value, LV_ANIM_OFF);
   lv_label_set_text(value_label, (std::to_string(value) + "%").c_str());
   lv_label_set_text(state_label, value > 0 ? "Running" : "Off");
+  lv_obj_set_style_text_color(state_label, lv_color_hex(value > 0 ? COLOR_ACCENT : COLOR_MUTED), 0);
   icon_set_color(icon_img, lv_color_hex(value > 0 ? COLOR_ACCENT : COLOR_MUTED));
 }
