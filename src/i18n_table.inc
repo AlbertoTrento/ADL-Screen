@@ -391,3 +391,7 @@
 {"Saved", {"Salvata", "Saved", "Gespeichert", "Enregistré", "Guardada"}},
 {"Select a network", {"Scegli una rete", "Select a network", "Netzwerk wählen", "Choisir un réseau", "Elige una red"}},
 {"Weak signal", {"Segnale debole", "Weak signal", "Schwaches Signal", "Signal faible", "Señal débil"}},
+{"Si scalda", {"Si scalda", "Heating", "Heizt", "Chauffe", "Calentando"}},
+{"In temperatura", {"In temperatura", "At temperature", "Auf Temperatur", "À température", "En temperatura"}},
+{"Si raffredda", {"Si raffredda", "Cooling", "Kühlt ab", "Refroidit", "Enfriando"}},
+{"Spento", {"Spento", "Off", "Aus", "Éteinte", "Apagada"}},

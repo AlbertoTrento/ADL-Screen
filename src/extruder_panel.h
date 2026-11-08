@@ -54,8 +54,16 @@ class ExtruderPanel : public NotifyConsumer {
   ButtonContainer extrude_btn;
   ButtonContainer retract_btn;
 
+  // Temperatura dell'ugello nella scheda in alto: gradi e stato (si scalda, in temperatura, si raffredda, spento).
+  lv_obj_t *temp_value_label = NULL;
+  lv_obj_t *temp_state_label = NULL;
+  int nozzle_temp = -1;
+  int nozzle_target = 0;
+  int cooldown_heater_on = -1;  // -1: colore del tasto Spegni ugello non ancora deciso
+
   void show_manual_filament_change();
   void update_pause_button(const std::string &state);
+  void update_nozzle_status();
 };
 
 #endif // __EXTRUDER_PANEL_H__

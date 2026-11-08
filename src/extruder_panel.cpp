@@ -5,6 +5,8 @@
 #include "utils.h"
 #include "spdlog/spdlog.h"
 
+#include <cmath>
+#include <cstdlib>
 #include <limits>
 
 LV_IMG_DECLARE(extrude_img);
@@ -138,7 +140,9 @@ ExtruderPanel::ExtruderPanel(KWebSocketClient &websocket_client,
   lv_obj_t *temp_card = NULL;
   for (const CardSpec &spec : specs) {
     lv_obj_t *option_card = card(panel_cont, 12, spec.y, 712, spec.h);
-    lv_obj_t *title = label(option_card, spec.title, &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
+    // Titoli piu' grandi e spaziati, perche' si leggano bene da davanti alla stampante.
+    lv_obj_t *title = label(option_card, spec.title, &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_FG));
+    lv_obj_set_style_text_letter_space(title, 1, 0);
     lv_obj_align(title, LV_ALIGN_TOP_LEFT, px(15), px(10));
 
     lv_obj_t *selector_cont = spec.selector->get_container();
@@ -154,15 +158,25 @@ ExtruderPanel::ExtruderPanel(KWebSocketClient &websocket_client,
   }
   lv_obj_move_foreground(manual_change_btn.get_container());
 
-  // Temperatura attuale dell'ugello accanto al titolo.
-  lv_obj_set_parent(extruder_temp.get_sensor(), temp_card);
-  lv_obj_clear_flag(extruder_temp.get_sensor(), LV_OBJ_FLAG_FLOATING);
-  lv_obj_set_size(extruder_temp.get_sensor(), px(120), px(32));
-  extruder_temp.set_current_only(px(70), px(5));
-  extruder_temp.set_image_zoom(100);
-  lv_obj_align(extruder_temp.get_sensor(), LV_ALIGN_TOP_RIGHT, -px(10), px(2));
+  // Temperatura dell'ugello a destra del titolo: gradi grandi e, accanto, cosa sta facendo.
+  // Il vecchio indicatore piccolo non serve piu'.
+  lv_obj_add_flag(extruder_temp.get_sensor(), LV_OBJ_FLAG_HIDDEN);
+  temp_value_label = label(temp_card, "--°", &lv_font_montserrat_24, lv_color_hex(powerui::COLOR_FG));
+  lv_obj_align(temp_value_label, LV_ALIGN_TOP_RIGHT, -px(15), px(6));
+  temp_state_label = label(temp_card, "", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_MUTED));
+  lv_obj_align_to(temp_state_label, temp_value_label, LV_ALIGN_OUT_LEFT_MID, -px(16), 0);
 
-  ws.register_notify_update(this);    
+  auto &temp_now = State::get_instance()->get_data("/printer_state/extruder/temperature"_json_pointer);
+  auto &target_now = State::get_instance()->get_data("/printer_state/extruder/target"_json_pointer);
+  if (temp_now.is_number()) {
+    nozzle_temp = (int)std::lround(temp_now.template get<double>());
+  }
+  if (target_now.is_number()) {
+    nozzle_target = (int)std::lround(target_now.template get<double>());
+  }
+  update_nozzle_status();
+
+  ws.register_notify_update(this);
 }
 
 ExtruderPanel::~ExtruderPanel() {
@@ -194,6 +208,59 @@ void ExtruderPanel::update_pause_button(const std::string &state) {
   }
 }
 
+// Stato dell'ugello a colpo d'occhio:
+//   si scalda       -> gradi e scritta rossi
+//   in temperatura  -> gradi e scritta verdi
+//   si raffredda    -> gradi bianchi, scritta azzurra
+//   spento e freddo -> gradi bianchi, scritta grigia
+// Il tasto Spegni ugello diventa rosso finche' il riscaldamento e' acceso.
+void ExtruderPanel::update_nozzle_status() {
+  if (temp_value_label == NULL || temp_state_label == NULL) {
+    return;
+  }
+  if (nozzle_temp < 0) {
+    lv_label_set_text(temp_value_label, "--°");
+    lv_label_set_text(temp_state_label, "");
+    return;
+  }
+
+  const char *state = "Spento";
+  uint32_t value_color = powerui::COLOR_FG;
+  uint32_t state_color = powerui::COLOR_MUTED;
+  if (nozzle_target > 0) {
+    if (std::abs(nozzle_temp - nozzle_target) <= 3) {
+      state = "In temperatura";
+      value_color = state_color = powerui::COLOR_ACCENT;
+    } else if (nozzle_temp < nozzle_target) {
+      state = "Si scalda";
+      value_color = state_color = powerui::COLOR_MAT_RED;
+    } else {
+      state = "Si raffredda";
+      state_color = powerui::COLOR_CHAMBER;
+    }
+    lv_label_set_text_fmt(temp_value_label, "%d° / %d°", nozzle_temp, nozzle_target);
+  } else {
+    if (nozzle_temp > 50) {
+      state = "Si raffredda";
+      state_color = powerui::COLOR_CHAMBER;
+    }
+    lv_label_set_text_fmt(temp_value_label, "%d°", nozzle_temp);
+  }
+  lv_label_set_text(temp_state_label, state);
+  lv_obj_set_style_text_color(temp_value_label, lv_color_hex(value_color), 0);
+  lv_obj_set_style_text_color(temp_state_label, lv_color_hex(state_color), 0);
+  lv_obj_align(temp_value_label, LV_ALIGN_TOP_RIGHT, -powerui::px(15), powerui::px(6));
+  lv_obj_align_to(temp_state_label, temp_value_label, LV_ALIGN_OUT_LEFT_MID, -powerui::px(16), 0);
+
+  // Il colore del tasto si cambia solo quando il riscaldamento si accende o si spegne.
+  const int heater_on = nozzle_target > 0 ? 1 : 0;
+  if (heater_on != cooldown_heater_on) {
+    cooldown_heater_on = heater_on;
+    powerui::style_button(cooldown_btn.get_container(), cooldown_btn.get_button(),
+                          heater_on ? powerui::ButtonKind::Destructive : powerui::ButtonKind::Outline);
+  }
+}
+
 void ExtruderPanel::update_clock() {
   const std::time_t now = std::time(nullptr);
   const std::tm local_time = *std::localtime(&now);
@@ -214,16 +281,20 @@ void ExtruderPanel::show_manual_filament_change() {
 
 void ExtruderPanel::consume(json& j) {
   std::lock_guard<std::mutex> lock(lv_lock);
+  bool changed = false;
   auto target_value = j["/params/0/extruder/target"_json_pointer];
-  if (!target_value.is_null()) {
-    int target = target_value.template get<int>();
-    extruder_temp.update_target(target);
+  if (target_value.is_number()) {
+    nozzle_target = (int)std::lround(target_value.template get<double>());
+    changed = true;
   }
-  
+
   auto temp_value = j["/params/0/extruder/temperature"_json_pointer];
-  if (!temp_value.is_null()) {   
-    int value = temp_value.template get<int>();
-    extruder_temp.update_value(value);
+  if (temp_value.is_number()) {
+    nozzle_temp = (int)std::lround(temp_value.template get<double>());
+    changed = true;
+  }
+  if (changed) {
+    update_nozzle_status();
   }
 
   auto state_value = j["/params/0/print_stats/state"_json_pointer];
