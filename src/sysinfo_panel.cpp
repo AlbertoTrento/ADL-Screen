@@ -755,7 +755,7 @@ void SysInfoPanel::create_tabs() {
   lv_obj_set_size(card, px(408), px(226));
   lv_obj_set_pos(card, px(316), px(12));
   const auto parts = split_version(installed_version());
-  make_version_block(card, "POWERSCREEN", &updates_version_label, &version_suffix_label, parts.first, parts.second);
+  make_version_block(card, "ADL SCREEN", &updates_version_label, &version_suffix_label, parts.first, parts.second);
   make_status(card, update_status);
 
   lv_obj_set_parent(channel_cont, card);
@@ -780,7 +780,7 @@ void SysInfoPanel::create_tabs() {
   style_card(script_card);
   lv_obj_set_size(script_card, px(408), px(178));
   lv_obj_set_pos(script_card, px(316), px(250));
-  make_version_block(script_card, "CFS POWER SCRIPT", &script_version_label, &script_suffix_label, script_base, script_suffix);
+  make_version_block(script_card, "ADL SCRIPT", &script_version_label, &script_suffix_label, script_base, script_suffix);
   script_status_label = make_status(script_card, NULL);
 
   script_button = make_update_button(script_card, "Check for updates");
@@ -1105,7 +1105,11 @@ void SysInfoPanel::poll_update() {
 }
 
 namespace {
-const char *POWER_SCRIPT_NAME = "CFS-Power-Script";
+// Nome della voce dello script nell'Update Manager di Moonraker: ora e' ADL-Script.
+// Se sulla stampante c'e' ancora la voce vecchia (CFS-Power-Script) si usa quella.
+const char *SCRIPT_NAME_NEW = "ADL-Script";
+const char *SCRIPT_NAME_OLD = "CFS-Power-Script";
+const char *POWER_SCRIPT_NAME = SCRIPT_NAME_NEW;
 }
 
 void SysInfoPanel::check_script_update() {
@@ -1152,8 +1156,15 @@ void SysInfoPanel::read_script_status() {
       read_version("moonraker", moonraker_version);
     }
     json info;
-    if (j.contains("result") && j["result"].contains("version_info") && j["result"]["version_info"].contains(POWER_SCRIPT_NAME)) {
-      info = j["result"]["version_info"][POWER_SCRIPT_NAME];
+    if (j.contains("result") && j["result"].contains("version_info")) {
+      const json &versions = j["result"]["version_info"];
+      for (const char *name : {SCRIPT_NAME_NEW, SCRIPT_NAME_OLD}) {
+        if (versions.contains(name)) {
+          POWER_SCRIPT_NAME = name;
+          info = versions[name];
+          break;
+        }
+      }
     }
     if (info.is_object()) {
       const std::string version = info.value("version", std::string());
