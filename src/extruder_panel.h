@@ -61,6 +61,16 @@ class ExtruderPanel : public NotifyConsumer {
   int nozzle_target = 0;
   int cooldown_heater_on = -1;  // -1: colore del tasto Spegni ugello non ancora deciso
 
+  // Togli filamento: mentre la stampante lavora il tasto e' bloccato e dice "In corso...".
+  bool unloading = false;
+  lv_timer_t *unload_guard_timer = NULL;
+  void set_unloading(bool busy);
+  static void _unload_guard_cb(lv_timer_t *timer) {
+    ExtruderPanel *panel = static_cast<ExtruderPanel *>(timer->user_data);
+    panel->unload_guard_timer = NULL;
+    panel->set_unloading(false);
+  }
+
   void show_manual_filament_change();
   void update_pause_button(const std::string &state);
   void update_nozzle_status();

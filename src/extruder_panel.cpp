@@ -94,15 +94,16 @@ ExtruderPanel::ExtruderPanel(KWebSocketClient &websocket_client,
   };
 
   // Ogni pulsante dice cosa fa: nome sopra e spiegazione sotto. Solo ASCII: i font non hanno le lettere accentate.
-  auto describe = [](ButtonContainer &button, const lv_font_t *font, const char *text) {
+  // Scritte grandi e bianche: si devono leggere da davanti alla stampante.
+  auto describe = [](ButtonContainer &button, const lv_font_t *font, const lv_font_t *info_font, const char *text) {
     lv_obj_add_flag(button.get_button(), LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_style_text_font(button.get_label(), font, 0);
-    lv_obj_align(button.get_label(), LV_ALIGN_TOP_MID, 0, px(12));
-    lv_obj_t *info = label(button.get_container(), text, &lv_font_montserrat_12, lv_color_hex(powerui::COLOR_MUTED));
-    lv_obj_set_width(info, LV_PCT(92));
+    lv_obj_align(button.get_label(), LV_ALIGN_TOP_MID, 0, px(10));
+    lv_obj_t *info = label(button.get_container(), text, info_font, lv_color_hex(powerui::COLOR_FG));
+    lv_obj_set_width(info, LV_PCT(94));
     lv_label_set_long_mode(info, LV_LABEL_LONG_WRAP);
     lv_obj_set_style_text_align(info, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_align(info, LV_ALIGN_BOTTOM_MID, 0, -px(10));
+    lv_obj_align(info, LV_ALIGN_BOTTOM_MID, 0, -px(8));
   };
 
   // Pagina Filamento (736 x 440): temperatura, carica e togli, lunghezza, spingi, tira indietro e spegni ugello.
@@ -113,16 +114,18 @@ ExtruderPanel::ExtruderPanel(KWebSocketClient &websocket_client,
   put(cooldown_btn, 492, 342, 232, 86);
   put(manual_change_btn, 280, 18, 210, 36);
 
+  // Carica e Togli sono i due lavori principali: stesso colore, cosi' si capisce che vanno insieme.
   style_button(load_btn.get_container(), load_btn.get_button(), ButtonKind::Soft);
-  for (ButtonContainer *button : {&unload_btn, &extrude_btn, &retract_btn, &cooldown_btn, &manual_change_btn}) {
+  style_button(unload_btn.get_container(), unload_btn.get_button(), ButtonKind::Soft);
+  for (ButtonContainer *button : {&extrude_btn, &retract_btn, &cooldown_btn, &manual_change_btn}) {
     style_button(button->get_container(), button->get_button(), ButtonKind::Outline);
   }
 
-  describe(load_btn, &lv_font_montserrat_20, "Porta il filamento all'ugello, spurga e pulisce");
-  describe(unload_btn, &lv_font_montserrat_20, "Scalda e tira indietro: poi lo sfili a mano");
-  describe(extrude_btn, &lv_font_montserrat_16, "Spinge in avanti il filamento dei mm scelti");
-  describe(retract_btn, &lv_font_montserrat_16, "Tira indietro il filamento dei mm scelti");
-  describe(cooldown_btn, &lv_font_montserrat_16, "Spegne il riscaldamento dell'ugello");
+  describe(load_btn, &lv_font_montserrat_24, &lv_font_montserrat_18, "Porta il filamento all'ugello, spurga e pulisce");
+  describe(unload_btn, &lv_font_montserrat_24, &lv_font_montserrat_18, "Scalda, taglia e ritira il filamento, poi spegne l'ugello");
+  describe(extrude_btn, &lv_font_montserrat_20, &lv_font_montserrat_16, "Spinge in avanti il filamento dei mm scelti");
+  describe(retract_btn, &lv_font_montserrat_20, &lv_font_montserrat_16, "Tira indietro il filamento dei mm scelti");
+  describe(cooldown_btn, &lv_font_montserrat_20, &lv_font_montserrat_16, "Spegne il riscaldamento dell'ugello");
 
   // Il cambio filamento serve solo con la stampa in pausa: fuori dalla pausa il pulsante non si vede.
   lv_obj_add_flag(manual_change_btn.get_button(), LV_OBJ_FLAG_HIDDEN);
@@ -180,6 +183,10 @@ ExtruderPanel::ExtruderPanel(KWebSocketClient &websocket_client,
 }
 
 ExtruderPanel::~ExtruderPanel() {
+  if (unload_guard_timer != NULL) {
+    lv_timer_del(unload_guard_timer);
+    unload_guard_timer = NULL;
+  }
   if (clock_timer != NULL) {
     lv_timer_del(clock_timer);
     clock_timer = NULL;
@@ -258,6 +265,25 @@ void ExtruderPanel::update_nozzle_status() {
     cooldown_heater_on = heater_on;
     powerui::style_button(cooldown_btn.get_container(), cooldown_btn.get_button(),
                           heater_on ? powerui::ButtonKind::Destructive : powerui::ButtonKind::Outline);
+  }
+}
+
+// Blocca o sblocca il tasto Togli filamento. Se la risposta della stampante non arriva
+// (per esempio si perde la connessione), dopo 5 minuti il tasto si sblocca da solo.
+void ExtruderPanel::set_unloading(bool busy) {
+  unloading = busy;
+  if (unload_guard_timer != NULL) {
+    lv_timer_del(unload_guard_timer);
+    unload_guard_timer = NULL;
+  }
+  if (busy) {
+    lv_obj_add_state(unload_btn.get_container(), LV_STATE_DISABLED);
+    lv_label_set_text(unload_btn.get_label(), "In corso...");
+    unload_guard_timer = lv_timer_create(&ExtruderPanel::_unload_guard_cb, 5 * 60 * 1000, this);
+    lv_timer_set_repeat_count(unload_guard_timer, 1);
+  } else {
+    lv_obj_clear_state(unload_btn.get_container(), LV_STATE_DISABLED);
+    lv_label_set_text(unload_btn.get_label(), "Togli filamento");
   }
 }
 
@@ -348,9 +374,19 @@ void ExtruderPanel::handle_callback(lv_event_t *e) {
       ws.gcode_script(fmt::format("M109 S{}\nM83\nG1 E-{} F{}", temp, len, std::stoi(speed) * 60));
     }
 
-    if (btn == unload_btn.get_container()) {
-      // Niente taglio: scalda, tira indietro di 100 mm e spegne. Il filamento si sfila a mano.
-      ws.gcode_script(fmt::format("M109 S{}\nM83\nG1 E-100 F600\nM400\nM104 S0", temp));
+    if (btn == unload_btn.get_container() && !unloading) {
+      // Prima l'home se serve (durante l'home l'ugello scende a 140 gradi), poi scalda e usa la macro
+      // del Power Script per la bobina esterna: va alla taglierina, taglia e ritira 100 mm. Alla fine spegne l'ugello.
+      const std::string unload_script =
+          fmt::format("IF_NEED_HOME\nM109 S{}\nPS_NOCFS_UNLOAD_FILAMENT\nM104 S0", temp);
+      set_unloading(true);
+      ws.send_jsonrpc("printer.gcode.script", json{{"script", unload_script}}, [this](json &j) {
+        if (j.contains("error")) {
+          spdlog::warn("togli filamento: {}", j["error"].dump());
+        }
+        std::lock_guard<std::mutex> guard(lv_lock);
+        set_unloading(false);
+      });
     }
 
     if (btn == manual_change_btn.get_container()) {

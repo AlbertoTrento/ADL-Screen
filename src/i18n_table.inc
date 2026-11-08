@@ -83,7 +83,7 @@
 {"La stampante non ha fatto l'home. Faccio l'home e poi carico il filamento?", {"La stampante non ha fatto l'home. Faccio l'home e poi carico il filamento?", "The printer is not homed. Home now and then load the filament?", "Drucker ist nicht referenziert. Jetzt referenzieren und laden?", "L'imprimante n'a pas fait l'origine. La faire puis charger ?", "La impresora no tiene origen. ¿Hacer origen y cargar?"}},
 {"Lunghezza per Carica mm e Scarica mm", {"Lunghezza per Carica mm e Scarica mm", "Length for Load mm and Unload mm", "Länge für Laden und Entladen (mm)", "Longueur pour Charger et Décharger (mm)", "Longitud para Cargar y Descargar (mm)"}},
 {"Porta il filamento all'ugello, spurga e pulisce", {"Porta il filamento all'ugello, spurga e pulisce", "Brings the filament to the nozzle, purges and cleans", "Führt Filament zur Düse, spült und reinigt", "Amène le filament à la buse, purge et nettoie", "Lleva el filamento a la boquilla, purga y limpia"}},
-{"Scalda e tira indietro: poi lo sfili a mano", {"Scalda e tira indietro: poi lo sfili a mano", "Heats and pulls back: then pull it out by hand", "Heizt und zieht zurück: dann von Hand entnehmen", "Chauffe et recule : retirez-le ensuite à la main", "Calienta y retrae: luego sácalo a mano"}},
+{"Scalda, taglia e ritira il filamento, poi spegne l'ugello", {"Scalda, taglia e ritira il filamento, poi spegne l'ugello", "Heats, cuts and retracts, then turns the nozzle off", "Heizt, schneidet und zieht zurück, dann Düse aus", "Chauffe, coupe et recule, puis éteint la buse", "Calienta, corta y retrae, luego apaga la boquilla"}},
 {"Scarica mm", {"Scarica mm", "Unload mm", "Entladen mm", "Décharger mm", "Descargar mm"}},
 {"Serve l'home", {"Serve l'home", "Homing required", "Referenzfahrt nötig", "Origine requise", "Origen necesario"}},
 {"Spegne il riscaldamento dell'ugello", {"Spegne il riscaldamento dell'ugello", "Turns off the nozzle heater", "Schaltet die Düsenheizung aus", "Coupe la chauffe de la buse", "Apaga la calefacción de la boquilla"}},
@@ -395,3 +395,4 @@
 {"In temperatura", {"In temperatura", "At temperature", "Auf Temperatur", "À température", "En temperatura"}},
 {"Si raffredda", {"Si raffredda", "Cooling", "Kühlt ab", "Refroidit", "Enfriando"}},
 {"Spento", {"Spento", "Off", "Aus", "Éteinte", "Apagada"}},
+{"In corso...", {"In corso...", "In progress...", "Läuft...", "En cours...", "En curso..."}},
