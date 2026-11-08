@@ -397,3 +397,4 @@
 {"Spento", {"Spento", "Off", "Aus", "Éteinte", "Apagada"}},
 {"In corso...", {"In corso...", "In progress...", "Läuft...", "En cours...", "En curso..."}},
 {"Recenti", {"Recenti", "Recent", "Neueste", "Récents", "Recientes"}},
+{"Temperature and fans", {"Temperature e ventole", "Temperature and fans", "Temperatur und Lüfter", "Température et ventilateurs", "Temperatura y ventiladores"}},

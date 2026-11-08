@@ -370,10 +370,11 @@ PrintStatusPanel::PrintStatusPanel(KWebSocketClient &websocket_client,
     lv_obj_add_flag(buttons_cont, LV_OBJ_FLAG_HIDDEN);  // old icon-over-text buttons (kept for their prompts)
 
     // Left card: 272 x 416.
-    lv_obj_t *left = card(status_cont, 12, 12, 272, 416);
+    // Scheda a sinistra piu' stretta: a destra resta piu' spazio per scritte grandi.
+    lv_obj_t *left = card(status_cont, 12, 12, 248, 416);
     lv_obj_move_to_index(left, 0);
     lv_obj_set_parent(thumbnail_cont, left);
-    lv_obj_set_size(thumbnail_cont, px(248), px(JOB_THUMB_HEIGHT));
+    lv_obj_set_size(thumbnail_cont, px(224), px(JOB_THUMB_HEIGHT));
     lv_obj_set_pos(thumbnail_cont, px(11), px(11));
     lv_obj_set_style_bg_color(thumbnail_cont, lv_color_hex(powerui::COLOR_BG), LV_PART_MAIN);
     lv_obj_set_style_radius(thumbnail_cont, px(10), LV_PART_MAIN);
@@ -384,34 +385,34 @@ PrintStatusPanel::PrintStatusPanel(KWebSocketClient &websocket_client,
 
     // File name on its own (the SD card icon overlapped it).
     lv_obj_set_parent(file_cont, left);
-    lv_obj_set_size(file_cont, px(248), px(28));
+    lv_obj_set_size(file_cont, px(224), px(28));
     lv_obj_set_pos(file_cont, px(11), px(11 + JOB_THUMB_HEIGHT + 9));
     lv_obj_set_style_bg_opa(file_cont, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(file_cont, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_all(file_cont, 0, LV_PART_MAIN);
     lv_obj_add_flag(file_icon, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_set_width(file_label, px(248));
+    lv_obj_set_width(file_label, px(224));
     lv_label_set_long_mode(file_label, LV_LABEL_LONG_DOT);
     lv_obj_align(file_label, LV_ALIGN_LEFT_MID, 0, 0);
-    lv_obj_set_style_text_font(file_label, &lv_font_montserrat_16, LV_PART_MAIN);
+    lv_obj_set_style_text_font(file_label, &lv_font_montserrat_20, LV_PART_MAIN);
     lv_obj_set_style_text_color(file_label, lv_color_hex(powerui::COLOR_FG), LV_PART_MAIN);
 
     lv_obj_set_parent(pbar_cont, left);
-    lv_obj_set_size(pbar_cont, px(248), px(72));
+    lv_obj_set_size(pbar_cont, px(224), px(72));
     lv_obj_set_pos(pbar_cont, px(11), px(11 + JOB_THUMB_HEIGHT + 9 + 28 + 12));  // 12 px below the name, 16 above the buttons
     lv_obj_set_style_bg_opa(pbar_cont, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(pbar_cont, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_all(pbar_cont, 0, LV_PART_MAIN);
-    lv_obj_set_width(status_label, px(150));
+    lv_obj_set_width(status_label, px(120));
     lv_obj_set_style_text_align(status_label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
-    lv_obj_set_style_text_font(status_label, &lv_font_montserrat_16, LV_PART_MAIN);
-    lv_obj_align(status_label, LV_ALIGN_TOP_LEFT, 0, px(6));
-    lv_obj_set_width(progress_label, px(90));
+    lv_obj_set_style_text_font(status_label, &lv_font_montserrat_18, LV_PART_MAIN);
+    lv_obj_align(status_label, LV_ALIGN_TOP_LEFT, 0, px(14));
+    lv_obj_set_width(progress_label, px(104));
     lv_obj_set_style_text_align(progress_label, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
-    lv_obj_set_style_text_font(progress_label, &lv_font_montserrat_24, LV_PART_MAIN);
+    lv_obj_set_style_text_font(progress_label, &lv_font_montserrat_40, LV_PART_MAIN);
     lv_obj_set_height(progress_label, LV_SIZE_CONTENT);
     lv_obj_align(progress_label, LV_ALIGN_TOP_RIGHT, 0, 0);
-    lv_obj_set_size(progress_bar, px(248), px(10));
+    lv_obj_set_size(progress_bar, px(224), px(10));
     lv_obj_align(progress_bar, LV_ALIGN_BOTTOM_MID, 0, -px(4));
     lv_obj_set_style_bg_color(progress_bar, lv_color_hex(powerui::COLOR_SECONDARY), LV_PART_MAIN);
     lv_obj_set_style_bg_opa(progress_bar, LV_OPA_COVER, LV_PART_MAIN);
@@ -421,47 +422,58 @@ PrintStatusPanel::PrintStatusPanel(KWebSocketClient &websocket_client,
     lv_obj_set_style_radius(progress_bar, LV_RADIUS_CIRCLE, LV_PART_INDICATOR);
 
     // Pause / Resume (one visible at a time) and Cancel inside the job card.
-    act_pause = action_button(left, &ui_icon_pause, "Pause", ActionKind::Outline, 12, 356, 120, 48, &PrintStatusPanel::_handle_action, this);
-    act_resume = action_button(left, &ui_icon_play, "Resume", ActionKind::Primary, 12, 356, 120, 48, &PrintStatusPanel::_handle_action, this);
+    // Scritta dei tasti piu' grande: e' l'ultimo figlio del tasto (prima c'e' l'icona).
+    auto big_text = [](lv_obj_t *btn, const lv_font_t *font) {
+      const uint32_t count = lv_obj_get_child_cnt(btn);
+      if (count > 0) {
+        lv_obj_set_style_text_font(lv_obj_get_child(btn, count - 1), font, 0);
+      }
+    };
+    act_pause = action_button(left, &ui_icon_pause, "Pause", ActionKind::Outline, 12, 352, 106, 52, &PrintStatusPanel::_handle_action, this);
+    act_resume = action_button(left, &ui_icon_play, "Resume", ActionKind::Primary, 12, 352, 106, 52, &PrintStatusPanel::_handle_action, this);
     lv_obj_add_flag(act_resume, LV_OBJ_FLAG_HIDDEN);
-    act_cancel = action_button(left, &ui_icon_close, "Cancel", ActionKind::Outline, 140, 356, 120, 48, &PrintStatusPanel::_handle_action, this);
+    act_cancel = action_button(left, &ui_icon_close, "Cancel", ActionKind::Outline, 128, 352, 106, 52, &PrintStatusPanel::_handle_action, this);
+    for (lv_obj_t *btn : {act_pause, act_resume, act_cancel}) {
+      big_text(btn, &lv_font_montserrat_18);
+    }
 
     // Right column. Progress, four lines: title; Layer with its value on the same line; the Elapsed and Remaining
     // titles; their values. A four-digit layer count fits on its own line and never meets the times.
-    lv_obj_t *progress_card = card(status_cont, 296, 12, 428, 160);
+    // Colonna destra: x 272, larga 452.
+    lv_obj_t *progress_card = card(status_cont, 272, 12, 452, 180);
     lv_obj_move_to_index(progress_card, 0);
-    lv_obj_t *progress_title = label(progress_card, "Progress", &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
+    lv_obj_t *progress_title = label(progress_card, "Progress", &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_MUTED));
     lv_obj_set_pos(progress_title, px(14), px(10));
     struct Stat { ImageLabel *item; const char *name; };
     Stat stats[3] = {{&layers, "Layer"}, {&elapsed, "Elapsed"}, {&time_left, "Remaining"}};
-    const int column = (428 - 28) / 2;
+    const int column = (452 - 28) / 2;
     for (int i = 0; i < 3; ++i) {
       const bool layer_row = (i == 0);
       lv_obj_t *cell = stats[i].item->get_container();
       lv_obj_set_parent(cell, progress_card);
-      lv_obj_set_size(cell, layer_row ? px(400) : px(column - 6), layer_row ? px(28) : px(62));
-      lv_obj_set_pos(cell, layer_row ? px(14) : px(14 + (i - 1) * column), layer_row ? px(40) : px(88));
+      lv_obj_set_size(cell, layer_row ? px(424) : px(column - 6), layer_row ? px(50) : px(76));
+      lv_obj_set_pos(cell, layer_row ? px(14) : px(14 + (i - 1) * column), layer_row ? px(38) : px(94));
       lv_obj_set_style_bg_opa(cell, LV_OPA_TRANSP, LV_PART_MAIN);
       lv_obj_set_style_border_width(cell, 0, LV_PART_MAIN);
       lv_obj_set_style_pad_all(cell, 0, LV_PART_MAIN);
       lv_obj_t *cell_icon = lv_obj_get_child(cell, 0);
       if (cell_icon != NULL) {
         lv_img_set_zoom(cell_icon, 80);
-        lv_obj_align(cell_icon, LV_ALIGN_TOP_LEFT, 0, layer_row ? px(2) : 0);
+        lv_obj_align(cell_icon, LV_ALIGN_TOP_LEFT, 0, layer_row ? px(14) : 0);
       }
-      lv_obj_t *cell_name = label(cell, stats[i].name, &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
-      lv_obj_align(cell_name, LV_ALIGN_TOP_LEFT, px(28), layer_row ? px(6) : px(2));
+      lv_obj_t *cell_name = label(cell, stats[i].name, &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_MUTED));
+      lv_obj_align(cell_name, LV_ALIGN_TOP_LEFT, px(28), layer_row ? px(14) : 0);
       lv_obj_t *cell_value = lv_obj_get_child(cell, 1);
       if (cell_value != NULL) {
         lv_label_set_long_mode(cell_value, LV_LABEL_LONG_CLIP);
         lv_obj_set_style_text_color(cell_value, lv_color_hex(powerui::COLOR_FG), LV_PART_MAIN);
         if (layer_row) {
-          lv_obj_set_width(cell_value, px(280));
-          lv_obj_set_style_text_font(cell_value, &lv_font_montserrat_24, LV_PART_MAIN);
-          lv_obj_align(cell_value, LV_ALIGN_TOP_LEFT, px(96), px(1));
+          lv_obj_set_width(cell_value, px(300));
+          lv_obj_set_style_text_font(cell_value, &lv_font_montserrat_40, LV_PART_MAIN);
+          lv_obj_align(cell_value, LV_ALIGN_TOP_LEFT, px(110), 0);
         } else {
           lv_obj_set_width(cell_value, px(column - 6));
-          lv_obj_set_style_text_font(cell_value, &lv_font_montserrat_24, LV_PART_MAIN);
+          lv_obj_set_style_text_font(cell_value, &lv_font_montserrat_40, LV_PART_MAIN);
           lv_obj_align(cell_value, LV_ALIGN_TOP_LEFT, 0, px(26));
         }
       }
@@ -471,46 +483,49 @@ PrintStatusPanel::PrintStatusPanel(KWebSocketClient &websocket_client,
     struct Row { ImageLabel *item; const char *name; };
     struct Category { const char *title; int x; Row rows[3]; };
     Category categories[2] = {
-      {"Temperature and cooling", 296, {{&extruder_temp, "Extruder"}, {&bed_temp, "Bed"}, {&fan0, "Fans"}}},
-      {"Motion", 514, {{&print_speed, "Speed"}, {&flow_rate, "Flow"}, {&z_offset, "Z offset"}}},
+      {"Temperature and fans", 272, {{&extruder_temp, "Ugello"}, {&bed_temp, "Piatto"}, {&fan0, "Fans"}}},
+      {"Motion", 502, {{&print_speed, "Speed"}, {&flow_rate, "Flow"}, {&z_offset, "Z offset"}}},
     };
-    const int list_top = 12 + 160 + 8;
+    const int list_top = 12 + 180 + 8;
     const int list_height = 428 - 56 - 8 - list_top;
-    const int list_width = (428 - 8) / 2;
-    const int row_step = (list_height - 38) / 3;
+    const int list_width = (452 - 8) / 2;
+    const int row_step = (list_height - 40) / 3;
     for (const auto &category : categories) {
       lv_obj_t *category_card = card(status_cont, category.x, list_top, list_width, list_height);
       lv_obj_move_to_index(category_card, 0);
-      lv_obj_t *title = label(category_card, category.title, &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
-      lv_obj_set_pos(title, px(14), px(10));
+      lv_obj_t *title = label(category_card, category.title, &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_MUTED));
+      lv_obj_set_pos(title, px(14), px(8));
       for (int i = 0; i < 3; ++i) {
         lv_obj_t *row = category.rows[i].item->get_container();
         lv_obj_set_parent(row, category_card);
         lv_obj_set_size(row, px(list_width - 28), px(row_step));
-        lv_obj_set_pos(row, px(14), px(34 + i * row_step));
+        lv_obj_set_pos(row, px(14), px(36 + i * row_step));
         lv_obj_set_style_bg_opa(row, LV_OPA_TRANSP, LV_PART_MAIN);
         lv_obj_set_style_border_width(row, 0, LV_PART_MAIN);
         lv_obj_set_style_pad_all(row, 0, LV_PART_MAIN);
+        // Niente icone piccole nelle righe: nome e valore grandi ci stanno solo cosi'.
         lv_obj_t *row_icon = lv_obj_get_child(row, 0);
         if (row_icon != NULL) {
-          lv_img_set_zoom(row_icon, 80);
-          lv_obj_align(row_icon, LV_ALIGN_LEFT_MID, 0, 0);
+          lv_obj_add_flag(row_icon, LV_OBJ_FLAG_HIDDEN);
         }
         lv_obj_t *value = lv_obj_get_child(row, 1);
         if (value != NULL) {
-          lv_obj_set_style_text_font(value, &lv_font_montserrat_16, LV_PART_MAIN);
+          lv_obj_set_style_text_font(value, &lv_font_montserrat_20, LV_PART_MAIN);
           lv_obj_set_style_text_color(value, lv_color_hex(powerui::COLOR_FG), LV_PART_MAIN);
         }
-        lv_obj_t *name = label(row, category.rows[i].name, &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
-        lv_obj_align(name, LV_ALIGN_LEFT_MID, px(30), 0);
+        lv_obj_t *name = label(row, category.rows[i].name, &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_MUTED));
+        lv_obj_align(name, LV_ALIGN_LEFT_MID, 0, 0);
       }
     }
 
     // Bottom actions of the right column.
-    act_tune = action_button(status_cont, &ui_icon_tune, "Tune", ActionKind::Outline, 296, 372, 96, 56, &PrintStatusPanel::_handle_action, this);
-    act_exclude = action_button(status_cont, &ui_icon_exclude, "Objects", ActionKind::Outline, 404, 372, 152, 56, &PrintStatusPanel::_handle_action, this);
+    act_tune = action_button(status_cont, &ui_icon_tune, "Tune", ActionKind::Outline, 272, 372, 136, 56, &PrintStatusPanel::_handle_action, this);
+    act_exclude = action_button(status_cont, &ui_icon_exclude, "Objects", ActionKind::Outline, 420, 372, 144, 56, &PrintStatusPanel::_handle_action, this);
     lv_obj_add_state(act_exclude, LV_STATE_DISABLED);
-    act_estop = action_button(status_cont, &ui_icon_estop, "Stop", ActionKind::Destructive, 568, 372, 156, 56, &PrintStatusPanel::_handle_action, this);
+    act_estop = action_button(status_cont, &ui_icon_estop, "Stop", ActionKind::Destructive, 576, 372, 148, 56, &PrintStatusPanel::_handle_action, this);
+    for (lv_obj_t *btn : {act_tune, act_exclude, act_estop}) {
+      big_text(btn, &lv_font_montserrat_20);
+    }
   }
 
   ws.register_notify_update(this);
