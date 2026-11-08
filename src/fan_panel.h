@@ -85,6 +85,16 @@ class FanPanel : public NotifyConsumer {
 
   void create_target(const std::string &object, const char *title, const std::vector<int> &options, int y);
 
+  // Timer che fa girare le pale delle icone, attivo solo con la pagina aperta.
+  lv_timer_t *spin_timer = NULL;
+  static void _spin_cb(lv_timer_t *timer) {
+    FanPanel *panel = static_cast<FanPanel *>(timer->user_data);
+    for (auto &f : panel->fans) {
+      f.second->spin(SPIN_STEP_MS);
+    }
+  }
+  static constexpr uint32_t SPIN_STEP_MS = 50;
+
   // La ventola posteriore (output_pin fan1) e il controllo automatico della camera (temperature_fan chamber_fan)
   // usano lo stesso filo (PC0): la scheda mostra il piu' alto dei due, cosi' se la ventola gira lo si vede.
   int rear_manual = 0;

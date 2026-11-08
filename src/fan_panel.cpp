@@ -9,6 +9,13 @@
 #include <vector>
 
 
+LV_IMG_DECLARE(ui_ventola_hotend_telaio);
+LV_IMG_DECLARE(ui_ventola_hotend_pale);
+LV_IMG_DECLARE(ui_ventola_camera_telaio);
+LV_IMG_DECLARE(ui_ventola_camera_pale);
+LV_IMG_DECLARE(ui_ventola_posteriore_telaio);
+LV_IMG_DECLARE(ui_ventola_posteriore_pale);
+
 namespace {
 constexpr uint32_t FAN_PANEL_BACKGROUND = powerui::COLOR_BG;
 }
@@ -45,6 +52,10 @@ FanPanel::FanPanel(KWebSocketClient &websocket_client, std::mutex &lock)
 }
 
 FanPanel::~FanPanel() {
+  if (spin_timer != NULL) {
+    lv_timer_del(spin_timer);
+    spin_timer = NULL;
+  }
   if (clock_timer != NULL) {
     lv_timer_del(clock_timer);
     clock_timer = NULL;
@@ -123,7 +134,18 @@ void FanPanel::create_fans(json &f) {
       // generic_fan, controller_fan, etc.
       fan_cb = &FanPanel::_handle_fan_update_generic;
     }
-    auto fptr = std::make_shared<FanControl>(fans_cont, entry.second.c_str(), 12 + index * card_step, card_height, fan_cb, this);
+    // Icona a colori: rossa la hotend, azzurra la camera, viola la posteriore.
+    const lv_img_dsc_t *frame = &ui_ventola_hotend_telaio;
+    const lv_img_dsc_t *blades = &ui_ventola_hotend_pale;
+    if (key == "output_pin fan2") {
+      frame = &ui_ventola_camera_telaio;
+      blades = &ui_ventola_camera_pale;
+    } else if (key == "output_pin fan1") {
+      frame = &ui_ventola_posteriore_telaio;
+      blades = &ui_ventola_posteriore_pale;
+    }
+    auto fptr = std::make_shared<FanControl>(fans_cont, entry.second.c_str(), 12 + index * card_step, card_height,
+                                             fan_cb, this, frame, blades);
     fans.insert({key, fptr});
     index++;
   }
@@ -261,7 +283,17 @@ void FanPanel::foreground() {
   }
   
   lv_obj_move_foreground(fanpanel_cont);
-  powerui::overlay_open("Fans", [this]() { lv_obj_move_background(fanpanel_cont); });
+  // Le pale girano solo mentre la pagina e' aperta.
+  if (spin_timer == NULL) {
+    spin_timer = lv_timer_create(&FanPanel::_spin_cb, SPIN_STEP_MS, this);
+  }
+  powerui::overlay_open("Fans", [this]() {
+    lv_obj_move_background(fanpanel_cont);
+    if (spin_timer != NULL) {
+      lv_timer_del(spin_timer);
+      spin_timer = NULL;
+    }
+  });
 }
 
 void FanPanel::update_clock() {
