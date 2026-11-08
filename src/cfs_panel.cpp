@@ -341,7 +341,8 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
     lv_obj_t *dd = lv_dropdown_create(ec);
     *dds[i] = dd;
     lv_obj_set_pos(dd, px(24), px(y + 24));
-    lv_obj_set_size(dd, px(250), px(56));
+    // Larghe: nomi lunghi come "Hyper PLA-CF Verde" ci stanno dentro.
+    lv_obj_set_size(dd, px(320), px(56));
     style_select(dd);
     // Testo grande sia nella tendina chiusa sia nell'elenco che si apre.
     lv_obj_set_style_text_font(dd, &lv_font_montserrat_20, LV_PART_MAIN);
@@ -366,17 +367,21 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
     }, LV_EVENT_READY, NULL);
   }
 
-  // Colonna centrale: 12 colori grandi, 4 file da 3.
+  // Colonna centrale: 12 colori da 48 (come il colore scelto), 4 file da 3, in alto e centrati
+  // tra le tendine e i pulsanti.
+  const int colors_x = 362;
   lv_obj_t *color_cap = label(ec, "COLOR", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(color_cap, px(296), px(80));
+  lv_obj_set_width(color_cap, px(168));
+  lv_obj_set_style_text_align(color_cap, LV_TEXT_ALIGN_CENTER, 0);
+  lv_obj_set_pos(color_cap, px(colors_x), px(80));
   for (int i = 0; i < 12; ++i) {
     lv_obj_t *sw = lv_obj_create(ec);
     swatches[i] = sw;
     lv_obj_remove_style_all(sw);
     lv_obj_clear_flag(sw, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(sw, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_size(sw, px(64), px(64));
-    lv_obj_set_pos(sw, px(296 + (i % 3) * 82), px(106 + (i / 3) * 76));
+    lv_obj_set_size(sw, px(48), px(48));
+    lv_obj_set_pos(sw, px(colors_x + (i % 3) * 60), px(106 + (i / 3) * 60));
     lv_obj_set_style_radius(sw, LV_RADIUS_CIRCLE, 0);
     lv_obj_set_style_bg_color(sw, lv_color_hex(PALETTE[i]), 0);
     lv_obj_set_style_bg_opa(sw, LV_OPA_COVER, 0);
@@ -392,8 +397,8 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
   }
 
   // Colonna destra, centrata in altezza: colore scelto, personalizzato, Annulla, Salva.
-  const int right_x = 544;
-  const int right_w = 144;
+  const int right_x = 548;
+  const int right_w = 140;
   lv_obj_t *chosen_box = plain(ec);
   lv_obj_set_size(chosen_box, px(right_w), px(100));
   lv_obj_set_pos(chosen_box, px(right_x), px(39));
