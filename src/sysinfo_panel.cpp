@@ -1172,8 +1172,9 @@ void SysInfoPanel::read_script_status() {
       const std::string full = info.value("full_version_string", version);
       const bool behind = info.contains("commits_behind") && info["commits_behind"].is_array() && !info["commits_behind"].empty();
       const bool valid = info.value("is_valid", true) && !info.value("corrupt", false);
-      const auto parts = split_version(version);
-      script_base = parts.first.empty() ? "unknown" : parts.first;
+      // Versione intera (es. "v1.4.0-4"): per ADL Script il numero dopo il trattino conta gli
+      // aggiornamenti dopo la 1.4.0, tagliarlo faceva sembrare lo script sempre fermo.
+      script_base = version.empty() ? "unknown" : version;
       script_suffix = full;
       if (!valid) {
         // Dirty or detached repository: Moonraker cannot compare versions, so do not claim it is up to date.
