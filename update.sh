@@ -40,6 +40,46 @@ if [ "$1" = "--set-channel" ]; then
     exit 0
 fi
 
+# Sistemazioni da fare dopo aver estratto il pacchetto: macro di Klipper, canale e voce in Fluidd.
+# $1 = canale (nightly|stable). Usa $CURL se passato da chi chiama.
+sistema_dopo_installazione() {
+    [ -n "$CURL" ] || CURL=`which curl`
+    ## keep the Klipper macros and helper scripts of PowerScreen in sync with the package
+    KLIPPER_CFG_DIR=/usr/data/printer_data/config/PowerScreen
+    if [ -d "$KLIPPER_CFG_DIR" ] && [ -d "$POWERSCREEN_DIR/scripts" ]; then
+        CFG_CHANGED=false
+        for cfg in "$POWERSCREEN_DIR"/scripts/*.cfg; do
+            [ -f "$cfg" ] || continue
+            if ! cmp -s "$cfg" "$KLIPPER_CFG_DIR/$(basename "$cfg")"; then
+                cp "$cfg" "$KLIPPER_CFG_DIR/"
+                CFG_CHANGED=true
+            fi
+        done
+        mkdir -p "$KLIPPER_CFG_DIR/scripts"
+        cp "$POWERSCREEN_DIR"/scripts/*.py "$KLIPPER_CFG_DIR/scripts/" 2>/dev/null
+        if [ "$CFG_CHANGED" = "true" ] && [ -x /etc/init.d/S55klipper_service ]; then
+            echo "Macros changed, restarting Klipper"
+            /etc/init.d/S55klipper_service restart &> /dev/null
+        fi
+    fi
+
+    set_moonraker_channel "$1"
+
+    ## la voce di aggiornamento in Fluidd torna [update_manager powerscreen]: con il nome ADL-Screen
+    ## Moonraker segnava errore su "managed_services: powerscreen" (accetta solo klipper, moonraker
+    ## o il nome della voce). Moonraker si riavvia con la sua API.
+    if [ -f "$MOONRAKER_UPDATE_CONF" ] && grep -q "^\[update_manager ADL-Screen\]" "$MOONRAKER_UPDATE_CONF"; then
+        sed -i "s/^\[update_manager ADL-Screen\]/[update_manager powerscreen]/" "$MOONRAKER_UPDATE_CONF"
+        echo "Moonraker update entry renamed back to powerscreen"
+        $CURL -s -X POST http://localhost:7125/server/restart > /dev/null 2>&1 &
+    fi
+}
+
+if [ "$1" = "--dopo-installazione" ]; then
+    sistema_dopo_installazione "$2"
+    exit 0
+fi
+
 if [ "$1" = "--check" ]; then
     CHECK_ONLY=true
 fi
@@ -138,34 +178,12 @@ if [ -f $CUSTOM_UPGRADE_SCRIPT ]; then
     $CUSTOM_UPGRADE_SCRIPT
 fi
 
-## keep the Klipper macros and helper scripts of PowerScreen in sync with the package
-KLIPPER_CFG_DIR=/usr/data/printer_data/config/PowerScreen
-if [ -d "$KLIPPER_CFG_DIR" ] && [ -d "$POWERSCREEN_DIR/scripts" ]; then
-    CFG_CHANGED=false
-    for cfg in "$POWERSCREEN_DIR"/scripts/*.cfg; do
-        [ -f "$cfg" ] || continue
-        if ! cmp -s "$cfg" "$KLIPPER_CFG_DIR/$(basename "$cfg")"; then
-            cp "$cfg" "$KLIPPER_CFG_DIR/"
-            CFG_CHANGED=true
-        fi
-    done
-    mkdir -p "$KLIPPER_CFG_DIR/scripts"
-    cp "$POWERSCREEN_DIR"/scripts/*.py "$KLIPPER_CFG_DIR/scripts/" 2>/dev/null
-    if [ "$CFG_CHANGED" = "true" ] && [ -x /etc/init.d/S55klipper_service ]; then
-        echo "Macros changed, restarting Klipper"
-        /etc/init.d/S55klipper_service restart &> /dev/null
-    fi
-fi
-
-set_moonraker_channel "$CHANNEL"
-
-## la voce di aggiornamento in Fluidd torna [update_manager powerscreen]: con il nome ADL-Screen
-## Moonraker segnava errore su "managed_services: powerscreen" (accetta solo klipper, moonraker
-## o il nome della voce). Moonraker si riavvia con la sua API.
-if [ -f "$MOONRAKER_UPDATE_CONF" ] && grep -q "^\[update_manager ADL-Screen\]" "$MOONRAKER_UPDATE_CONF"; then
-    sed -i "s/^\[update_manager ADL-Screen\]/[update_manager powerscreen]/" "$MOONRAKER_UPDATE_CONF"
-    echo "Moonraker update entry renamed back to powerscreen"
-    $CURL -s -X POST http://localhost:7125/server/restart > /dev/null 2>&1 &
+## Le sistemazioni dopo l'estrazione le fa lo update.sh appena arrivato nel pacchetto, non questo
+## (che e' ancora quello vecchio, gia' caricato): cosi' una correzione vale subito, allo stesso aggiornamento.
+if [ -f "$POWERSCREEN_DIR/update.sh" ]; then
+    CURL="$CURL" sh "$POWERSCREEN_DIR/update.sh" --dopo-installazione "$CHANNEL"
+else
+    sistema_dopo_installazione "$CHANNEL"
 fi
 
 echo "Updated PowerScreen to version $latest_version"
