@@ -76,9 +76,19 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
   // The file picker is the Files tab: it fills the tab page, so the Back button is not needed.
   lv_obj_set_size(files_cont, LV_PCT(100), LV_PCT(100));
   lv_obj_clear_flag(files_cont, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_flex_flow(files_cont, LV_FLEX_FLOW_ROW);
+  // In colonna: le schede Locale/USB/Timelapse/Storico in alto su tutta la larghezza, sotto l'elenco e il dettaglio.
+  lv_obj_set_flex_flow(files_cont, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_all(files_cont, powerui::px(12), 0);
-  lv_obj_set_style_pad_column(files_cont, powerui::px(12), 0);
+  lv_obj_set_style_pad_row(files_cont, powerui::px(10), 0);
+  lv_obj_t *files_body = lv_obj_create(files_cont);
+  lv_obj_remove_style_all(files_body);
+  lv_obj_clear_flag(files_body, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_width(files_body, LV_PCT(100));
+  lv_obj_set_flex_grow(files_body, 1);
+  lv_obj_set_flex_flow(files_body, LV_FLEX_FLOW_ROW);
+  lv_obj_set_style_pad_column(files_body, powerui::px(12), 0);
+  lv_obj_set_parent(left_cont, files_body);
+  lv_obj_set_parent(file_view, files_body);
   lv_obj_set_style_radius(files_cont, 0, 0);
   lv_obj_set_style_border_width(files_cont, 0, 0);
   lv_obj_set_style_bg_color(files_cont, lv_color_hex(powerui::COLOR_BG), 0);
@@ -118,7 +128,7 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
 
   select_btn = lv_btn_create(file_table_btns);
   label = lv_label_create(select_btn);
-  lv_label_set_text(label, "Select");
+  lv_label_set_text(label, "Elimina più");
   lv_obj_center(label);
   lv_obj_add_event_cb(select_btn, &PrintPanel::_handle_btns, LV_EVENT_CLICKED, this);
   
@@ -138,6 +148,7 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
   lv_obj_set_style_bg_opa(file_table_btns, LV_OPA_TRANSP, 0);
   lv_obj_set_style_border_width(file_table_btns, 0, 0);
   lv_obj_set_height(file_table_btns, powerui::px(48));
+  lv_obj_set_style_text_font(file_table_btns, &lv_font_montserrat_18, 0);
 
   lv_obj_t *sort_buttons[] = {refresh_btn, modified_sort_btn, az_sort_btn, select_btn};
   for (lv_obj_t *sort_button : sort_buttons) {
@@ -153,15 +164,15 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
     lv_obj_set_style_radius(sort_button, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
   }
 
-  lv_obj_set_size(select_btn, powerui::px(88), powerui::px(40));
+  lv_obj_set_size(select_btn, powerui::px(130), powerui::px(44));
 
   // Un solo tasto per l'ordine dei file: a ogni tocco passa da "Recenti" (data, piu' recenti prima) ad "A-Z".
   // Il vecchio tasto "Modificato" non serve piu'.
   lv_obj_add_flag(modified_sort_btn, LV_OBJ_FLAG_HIDDEN);
-  lv_obj_set_size(az_sort_btn, powerui::px(100), powerui::px(40));
+  lv_obj_set_size(az_sort_btn, powerui::px(104), powerui::px(44));
 
   // Refresh stands out: larger, with a green outline and icon.
-  lv_obj_set_size(refresh_btn, powerui::px(48), powerui::px(40));
+  lv_obj_set_size(refresh_btn, powerui::px(48), powerui::px(44));
   lv_obj_set_style_bg_color(refresh_btn, lv_color_hex(powerui::COLOR_CARD), LV_PART_MAIN | LV_STATE_DEFAULT);
   lv_obj_set_style_border_width(refresh_btn, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
   lv_obj_set_style_border_color(refresh_btn, lv_color_hex(powerui::COLOR_ACCENT), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -175,7 +186,7 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
   lv_obj_set_flex_grow(count_label, 1);
   lv_obj_set_style_text_align(count_label, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
   lv_obj_set_style_text_color(count_label, lv_color_hex(powerui::COLOR_MUTED), LV_PART_MAIN);
-  lv_obj_set_style_text_font(count_label, &lv_font_montserrat_12, LV_PART_MAIN);
+  lv_obj_set_style_text_font(count_label, &lv_font_montserrat_16, LV_PART_MAIN);
   lv_obj_move_to_index(modified_sort_btn, 0);
   lv_obj_move_to_index(az_sort_btn, 1);
   lv_obj_move_to_index(select_btn, 2);
@@ -184,12 +195,12 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
   update_sort_buttons();
 
   // Storage switch: Local / USB.
-  storage_row = lv_obj_create(left_cont);
+  storage_row = lv_obj_create(files_cont);
   lv_obj_remove_style_all(storage_row);
   lv_obj_clear_flag(storage_row, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_size(storage_row, LV_PCT(100), powerui::px(40));
+  lv_obj_set_size(storage_row, LV_PCT(100), powerui::px(48));
   lv_obj_set_style_pad_all(storage_row, 0, 0);
-  lv_obj_set_style_pad_column(storage_row, 6, 0);
+  lv_obj_set_style_pad_column(storage_row, powerui::px(8), 0);
   lv_obj_set_flex_flow(storage_row, LV_FLEX_FLOW_ROW);
   auto make_storage_button = [this](const char *text) {
     lv_obj_t *button = lv_btn_create(storage_row);
@@ -199,7 +210,7 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
     lv_obj_set_style_shadow_width(button, 0, LV_PART_MAIN);
     lv_obj_set_style_border_width(button, 1, LV_PART_MAIN);
     lv_obj_t *button_label = lv_label_create(button);
-    lv_obj_set_style_text_font(button_label, &lv_font_montserrat_14, LV_PART_MAIN);
+    lv_obj_set_style_text_font(button_label, &lv_font_montserrat_20, LV_PART_MAIN);
     lv_label_set_text(button_label, text);
     lv_obj_center(button_label);
     lv_obj_add_event_cb(button, &PrintPanel::_handle_btns, LV_EVENT_CLICKED, this);
@@ -281,7 +292,7 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
   lv_obj_set_style_border_width(print_btn.get_button(), 0, LV_PART_MAIN);
   lv_obj_t *print_label = lv_obj_get_child(print_btn.get_container(), 1);
   if (print_label != NULL) {
-    lv_obj_set_style_text_font(print_label, &lv_font_montserrat_20, LV_PART_MAIN);
+    lv_obj_set_style_text_font(print_label, &lv_font_montserrat_24, LV_PART_MAIN);
     lv_obj_set_style_text_color(print_label, lv_color_hex(powerui::COLOR_WHITE), LV_PART_MAIN);
   }
 
@@ -453,7 +464,7 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
   ws.register_notify_update(this);
 
   // Timelapse and History views (hidden until their segment is selected).
-  extra_view.reset(new FilesExtraView(ws, lv_lock, left_cont, files_cont, [this](const std::string &file) {
+  extra_view.reset(new FilesExtraView(ws, lv_lock, left_cont, lv_obj_get_parent(left_cont), [this](const std::string &file) {
     begin_print_flow(file);
   }));
 }
@@ -544,7 +555,7 @@ void PrintPanel::show_dir(Tree *dir, uint32_t sort_type) {
   }
   sort_modified = (sort_type == SORTED_BY_MODIFIED);
   update_sort_buttons();
-  lv_label_set_text(count_label, usb_missing ? "" : fmt::format("{} - {} files", usb_view ? "USB" : "Local", dir->children.size()).c_str());
+  lv_label_set_text(count_label, usb_missing ? "" : fmt::format("{} file", dir->children.size()).c_str());
 
   if (usb_missing) {
     cur_file = NULL;
@@ -561,7 +572,7 @@ void PrintPanel::show_dir(Tree *dir, uint32_t sort_type) {
   auto create_card = [this](Tree *node, const std::string &path, bool directory) {
     lv_obj_t *card = lv_obj_create(file_grid);
     lv_obj_set_width(card, LV_PCT(100));
-    lv_obj_set_height(card, powerui::px(56));
+    lv_obj_set_height(card, powerui::px(64));
     lv_obj_clear_flag(card, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(card, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(card, &PrintPanel::_handle_file_card, LV_EVENT_CLICKED, this);
@@ -581,7 +592,7 @@ void PrintPanel::show_dir(Tree *dir, uint32_t sort_type) {
     lv_obj_set_flex_align(card, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
     lv_obj_t *thumbnail_frame = lv_obj_create(card);
-    lv_obj_set_size(thumbnail_frame, powerui::px(40), powerui::px(40));
+    lv_obj_set_size(thumbnail_frame, powerui::px(48), powerui::px(48));
     lv_obj_clear_flag(thumbnail_frame, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_clear_flag(thumbnail_frame, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_bg_color(thumbnail_frame, lv_color_hex(powerui::COLOR_BG), LV_PART_MAIN);
@@ -624,7 +635,7 @@ void PrintPanel::show_dir(Tree *dir, uint32_t sort_type) {
     lv_label_set_long_mode(name_label, LV_LABEL_LONG_CLIP);
     lv_label_set_text(name_label, display_name.c_str());
     lv_obj_set_style_text_color(name_label, lv_color_hex(powerui::COLOR_FG), LV_PART_MAIN);
-    lv_obj_set_style_text_font(name_label, &lv_font_montserrat_14, LV_PART_MAIN);
+    lv_obj_set_style_text_font(name_label, &lv_font_montserrat_20, LV_PART_MAIN);
 
     lv_obj_t *subtitle_label = lv_label_create(text_col);
     lv_obj_clear_flag(subtitle_label, LV_OBJ_FLAG_CLICKABLE);
@@ -632,13 +643,13 @@ void PrintPanel::show_dir(Tree *dir, uint32_t sort_type) {
     lv_label_set_long_mode(subtitle_label, LV_LABEL_LONG_CLIP);
     lv_label_set_text(subtitle_label, directory ? "Folder" : "");
     lv_obj_set_style_text_color(subtitle_label, lv_color_hex(powerui::COLOR_MUTED), LV_PART_MAIN);
-    lv_obj_set_style_text_font(subtitle_label, &lv_font_montserrat_12, LV_PART_MAIN);
+    lv_obj_set_style_text_font(subtitle_label, &lv_font_montserrat_16, LV_PART_MAIN);
 
     lv_obj_t *chevron = lv_label_create(card);
     lv_obj_clear_flag(chevron, LV_OBJ_FLAG_CLICKABLE);
     lv_label_set_text(chevron, LV_SYMBOL_RIGHT);
     lv_obj_set_style_text_color(chevron, lv_color_hex(powerui::COLOR_MUTED), LV_PART_MAIN);
-    lv_obj_set_style_text_font(chevron, &lv_font_montserrat_14, LV_PART_MAIN);
+    lv_obj_set_style_text_font(chevron, &lv_font_montserrat_18, LV_PART_MAIN);
 
     lv_obj_t *check = NULL;
     if (!directory) {
@@ -854,7 +865,7 @@ void PrintPanel::update_file_card(const std::string &path, json &metadata) {
       lv_img_set_src(card.thumbnail, card.thumbnail_source.c_str());
       lv_obj_set_style_img_recolor_opa(card.thumbnail, LV_OPA_TRANSP, LV_PART_MAIN);
       lv_obj_set_size(card.thumbnail, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-      lv_img_set_zoom(card.thumbnail, 100);  // fits the 40 px frame
+      lv_img_set_zoom(card.thumbnail, 120);  // entra nel riquadro da 48 px
       lv_obj_center(card.thumbnail);
       lv_obj_invalidate(card.thumbnail);
     }

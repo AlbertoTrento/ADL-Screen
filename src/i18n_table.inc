@@ -399,3 +399,4 @@
 {"Recenti", {"Recenti", "Recent", "Neueste", "Récents", "Recientes"}},
 {"Temperature and fans", {"Temperature e ventole", "Temperature and fans", "Temperatur und Lüfter", "Température et ventilateurs", "Temperatura y ventiladores"}},
 {"Distanza", {"Distanza", "Distance", "Strecke", "Distance", "Distancia"}},
+{"Elimina più", {"Elimina più", "Delete several", "Mehrere löschen", "Suppr. plusieurs", "Borrar varios"}},

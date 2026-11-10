@@ -86,7 +86,7 @@ FilesExtraView::FilesExtraView(KWebSocketClient &c, std::mutex &lock, lv_obj_t *
   lv_obj_set_size(toolbar, LV_PCT(100), px(40));
   lv_obj_set_flex_flow(toolbar, LV_FLEX_FLOW_ROW);
   lv_obj_set_flex_align(toolbar, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-  stats_label = label(toolbar, "", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
+  stats_label = label(toolbar, "", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
   lv_label_set_long_mode(stats_label, LV_LABEL_LONG_CLIP);
   lv_obj_set_flex_grow(stats_label, 1);
   toolbar_btn = lv_btn_create(toolbar);
