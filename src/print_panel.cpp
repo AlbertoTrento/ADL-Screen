@@ -679,7 +679,8 @@ void PrintPanel::show_dir(Tree *dir, uint32_t sort_type) {
 	  return true;
 	}
 
-	return reversed ? x.date_modified > y.date_modified : y.date_modified > x.date_modified;
+	// Recenti: il file piu' nuovo in cima.
+	return reversed ? y.date_modified > x.date_modified : x.date_modified > y.date_modified;
       });
   } else {
     KUtils::sort_map_values<std::string, Tree>(dir->children, sorted_files, [reversed](Tree &x, Tree &y) {
