@@ -57,7 +57,7 @@ Dal menu di ADL Script installare almeno:
 
 Secondo le istruzioni dell'autore, l'installatore disattiva lo schermo Creality (`Monitor`, `display-server`), Creality Cloud, il collegamento LAN di Creality Print e gli aggiornamenti firmware OTA. Mostra un avviso e chiede conferma prima di procedere.
 
-L'installatore e lo script di ripristino non sono inclusi nei materiali locali disponibili: le procedure seguenti conservano le istruzioni dell'autore e non sono state eseguite né verificate tramite rete.
+L'installatore e lo script di ripristino non sono inclusi nei materiali locali disponibili.
 
 ### Metodo A: menu di ADL Script
 
@@ -84,7 +84,7 @@ wget --no-check-certificate -O /tmp/powerscreen-installer.sh https://raw.githubu
 sh /tmp/powerscreen-installer.sh nightly
 ```
 
-Secondo il README originale, l'installatore scarica `powerscreen-k1c.tar.gz` dalle [Release ADL-Screen](https://github.com/AlbertoTrento/ADL-Screen/releases), installa in `/usr/data/powerscreen`, conserva gli originali Creality in `/usr/data/powerscreen-backup`, configura servizio, moduli e macro, registra l'aggiornamento in Moonraker e riavvia Klipper e pannello. Questi sono comportamenti documentati dell'installatore, non operazioni svolte durante questa preparazione editoriale.
+Secondo il README originale, l'installatore scarica `powerscreen-k1c.tar.gz` dalle [Release ADL-Screen](https://github.com/AlbertoTrento/ADL-Screen/releases), installa in `/usr/data/powerscreen`, conserva gli originali Creality in `/usr/data/powerscreen-backup`, configura servizio, moduli e macro, registra l'aggiornamento in Moonraker e riavvia Klipper e pannello.
 
 I nomi interni `powerscreen`, `powerscreen-k1c.tar.gz` e `/usr/data/powerscreen` restano quelli usati dalle procedure esistenti.
 
@@ -162,6 +162,3 @@ ADL_Screen è una versione modificata di [PowerScreen](https://github.com/borfer
 - **PowerUI:** [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), con attribuzione a Boris Fernández, collegamento alla licenza e indicazione delle modifiche. L'uso commerciale richiede il permesso dell'autore. Vedere [LICENSE-POWERUI.md](LICENSE-POWERUI.md).
 - PowerUI si basa su shadcn/ui; ulteriori attribuzioni, comprese Lucide, Z-Bolt e LVGL, sono conservate in [NOTICE.md](NOTICE.md).
 
-## Ambito della preparazione editoriale
-
-Testi rielaborati dal README, dalle note e licenze disponibili e dai sorgenti pertinenti. Non sono stati eseguiti test, installazioni, compilazioni, accessi di rete o prove sulla stampante. Le istruzioni degli installer esterni e delle macro ADL Script sono riportate come informazioni dell'autore, senza attestazione del loro funzionamento in questa esecuzione.
