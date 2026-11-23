@@ -1,4 +1,5 @@
 #include "sysinfo_panel.h"
+#include "screenshot.h"
 #include "powerui.h"
 #include "utils.h"
 #include "config.h"
@@ -646,15 +647,16 @@ void SysInfoPanel::create_tabs() {
   // Right column: preferences card.
   // Testi grandi: titolo a 20, nomi delle righe a 18 (vanno a capo se lunghi, es. "Conferma arresto di emergenza"),
   // tendine 150x44 con testo a 18 anche nell'elenco aperto, interruttore 56x32.
-  // Righe: titolo 12, linea 44, Spegnimento 44-100, Luminosita' 100-178, Arresto 178-236, Log 236-292.
+  // Righe: titolo 10, linea 40, Spegnimento 40-90, Luminosita' 90-156, Arresto 156-202, Log 202-248,
+  // Foto dello schermo 248-294.
   lv_obj_set_size(controls_card, px(350), px(294));
   lv_obj_set_pos(controls_card, px(374), px(134));
   lv_obj_t *prefs_title = label(controls_card, "Preferences", &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_FG));
-  lv_obj_set_pos(prefs_title, px(20), px(12));
+  lv_obj_set_pos(prefs_title, px(20), px(10));
 
   lv_obj_add_flag(z_icon_toggle_cont, LV_OBJ_FLAG_HIDDEN);  // "Invert Z icon" is no longer offered
-  lv_obj_set_size(display_sleep_dd, px(150), px(44));
-  lv_obj_set_size(loglevel_dd, px(150), px(44));
+  lv_obj_set_size(display_sleep_dd, px(150), px(40));
+  lv_obj_set_size(loglevel_dd, px(150), px(40));
   style_select(display_sleep_dd);
   style_select(loglevel_dd);
   style_select(channel_dd);
@@ -672,9 +674,9 @@ void SysInfoPanel::create_tabs() {
 
   // `label_w`: spazio per il nome fino al controllo (bordo 20 a sinistra, 16 a destra, 10 di distacco).
   struct PrefRow { lv_obj_t *row; lv_obj_t *control; int y; int h; int label_w; };
-  PrefRow pref_rows[3] = {{disp_sleep_cont, display_sleep_dd, 44, 56, 350 - 20 - 16 - 150 - 10},
-                          {estop_toggle_cont, prompt_estop_toggle, 178, 58, 350 - 20 - 16 - 56 - 10},
-                          {ll_cont, loglevel_dd, 236, 56, 350 - 20 - 16 - 150 - 10}};
+  PrefRow pref_rows[3] = {{disp_sleep_cont, display_sleep_dd, 40, 50, 350 - 20 - 16 - 150 - 10},
+                          {estop_toggle_cont, prompt_estop_toggle, 156, 46, 350 - 20 - 16 - 56 - 10},
+                          {ll_cont, loglevel_dd, 202, 46, 350 - 20 - 16 - 150 - 10}};
   for (const auto &pref : pref_rows) {
     lv_obj_set_size(pref.row, LV_PCT(100), px(pref.h));
     lv_obj_set_pos(pref.row, 0, px(pref.y));
@@ -692,13 +694,13 @@ void SysInfoPanel::create_tabs() {
   // Brightness: label, percentage and a slider (backlight 15-100 %, see write_backlight).
   // Barra alta 20 con area di tocco allargata: si prende bene col dito anche quando e' al minimo.
   lv_obj_t *brightness_label = label(controls_card, "Brightness", &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_FG));
-  lv_obj_set_pos(brightness_label, px(20), px(100 + 12));
+  lv_obj_set_pos(brightness_label, px(20), px(90 + 8));
   brightness_value = label(controls_card, "100%", &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_FG));
-  lv_obj_align(brightness_value, LV_ALIGN_TOP_RIGHT, -px(20), px(100 + 12));
+  lv_obj_align(brightness_value, LV_ALIGN_TOP_RIGHT, -px(20), px(90 + 8));
   brightness_slider = lv_slider_create(controls_card);
   lv_slider_set_range(brightness_slider, BRIGHTNESS_MIN_PERCENT, 100);
   lv_obj_set_size(brightness_slider, px(298), px(20));
-  lv_obj_set_pos(brightness_slider, px(26), px(100 + 46));
+  lv_obj_set_pos(brightness_slider, px(26), px(90 + 38));
   lv_obj_set_ext_click_area(brightness_slider, px(14));
   lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(powerui::COLOR_SECONDARY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(brightness_slider, LV_OPA_COVER, LV_PART_MAIN);
@@ -716,7 +718,24 @@ void SysInfoPanel::create_tabs() {
   lv_obj_add_event_cb(brightness_slider, &SysInfoPanel::_handle_brightness, LV_EVENT_RELEASED, this);
   lv_obj_add_event_cb(brightness_slider, &SysInfoPanel::_handle_brightness, LV_EVENT_PRESS_LOST, this);
 
-  for (int y : {44, 100, 178, 236}) {
+  // Foto dello schermo (per le immagini del README): spenta a ogni avvio.
+  {
+    lv_obj_t *photo_label = label(controls_card, "Foto dello schermo", &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_FG));
+    lv_obj_set_pos(photo_label, px(20), px(248 + 12));
+    lv_obj_t *photo_switch = lv_switch_create(controls_card);
+    style_switch(photo_switch);
+    lv_obj_set_size(photo_switch, px(56), px(32));
+    lv_obj_set_ext_click_area(photo_switch, px(10));
+    lv_obj_align(photo_switch, LV_ALIGN_TOP_RIGHT, -px(16), px(248 + 7));
+    if (screenshot::enabled()) {
+      lv_obj_add_state(photo_switch, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(photo_switch, [](lv_event_t *e) {
+      screenshot::set_enabled(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
+    }, LV_EVENT_VALUE_CHANGED, NULL);
+  }
+
+  for (int y : {40, 90, 156, 202, 248}) {
     lv_obj_t *line = plain(controls_card);
     lv_obj_set_size(line, LV_PCT(100), 1);
     lv_obj_set_pos(line, 0, px(y));

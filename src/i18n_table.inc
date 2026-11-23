@@ -494,3 +494,4 @@
 {"Inizio dell'isteresi SpreadCycle.", {"Inizio dell'isteresi SpreadCycle.", "Start of the SpreadCycle hysteresis.", "Beginn der SpreadCycle-Hysterese.", "Début de l'hystérésis SpreadCycle.", "Inicio de la histéresis SpreadCycle."}},
 {"Isteresi finale (hend)", {"Isteresi finale (hend)", "Hysteresis end (hend)", "Hysterese-Ende (hend)", "Hystérésis de fin (hend)", "Histéresis final (hend)"}},
 {"Fine dell'isteresi SpreadCycle.", {"Fine dell'isteresi SpreadCycle.", "End of the SpreadCycle hysteresis.", "Ende der SpreadCycle-Hysterese.", "Fin de l'hystérésis SpreadCycle.", "Fin de la histéresis SpreadCycle."}},
+{"Foto dello schermo", {"Foto dello schermo", "Screenshots", "Bildschirmfotos", "Captures d'écran", "Capturas de pantalla"}},
