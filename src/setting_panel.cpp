@@ -75,6 +75,13 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
                           &language_btn}) {
     b->set_row_layout();
   }
+  // Icone colorate, come nella pagina Calibrazioni (Riavvia resta rosso).
+  spoolman_btn.set_icon_color(lv_color_hex(0xFB923C));            // CFS arancio
+  macros_btn.set_icon_color(lv_color_hex(0x4ADE80));              // Macro verde
+  wifi_btn.set_icon_color(lv_color_hex(0x38BDF8));                // Wi-Fi azzurro
+  sysinfo_btn.set_icon_color(lv_color_hex(0xC084FC));             // Sistema viola
+  language_btn.set_icon_color(lv_color_hex(0xFACC15));            // Lingua giallo
+  powerscreen_update_btn.set_icon_color(lv_color_hex(0x2DD4BF));  // Aggiornamenti verde acqua
   wifi_btn.set_subtitle("Network");
   restart_btn.set_subtitle("Screen, Klipper, Firmware");
   macros_btn.set_subtitle("Run printer macros");
@@ -125,11 +132,13 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
   lv_obj_t *mark_logo = lv_img_create(mark);
   lv_img_set_src(mark_logo, &ui_adl_logo);
   lv_obj_clear_flag(mark_logo, LV_OBJ_FLAG_CLICKABLE);
-  // Logo e versione affiancati: la cella e' bassa e larga.
-  lv_obj_align(mark_logo, LV_ALIGN_LEFT_MID, powerui::px(24), 0);
+  // Logo ADL piu' grande (senza riempire la cella) e sotto la versione in rosso ADL.
+  lv_img_set_zoom(mark_logo, 410);  // 98x32 -> circa 157x51
+  lv_img_set_antialias(mark_logo, true);
+  lv_obj_align(mark_logo, LV_ALIGN_CENTER, 0, -powerui::px(14));
   lv_obj_t *mark_version = powerui::label(mark, fmt::format("ADL Screen {}", package_version()).c_str(),
-                                          &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_MUTED));
-  lv_obj_align(mark_version, LV_ALIGN_RIGHT_MID, -powerui::px(16), 0);
+                                          &lv_font_montserrat_18, lv_color_hex(0xD9534F));
+  lv_obj_align(mark_version, LV_ALIGN_BOTTOM_MID, 0, -powerui::px(6));
 
 }
 

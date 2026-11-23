@@ -1363,33 +1363,37 @@ void PrintPanel::show_start_dialog(const std::string &path, bool has_mesh, int m
                       LV_EVENT_DELETE, NULL);
 
   const int rows = (has_mesh ? 1 : 0) + (has_purge ? 1 : 0) + (has_cfs ? 1 : 0);
-  const int w = 540, h = 150 + rows * 62 + 70;
+  // Finestra grande (resta un bordo intorno): righe alte 76, scelte e pulsanti grandi.
+  const int w = 740, h = 210 + rows * 76;
+  const int sel_w = 330;
   lv_obj_t *dlg = card(overlay, 0, 0, w, h);
   lv_obj_center(dlg);
   lv_obj_set_style_border_opa(dlg, LV_OPA_30, 0);
 
-  lv_obj_t *title = label(dlg, "Avvia stampa", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(title, px(24), px(18));
+  lv_obj_t *title = label(dlg, "Avvia stampa", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(title, px(24), px(16));
 
   // File card.
   std::string name = path.substr(path.find_last_of('/') == std::string::npos ? 0 : path.find_last_of('/') + 1);
   lv_obj_t *file_card = plain(dlg);
   lv_obj_set_size(file_card, px(w - 48), px(56));
-  lv_obj_set_pos(file_card, px(24), px(56));
+  lv_obj_set_pos(file_card, px(24), px(54));
   lv_obj_set_style_radius(file_card, px(10), 0);
   lv_obj_set_style_bg_color(file_card, lv_color_hex(COLOR_SECONDARY), 0);
   lv_obj_set_style_bg_opa(file_card, LV_OPA_COVER, 0);
-  lv_obj_t *file_label = label(file_card, name.c_str(), &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
+  lv_obj_t *file_label = label(file_card, name.c_str(), &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
   lv_label_set_long_mode(file_label, LV_LABEL_LONG_DOT);
   lv_obj_set_width(file_label, px(w - 48 - 28));
   lv_obj_align(file_label, LV_ALIGN_LEFT_MID, px(14), 0);
 
-  int y = 126;
+  int y = 124;
   auto row_title = [&](const char *text, const char *sub) {
-    lv_obj_t *t = label(dlg, text, &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
+    lv_obj_t *t = label(dlg, text, &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
     lv_obj_set_pos(t, px(24), px(y + 6));
-    lv_obj_t *s = label(dlg, sub, &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-    lv_obj_set_pos(s, px(24), px(y + 30));
+    lv_obj_t *s = label(dlg, sub, &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
+    lv_label_set_long_mode(s, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(s, px(w - 48 - sel_w - 16));
+    lv_obj_set_pos(s, px(24), px(y + 34));
   };
   if (has_mesh) {
     row_title("Mesh del piatto", "Adattiva misura solo la zona del pezzo");
@@ -1398,21 +1402,22 @@ void PrintPanel::show_start_dialog(const std::string &path, bool has_mesh, int m
     lv_btnmatrix_set_btn_ctrl_all(dialog->mesh_selector, LV_BTNMATRIX_CTRL_CHECKABLE);
     lv_btnmatrix_set_one_checked(dialog->mesh_selector, true);
     lv_btnmatrix_set_btn_ctrl(dialog->mesh_selector, mesh_mode, LV_BTNMATRIX_CTRL_CHECKED);
-    lv_obj_set_size(dialog->mesh_selector, px(250), px(44));
-    lv_obj_set_pos(dialog->mesh_selector, px(w - 24 - 250), px(y + 4));
+    lv_obj_set_size(dialog->mesh_selector, px(sel_w), px(56));
+    lv_obj_set_pos(dialog->mesh_selector, px(w - 24 - sel_w), px(y + 8));
     style_segmented(dialog->mesh_selector);
-    lv_obj_set_style_text_font(dialog->mesh_selector, &lv_font_montserrat_14, LV_PART_ITEMS);
-    y += 62;
+    lv_obj_set_style_text_font(dialog->mesh_selector, &lv_font_montserrat_18, LV_PART_ITEMS);
+    y += 76;
   }
   if (has_purge) {
     row_title("Spurgo adattivo", "Spurga accanto al pezzo");
     dialog->purge_switch = lv_switch_create(dlg);
     style_switch(dialog->purge_switch);
-    lv_obj_set_pos(dialog->purge_switch, px(w - 24 - 46), px(y + 14));
+    lv_obj_set_size(dialog->purge_switch, px(64), px(36));
+    lv_obj_set_pos(dialog->purge_switch, px(w - 24 - 64), px(y + 18));
     if (purge_on) {
       lv_obj_add_state(dialog->purge_switch, LV_STATE_CHECKED);
     }
-    y += 62;
+    y += 76;
   }
   if (has_cfs) {
     row_title("Filamento", "Bobina esterna: infilala fino all'estrusore");
@@ -1421,15 +1426,21 @@ void PrintPanel::show_start_dialog(const std::string &path, bool has_mesh, int m
     lv_btnmatrix_set_btn_ctrl_all(dialog->filament_selector, LV_BTNMATRIX_CTRL_CHECKABLE);
     lv_btnmatrix_set_one_checked(dialog->filament_selector, true);
     lv_btnmatrix_set_btn_ctrl(dialog->filament_selector, 0, LV_BTNMATRIX_CTRL_CHECKED);
-    lv_obj_set_size(dialog->filament_selector, px(250), px(44));
-    lv_obj_set_pos(dialog->filament_selector, px(w - 24 - 250), px(y + 4));
+    lv_obj_set_size(dialog->filament_selector, px(sel_w), px(56));
+    lv_obj_set_pos(dialog->filament_selector, px(w - 24 - sel_w), px(y + 8));
     style_segmented(dialog->filament_selector);
-    lv_obj_set_style_text_font(dialog->filament_selector, &lv_font_montserrat_14, LV_PART_ITEMS);
-    y += 62;
+    lv_obj_set_style_text_font(dialog->filament_selector, &lv_font_montserrat_18, LV_PART_ITEMS);
+    y += 76;
   }
 
-  action_button(dlg, NULL, "Annulla", ActionKind::Outline, 24, h - 74, 196, 50, &PrintPanel::_start_dialog_event, dialog);
-  action_button(dlg, &ui_icon_play, "Avvia", ActionKind::Primary, w - 24 - 292, h - 74, 292, 50, &PrintPanel::_start_dialog_event, dialog);
+  // Annulla e Avvia restano gli ultimi due figli della card (li cerca _start_dialog_event).
+  lv_obj_t *cancel = action_button(dlg, NULL, "Annulla", ActionKind::Outline, 24, h - 80, 260, 60,
+                                   &PrintPanel::_start_dialog_event, dialog);
+  lv_obj_t *go = action_button(dlg, &ui_icon_play, "Avvia", ActionKind::Primary, w - 24 - 380, h - 80, 380, 60,
+                               &PrintPanel::_start_dialog_event, dialog);
+  for (lv_obj_t *btn : {cancel, go}) {
+    lv_obj_set_style_text_font(lv_obj_get_child(btn, lv_obj_get_child_cnt(btn) - 1), &lv_font_montserrat_24, 0);
+  }
 }
 
 void PrintPanel::_start_dialog_event(lv_event_t *event) {
