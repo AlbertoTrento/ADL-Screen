@@ -24,7 +24,7 @@ Il README dell'autore indica il canale **nightly**, con versioni preliminari. Le
 | Gestione filamento | Carica la bobina esterna, ritira il filamento, estrudi o ritrai una quantità in millimetri e spegni l'ugello. Il cambio manuale dedicato compare durante la pausa. |
 | Regolazioni e comandi macchina | Regola velocità, flusso, offset Z e Pressure Advance; gestisci movimento, home, motori, ventole e LED. La camera richiede le macro di controllo previste. |
 | Calibrazioni | Accedi a mesh del piatto e profili, Input Shaper, analisi delle cinghie e PID. I comandi richiedono hardware, moduli e macro compatibili; i salvataggi con `SAVE_CONFIG` riavviano Klipper. |
-| File e lavori precedenti | Ordina ed elimina file, consulta gli ultimi 30 lavori restituiti dalla cronologia e ristampa quelli ancora disponibili. Consulta i timelapse, copiali su USB o eliminali; il pannello non riproduce video. |
+| File e lavori precedenti | Ordina ed elimina file, consulta le ultime 100 stampe dello Storico con la loro anteprima e ristampa quelle ancora disponibili. I timelapse si guardano da Fluidd. |
 | Console e macro | Invia G-code, consulta le risposte ed esegui macro, anche con parametri. Le macro disponibili dipendono dalla configurazione della stampante. |
 | Impostazioni e strumenti opzionali | Scegli tra italiano, inglese, tedesco, francese e spagnolo; gestisci Wi-Fi e informazioni di sistema. Spoolman, strumenti TMC e dispositivi di alimentazione dipendono dai servizi rilevati. |
 
@@ -120,9 +120,9 @@ Per la manutenzione aprire la funzione desiderata: **Bed Mesh** mostra la superf
 
 La console invia comandi alla stampante e mostra le risposte; la pagina macro permette di selezionare una macro e compilare gli eventuali parametri.
 
-### Cronologia, timelapse e lingua
+### Storico e lingua
 
-**History** mostra i lavori recenti e permette di ristampare un file ancora disponibile. L'azzeramento dei totali non cancella l'elenco dei lavori. **Timelapse** elenca i video prodotti dal modulo dedicato: è possibile copiarli su USB o eliminarli, ma per guardarli occorre aprirli da Fluidd o da un altro dispositivo.
+**Storico** mostra le stampe recenti con l'anteprima del pezzo e permette di ristampare un file ancora presente sulla stampante. I totali in alto sono calcolati dalle stampe dell'elenco. I video dei timelapse si guardano e si scaricano da Fluidd.
 
 Da **Impostazioni > Lingua** scegliere italiano, inglese, tedesco, francese o spagnolo. L'italiano è il valore predefinito; la scelta viene salvata e il pannello viene riavviato per applicarla.
 
@@ -146,13 +146,53 @@ Secondo l'autore questa procedura ripristina schermo e servizi Creality. Dopo la
 
 ## Schermate
 
-I riferimenti seguenti conservano i percorsi del manifesto. Le immagini non sono state ispezionate e non vengono attribuite loro funzioni specifiche.
+### Home e stampa
 
-| Riferimento | Immagine |
+| | |
 | --- | --- |
-| Schermata 1 | ![ADL_Screen — schermata 1](images/screenshots/01.png) |
-| Schermata 2 | ![ADL_Screen — schermata 2](images/screenshots/02.png) |
-| Schermata 3 | ![ADL_Screen — schermata 3](images/screenshots/03.png) |
+| ![Home con il grafico delle temperature](images/screenshots/01-home-grafico.png)<br>Home con il grafico delle temperature | ![Home con la stampa in corso](images/screenshots/02-home-stampa.png)<br>Home con la stampa in corso |
+| ![Impostazione della temperatura](images/screenshots/03-home-temperatura.png)<br>Impostazione della temperatura | ![Avvio della stampa: mesh, spurgo e filamento](images/screenshots/33-avvia-stampa.png)<br>Avvio della stampa: mesh, spurgo e filamento |
+| ![Stato stampa](images/screenshots/04-stato-stampa.png)<br>Stato stampa | ![Stato stampa durante la stampa](images/screenshots/34-stato-stampa-in-stampa.png)<br>Stato stampa durante la stampa |
+
+### Controlli
+
+| | |
+| --- | --- |
+| ![Movimento](images/screenshots/05-movimento.png)<br>Movimento | ![Filamento](images/screenshots/06-filamento.png)<br>Filamento |
+| ![Ventole accese](images/screenshots/07-ventole.png)<br>Ventole accese | ![Ventole spente](images/screenshots/08-ventole-spente.png)<br>Ventole spente |
+
+### File
+
+| | |
+| --- | --- |
+| ![File sulla stampante](images/screenshots/09-file-locale.png)<br>File sulla stampante | ![Storico delle stampe](images/screenshots/10-file-storico.png)<br>Storico delle stampe |
+
+### CFS
+
+| | |
+| --- | --- |
+| ![CFS: slot e bobina esterna](images/screenshots/11-cfs.png)<br>CFS: slot e bobina esterna | ![Modifica di uno slot](images/screenshots/12-cfs-modifica-slot.png)<br>Modifica di uno slot |
+| ![Colore personalizzato](images/screenshots/13-cfs-colore-personalizzato.png)<br>Colore personalizzato |  |
+
+### Calibrazioni
+
+| | |
+| --- | --- |
+| ![Calibrazioni](images/screenshots/14-calibrazioni.png)<br>Calibrazioni | ![Mesh del piatto](images/screenshots/15-mesh-piatto.png)<br>Mesh del piatto |
+| ![Regolazione fine](images/screenshots/16-regolazione-fine.png)<br>Regolazione fine | ![Input shaper](images/screenshots/17-input-shaper.png)<br>Input shaper |
+| ![Cinghie](images/screenshots/18-cinghie.png)<br>Cinghie | ![Limiti](images/screenshots/19-limiti.png)<br>Limiti |
+| ![Stato driver TMC](images/screenshots/20-tmc-spento.png)<br>Stato driver TMC | ![Stato driver TMC: un motore](images/screenshots/21-tmc-motore.png)<br>Stato driver TMC: un motore |
+| ![Stato driver TMC: regolazioni avanzate](images/screenshots/22-tmc-regolazioni.png)<br>Stato driver TMC: regolazioni avanzate | ![Console](images/screenshots/23-console.png)<br>Console |
+| ![Taratura PID](images/screenshots/24-taratura-pid.png)<br>Taratura PID | ![Pulizia ugello](images/screenshots/25-pulizia-ugello.png)<br>Pulizia ugello |
+
+### Impostazioni
+
+| | |
+| --- | --- |
+| ![Impostazioni](images/screenshots/26-impostazioni.png)<br>Impostazioni | ![Macro](images/screenshots/27-macro.png)<br>Macro |
+| ![Wi-Fi](images/screenshots/28-wifi.png)<br>Wi-Fi | ![Sistema](images/screenshots/29-sistema.png)<br>Sistema |
+| ![Lingua](images/screenshots/30-lingua.png)<br>Lingua | ![Aggiornamenti](images/screenshots/31-aggiornamenti.png)<br>Aggiornamenti |
+| ![Riavvio](images/screenshots/32-riavvia.png)<br>Riavvio |  |
 
 ## Crediti e licenze
 
