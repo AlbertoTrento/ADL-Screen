@@ -17,22 +17,23 @@ MacroItem::MacroItem(lv_obj_t *parent,
 {
   using namespace powerui;
 
-  lv_obj_set_size(cont, tile_width, px(84));
+  lv_obj_set_size(cont, tile_width, px(100));
   lv_obj_add_flag(cont, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_style_bg_color(cont, lv_color_hex(COLOR_SECONDARY), LV_STATE_PRESSED);
 
-  lv_obj_t *title = label(cont, macro_name.c_str(), &lv_font_montserrat_14, lv_color_hex(COLOR_FG));
+  // Nome della macro a 20, fino a due righe.
+  lv_obj_t *title = label(cont, macro_name.c_str(), &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
   lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
-  lv_obj_set_size(title, tile_width - px(24), px(36));
+  lv_obj_set_size(title, tile_width - px(24), px(50));
   lv_obj_set_pos(title, px(12), px(10));
 
   const std::string info = macro_params.empty()
     ? "No parameters"
     : std::to_string(macro_params.size()) + (macro_params.size() == 1 ? " parameter" : " parameters");
-  lv_obj_t *info_label = label(cont, info.c_str(), &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
+  lv_obj_t *info_label = label(cont, info.c_str(), &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
   lv_obj_align(info_label, LV_ALIGN_BOTTOM_LEFT, px(12), -px(10));
 
-  lv_obj_t *mark = label(cont, macro_params.empty() ? LV_SYMBOL_PLAY : LV_SYMBOL_SETTINGS, &lv_font_montserrat_16,
+  lv_obj_t *mark = label(cont, macro_params.empty() ? LV_SYMBOL_PLAY : LV_SYMBOL_SETTINGS, &lv_font_montserrat_20,
 			 lv_color_hex(COLOR_ACCENT));
   lv_obj_align(mark, LV_ALIGN_BOTTOM_RIGHT, -px(12), -px(8));
 

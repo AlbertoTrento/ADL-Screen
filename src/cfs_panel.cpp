@@ -228,17 +228,19 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
   lv_obj_move_background(cont);
 
   // ---- Slots card.
-  slots_card = card(cont, 12, 12, 712, 208);
+  slots_card = card(cont, 12, 12, 712, 220);
   // Scritte grandi in tutta la pagina: si devono leggere da davanti alla stampante.
   header_label = label(slots_card, "CFS", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
   lv_obj_set_pos(header_label, px(20), px(12));
-  status_label = label(slots_card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
+  status_label = label(slots_card, "", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
   lv_obj_set_pos(status_label, px(80), px(16));
-  version_label = label(slots_card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_ACCENT));
-  lv_obj_align(version_label, LV_ALIGN_TOP_RIGHT, -px(20 + 190 + 12), px(16));
+  // "Box firmware" piu' grande e "Controlla filamenti" alto 44 con testo 18.
+  version_label = label(slots_card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_ACCENT));
+  lv_obj_align(version_label, LV_ALIGN_TOP_RIGHT, -px(20 + 220 + 12), px(18));
   // Same command as the refresh button of the Creality screen; disabled while printing (see refresh()).
-  refresh_btn = action_button(slots_card, NULL, "Controlla filamenti", ActionKind::Outline, 712 - 20 - 190, 8, 190, 34,
+  refresh_btn = action_button(slots_card, NULL, "Controlla filamenti", ActionKind::Outline, 712 - 20 - 220, 8, 220, 44,
                               [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->refresh_slots(); }, this);
+  lv_obj_set_style_text_font(lv_obj_get_child(refresh_btn, lv_obj_get_child_cnt(refresh_btn) - 1), &lv_font_montserrat_18, 0);
 
   for (int i = 0; i < SLOT_COUNT; ++i) {
     SlotWidget &w = slots[i];
@@ -246,8 +248,8 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
     // La bobina esterna ha il suo riquadro sotto: i quattro slot del CFS restano in alto.
     const bool esterna = i == EXTERNAL_SLOT;
     const int card_w = esterna ? EXTERNAL_W : SLOT_W;
-    w.card = esterna ? card(cont, EXTERNAL_X, 232, EXTERNAL_W, 196)
-                     : card(slots_card, 16 + i * (SLOT_W + SLOT_GAP), 48, SLOT_W, SLOT_H);
+    w.card = esterna ? card(cont, EXTERNAL_X, 244, EXTERNAL_W, 184)
+                     : card(slots_card, 16 + i * (SLOT_W + SLOT_GAP), 60, SLOT_W, SLOT_H);
     lv_obj_set_style_bg_color(w.card, lv_color_hex(COLOR_BG), 0);
     lv_obj_add_flag(w.card, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(w.card, [](lv_event_t *e) {
@@ -271,21 +273,22 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
     }, LV_EVENT_CLICKED, &handles[i]);
 
     w.spool = cfs_ui::spool_create(w.card, 56, lv_color_hex(COLOR_BG), 0);
-    lv_obj_align(w.spool, LV_ALIGN_TOP_MID, 0, px(20));
+    // Nella bobina esterna la scritta in alto e' lunga: la bobina scende, cosi' non la copre.
+    lv_obj_align(w.spool, LV_ALIGN_TOP_MID, 0, px(esterna ? 34 : 20));
 
     w.name = label(w.card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
     lv_obj_set_width(w.name, px(card_w - 16));
     lv_obj_set_style_text_align(w.name, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(w.name, LV_LABEL_LONG_DOT);
-    lv_obj_align(w.name, LV_ALIGN_TOP_MID, 0, px(82));
+    lv_obj_align(w.name, LV_ALIGN_TOP_MID, 0, px(esterna ? 94 : 82));
 
     w.sub = label(w.card, "", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
     lv_obj_set_width(w.sub, px(card_w - 16));
     lv_obj_set_style_text_align(w.sub, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(w.sub, LV_LABEL_LONG_DOT);
-    lv_obj_align(w.sub, LV_ALIGN_TOP_MID, 0, px(108));
+    lv_obj_align(w.sub, LV_ALIGN_TOP_MID, 0, px(esterna ? 118 : 108));
     if (esterna) {
-      action_button(w.card, NULL, "Modifica", ActionKind::Outline, 40, 144, 160, 40, [](lv_event_t *e) {
+      action_button(w.card, NULL, "Modifica", ActionKind::Outline, 40, 140, 160, 38, [](lv_event_t *e) {
         static_cast<CfsPanel *>(e->user_data)->open_edit(EXTERNAL_SLOT);
       }, this);
     }
@@ -294,22 +297,22 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
   load_external();
 
   // ---- Detail card of the selected slot.
-  detail_card = card(cont, 12, 232, 460, 196);
+  detail_card = card(cont, 12, 244, 460, 184);
   detail_spool = cfs_ui::spool_create(detail_card, 72, lv_color_hex(COLOR_CARD), 0);
-  lv_obj_set_pos(detail_spool, px(20), px(44));
+  lv_obj_set_pos(detail_spool, px(20), px(40));
   detail_slot_label = label(detail_card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(detail_slot_label, px(110), px(14));
+  lv_obj_set_pos(detail_slot_label, px(110), px(10));
   detail_name = label(detail_card, "", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
   lv_obj_set_width(detail_name, px(330));
   lv_label_set_long_mode(detail_name, LV_LABEL_LONG_DOT);
-  lv_obj_set_pos(detail_name, px(110), px(40));
+  lv_obj_set_pos(detail_name, px(110), px(34));
   detail_info = label(detail_card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
   lv_obj_set_width(detail_info, px(330));
-  lv_obj_set_pos(detail_info, px(110), px(74));
+  lv_obj_set_pos(detail_info, px(110), px(66));
   detail_remain = label(detail_card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
   lv_obj_set_width(detail_remain, px(330));
-  lv_obj_set_pos(detail_remain, px(110), px(100));
-  detail_edit_btn = action_button(detail_card, NULL, "Modifica slot", ActionKind::Outline, 110, 138, 190, 44,
+  lv_obj_set_pos(detail_remain, px(110), px(90));
+  detail_edit_btn = action_button(detail_card, NULL, "Modifica slot", ActionKind::Outline, 110, 126, 190, 44,
                                   [](lv_event_t *e) {
                                     CfsPanel *p = static_cast<CfsPanel *>(e->user_data);
                                     p->open_edit(p->selected);
@@ -336,19 +339,19 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
   lv_obj_t **dds[3] = {&brand_dd, &type_dd, &name_dd};
   for (int i = 0; i < 3; ++i) {
     const int y = 80 + i * 100;
-    lv_obj_t *cap = label(ec, captions[i], &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
+    lv_obj_t *cap = label(ec, captions[i], &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
     lv_obj_set_pos(cap, px(24), px(y));
     lv_obj_t *dd = lv_dropdown_create(ec);
     *dds[i] = dd;
     lv_obj_set_pos(dd, px(24), px(y + 24));
     // Larghe: nomi lunghi come "Hyper PLA-CF Verde" ci stanno dentro.
-    lv_obj_set_size(dd, px(320), px(56));
+    lv_obj_set_size(dd, px(320), px(60));
     style_select(dd);
     // Testo grande sia nella tendina chiusa sia nell'elenco che si apre.
-    lv_obj_set_style_text_font(dd, &lv_font_montserrat_20, LV_PART_MAIN);
+    lv_obj_set_style_text_font(dd, &lv_font_montserrat_24, LV_PART_MAIN);
     lv_obj_t *dd_list = lv_dropdown_get_list(dd);
     if (dd_list != NULL) {
-      lv_obj_set_style_text_font(dd_list, &lv_font_montserrat_20, LV_PART_MAIN);
+      lv_obj_set_style_text_font(dd_list, &lv_font_montserrat_24, LV_PART_MAIN);
       lv_obj_set_style_text_line_space(dd_list, px(22), LV_PART_MAIN);
     }
     choice_handles[i] = {this, i};
@@ -361,7 +364,7 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
       lv_obj_t *list = lv_dropdown_get_list(lv_event_get_target(e));
       if (list != NULL) {
         lv_obj_set_style_max_height(list, px(280), LV_PART_MAIN);
-        lv_obj_set_style_text_font(list, &lv_font_montserrat_20, LV_PART_MAIN);
+        lv_obj_set_style_text_font(list, &lv_font_montserrat_24, LV_PART_MAIN);
         lv_obj_set_style_text_line_space(list, px(22), LV_PART_MAIN);
       }
     }, LV_EVENT_READY, NULL);
@@ -369,9 +372,9 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
 
   // Colonna centrale: 12 colori da 48 (come il colore scelto), 4 file da 3, in alto e centrati
   // tra le tendine e i pulsanti.
-  const int colors_x = 362;
-  lv_obj_t *color_cap = label(ec, "COLOR", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_width(color_cap, px(168));
+  const int colors_x = 355;
+  lv_obj_t *color_cap = label(ec, "COLOR", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_width(color_cap, px(182));
   lv_obj_set_style_text_align(color_cap, LV_TEXT_ALIGN_CENTER, 0);
   lv_obj_set_pos(color_cap, px(colors_x), px(80));
   for (int i = 0; i < 12; ++i) {
@@ -380,8 +383,8 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
     lv_obj_remove_style_all(sw);
     lv_obj_clear_flag(sw, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(sw, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_size(sw, px(48), px(48));
-    lv_obj_set_pos(sw, px(colors_x + (i % 3) * 60), px(106 + (i / 3) * 60));
+    lv_obj_set_size(sw, px(54), px(54));
+    lv_obj_set_pos(sw, px(colors_x + (i % 3) * 64), px(108 + (i / 3) * 64));
     lv_obj_set_style_radius(sw, LV_RADIUS_CIRCLE, 0);
     lv_obj_set_style_bg_color(sw, lv_color_hex(PALETTE[i]), 0);
     lv_obj_set_style_bg_opa(sw, LV_OPA_COVER, 0);
@@ -415,7 +418,7 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
   lv_obj_set_style_border_width(hex_preview, 1, 0);
   lv_obj_set_style_border_color(hex_preview, lv_color_hex(COLOR_WHITE), 0);
   lv_obj_set_style_border_opa(hex_preview, LV_OPA_30, 0);
-  hex_label = label(chosen_box, "#FFFFFF", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
+  hex_label = label(chosen_box, "#FFFFFF", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
   lv_obj_align(hex_label, LV_ALIGN_TOP_MID, 0, px(66));
 
   // Il testo dei pulsanti e' l'ultimo figlio: lo ingrandisco qui.
@@ -666,7 +669,8 @@ void CfsPanel::refresh() {
     cfs_ui::spool_set(w.spool, s, state.active == i);
     lv_label_set_text(w.name, s.name.c_str());
     lv_obj_set_style_text_color(w.name, lv_color_hex(s.kind == cfs::SlotKind::Empty ? COLOR_MUTED : COLOR_FG), 0);
-    lv_label_set_text(w.sub, i == EXTERNAL_SLOT && s.kind != cfs::SlotKind::Defined ? "Bobina esterna" : slot_subtitle(s).c_str());
+    // Bobina esterna: il nome e' gia' scritto in alto, sotto non si ripete.
+    lv_label_set_text(w.sub, i == EXTERNAL_SLOT && s.kind != cfs::SlotKind::Defined ? "" : slot_subtitle(s).c_str());
     if (s.kind == cfs::SlotKind::Empty || i == EXTERNAL_SLOT) {
       lv_obj_add_flag(w.pencil, LV_OBJ_FLAG_HIDDEN);
     } else {

@@ -15,7 +15,7 @@ std::string to_lower(std::string text) {
 }
 
 void style_keyboard(lv_obj_t *kb) {
-  lv_obj_set_style_text_font(kb, &lv_font_montserrat_16, LV_STATE_DEFAULT);
+  lv_obj_set_style_text_font(kb, &lv_font_montserrat_20, LV_STATE_DEFAULT);
   lv_obj_set_style_bg_color(kb, lv_color_hex(powerui::COLOR_CARD), LV_PART_MAIN);
   lv_obj_set_style_bg_color(kb, lv_color_hex(powerui::COLOR_SECONDARY), LV_PART_ITEMS);
   lv_obj_set_style_text_color(kb, lv_color_hex(powerui::COLOR_FG), LV_PART_ITEMS);
@@ -34,7 +34,7 @@ void style_field(lv_obj_t *field) {
   lv_obj_set_style_border_opa(field, LV_OPA_50, LV_PART_MAIN | LV_STATE_FOCUSED);
   lv_obj_set_style_radius(field, powerui::px(8), LV_PART_MAIN);
   lv_obj_set_style_text_color(field, lv_color_hex(powerui::COLOR_FG), LV_PART_MAIN);
-  lv_obj_set_style_text_font(field, &lv_font_montserrat_14, LV_PART_MAIN);
+  lv_obj_set_style_text_font(field, &lv_font_montserrat_18, LV_PART_MAIN);
   lv_obj_set_style_text_color(field, lv_color_hex(powerui::COLOR_MUTED), LV_PART_TEXTAREA_PLACEHOLDER);
   lv_obj_clear_flag(field, LV_OBJ_FLAG_SCROLLABLE);
 }
@@ -221,7 +221,7 @@ MacrosPanel::MacrosPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent)
 
   // Top bar: search and the "Show hidden" switch.
   lv_obj_t *bar = plain(cont);
-  lv_obj_set_size(bar, LV_PCT(100), px(40));
+  lv_obj_set_size(bar, LV_PCT(100), px(48));
   lv_obj_set_flex_flow(bar, LV_FLEX_FLOW_ROW);
   lv_obj_set_flex_align(bar, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
   lv_obj_set_style_pad_column(bar, px(10), 0);
@@ -229,12 +229,12 @@ MacrosPanel::MacrosPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent)
   search = lv_textarea_create(bar);
   lv_textarea_set_one_line(search, true);
   lv_textarea_set_placeholder_text(search, "Search macros");
-  lv_obj_set_height(search, px(36));
+  lv_obj_set_height(search, px(46));
   lv_obj_set_flex_grow(search, 1);
   style_field(search);
   lv_obj_add_event_cb(search, &MacrosPanel::_handle_search_event, LV_EVENT_ALL, this);
 
-  label(bar, "Show hidden", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
+  label(bar, "Show hidden", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
   show_hidden_switch = lv_switch_create(bar);
   style_switch(show_hidden_switch);
   lv_obj_add_event_cb(show_hidden_switch, &MacrosPanel::_handle_show_hidden, LV_EVENT_VALUE_CHANGED, this);
@@ -242,14 +242,14 @@ MacrosPanel::MacrosPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent)
   // Group pills: All, the user's groups, Other and "+"; scrolls sideways.
   pill_row = lv_obj_create(cont);
   lv_obj_remove_style_all(pill_row);
-  lv_obj_set_size(pill_row, LV_PCT(100), px(32));
+  lv_obj_set_size(pill_row, LV_PCT(100), px(44));
   lv_obj_set_flex_flow(pill_row, LV_FLEX_FLOW_ROW);
   lv_obj_set_flex_align(pill_row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
   lv_obj_set_style_pad_column(pill_row, px(8), 0);
   lv_obj_set_scroll_dir(pill_row, LV_DIR_HOR);
   lv_obj_set_scrollbar_mode(pill_row, LV_SCROLLBAR_MODE_OFF);
 
-  // Tiles: three columns, scrolls vertically.
+  // Card delle macro: due colonne, scorre in verticale.
   grid = lv_obj_create(cont);
   lv_obj_remove_style_all(grid);
   lv_obj_set_width(grid, LV_PCT(100));
@@ -285,7 +285,8 @@ void MacrosPanel::populate() {
 
   const lv_coord_t pad = powerui::px(12);
   const lv_coord_t gap = powerui::px(10);
-  const lv_coord_t tile_width = (powerui::overlay_width_px() - 2 * pad - 2 * gap - 2) / 3;
+  // Due colonne: i nomi delle macro sono lunghi e a 20 non starebbero in tre.
+  const lv_coord_t tile_width = (powerui::overlay_width_px() - 2 * pad - gap - 2) / 2;
 
   if (!config_json.is_null()) {
     auto macros = KUtils::parse_macros(config_json);
@@ -317,7 +318,7 @@ void MacrosPanel::populate() {
   }
 
   if (macro_items.empty()) {
-    powerui::label(grid, "No macros found", &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
+    powerui::label(grid, "No macros found", &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_MUTED));
   }
   rebuild_pills();
   apply_filter();
@@ -409,7 +410,7 @@ void MacrosPanel::open_params(MacroItem &item) {
   lv_obj_align(dialog_kb, LV_ALIGN_BOTTOM_MID, 0, 0);
   style_keyboard(dialog_kb);
 
-  const int w = 460, pad = 16, top = 54, row_h = 40, gap = 6;
+  const int w = 520, pad = 16, top = 58, row_h = 48, gap = 8;
   const int rows = (int)item.params().size();
   const int visible_rows = std::min(rows, 3);
   const int list_h = visible_rows * row_h + (visible_rows - 1) * gap;
@@ -419,7 +420,7 @@ void MacrosPanel::open_params(MacroItem &item) {
   lv_obj_align(dlg, LV_ALIGN_TOP_MID, 0, px(8));
   lv_obj_set_style_border_opa(dlg, LV_OPA_30, 0);
 
-  lv_obj_t *title = label(dlg, item.name().c_str(), &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
+  lv_obj_t *title = label(dlg, item.name().c_str(), &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
   lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
   lv_obj_set_width(title, px(w - 2 * pad - 44));
   lv_obj_set_pos(title, px(pad), px(19));
@@ -442,14 +443,14 @@ void MacrosPanel::open_params(MacroItem &item) {
     lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(row, px(8), 0);
 
-    lv_obj_t *name = label(row, key.c_str(), &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
+    lv_obj_t *name = label(row, key.c_str(), &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
     lv_label_set_long_mode(name, LV_LABEL_LONG_DOT);
     lv_obj_set_width(name, LV_PCT(38));
 
     lv_obj_t *field = lv_textarea_create(row);
     lv_textarea_set_one_line(field, true);
     lv_textarea_set_text(field, value.c_str());
-    lv_obj_set_height(field, px(36));
+    lv_obj_set_height(field, px(44));
     lv_obj_set_flex_grow(field, 1);
     style_field(field);
     lv_obj_add_event_cb(field, &params_field_event, LV_EVENT_ALL, dialog_kb);
@@ -559,8 +560,8 @@ void MacrosPanel::rebuild_pills() {
     const bool is_selected = !is_add && id == selected;
     lv_obj_t *pill = lv_obj_create(pill_row);
     lv_obj_remove_style_all(pill);
-    lv_obj_set_size(pill, LV_SIZE_CONTENT, px(32));
-    lv_obj_set_style_pad_hor(pill, px(14), 0);
+    lv_obj_set_size(pill, LV_SIZE_CONTENT, px(42));
+    lv_obj_set_style_pad_hor(pill, px(18), 0);
     lv_obj_set_style_radius(pill, LV_RADIUS_CIRCLE, 0);
     lv_obj_set_style_bg_opa(pill, LV_OPA_COVER, 0);
     lv_obj_set_style_border_width(pill, 1, 0);
@@ -577,7 +578,7 @@ void MacrosPanel::rebuild_pills() {
     lv_obj_add_flag(pill, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_flex_flow(pill, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(pill, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_t *text_label = label(pill, text.c_str(), &lv_font_montserrat_14,
+    lv_obj_t *text_label = label(pill, text.c_str(), &lv_font_montserrat_18,
                                  lv_color_hex(is_selected || is_add ? COLOR_ACCENT : COLOR_FG));
     lv_obj_clear_flag(text_label, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(pill, &MacrosPanel::_handle_pill_event, LV_EVENT_ALL, this);

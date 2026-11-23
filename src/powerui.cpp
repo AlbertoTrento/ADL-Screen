@@ -410,20 +410,26 @@ void confirm_dialog(const char *title, const char *message, const char *confirm_
   lv_obj_set_user_data(overlay, new ConfirmData{std::move(on_confirm)});
   lv_obj_add_event_cb(overlay, &confirm_deleted, LV_EVENT_DELETE, NULL);
 
-  const int w = 460, h = 214;
+  // Finestra grande con scritte grandi: titolo 24, messaggio 18, pulsanti alti 60 con testo 20.
+  const int w = 600, h = 290;
   lv_obj_t *dlg = card(overlay, 0, 0, w, h);
   lv_obj_center(dlg);
   lv_obj_set_style_border_opa(dlg, LV_OPA_30, 0);
 
-  lv_obj_t *t = label(dlg, title, &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(t, px(24), px(20));
-  lv_obj_t *m = label(dlg, message, &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
+  lv_obj_t *t = label(dlg, title, &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_label_set_long_mode(t, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(t, px(w - 48));
+  lv_obj_set_pos(t, px(24), px(22));
+  lv_obj_t *m = label(dlg, message, &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
   lv_label_set_long_mode(m, LV_LABEL_LONG_WRAP);
   lv_obj_set_width(m, px(w - 48));
-  lv_obj_set_pos(m, px(24), px(56));
+  lv_obj_set_pos(m, px(24), px(66));
   // Child order matters: confirm_clicked identifies the confirm button as child 3 of the card.
-  action_button(dlg, NULL, dismiss_text, ActionKind::Outline, 24, h - 74, 196, 50, &confirm_clicked, overlay);
-  action_button(dlg, NULL, confirm_text, kind, w - 24 - 196, h - 74, 196, 50, &confirm_clicked, overlay);
+  lv_obj_t *dismiss = action_button(dlg, NULL, dismiss_text, ActionKind::Outline, 24, h - 84, 260, 60, &confirm_clicked, overlay);
+  lv_obj_t *confirm = action_button(dlg, NULL, confirm_text, kind, w - 24 - 260, h - 84, 260, 60, &confirm_clicked, overlay);
+  for (lv_obj_t *btn : {dismiss, confirm}) {
+    lv_obj_set_style_text_font(lv_obj_get_child(btn, lv_obj_get_child_cnt(btn) - 1), &lv_font_montserrat_20, 0);
+  }
 }
 
 namespace {
@@ -469,14 +475,15 @@ void choice_dialog(const char *title, const std::vector<std::string> &options, s
   lv_obj_add_event_cb(overlay, &choice_overlay_clicked, LV_EVENT_CLICKED, NULL);
 
   const int n = (int)options.size();
-  const int w = 280, pad = 14, head = 32, row_h = 42, gap = 8;
+  // Finestra di scelta grande (Riavvia, Lingua...): titolo 24, voci alte 56 con testo 20.
+  const int w = 400, pad = 16, head = 44, row_h = 56, gap = 10;
   const int h = pad + head + 12 + n * row_h + (n - 1) * gap + pad;
   lv_obj_t *dlg = card(overlay, 0, 0, w, h);
   lv_obj_center(dlg);
   lv_obj_set_style_border_opa(dlg, LV_OPA_30, 0);
 
-  lv_obj_t *t = label(dlg, title, &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(t, px(pad + 2), px(pad + 5));
+  lv_obj_t *t = label(dlg, title, &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(t, px(pad + 4), px(pad + 8));
   // Child order matters: choice_clicked reads the option index from the position inside the card.
   action_button(dlg, NULL, LV_SYMBOL_CLOSE, ActionKind::Outline, w - pad - head, pad, head, head, &choice_clicked, overlay);
   for (int i = 0; i < n; i++) {
@@ -484,6 +491,7 @@ void choice_dialog(const char *title, const std::vector<std::string> &options, s
                                   pad + head + 12 + i * (row_h + gap), w - 2 * pad, row_h, &choice_clicked, overlay);
     lv_obj_set_style_bg_color(row, lv_color_hex(COLOR_SECONDARY), 0);
     lv_obj_set_style_bg_color(row, lv_color_hex(COLOR_PRESSED), LV_STATE_PRESSED);
+    lv_obj_set_style_text_font(lv_obj_get_child(row, lv_obj_get_child_cnt(row) - 1), &lv_font_montserrat_20, 0);
     if (i == selected) {
       lv_obj_set_style_bg_color(row, lv_color_hex(COLOR_ACCENT_BG), 0);
       lv_obj_set_style_border_color(row, lv_color_hex(COLOR_ACCENT), 0);
