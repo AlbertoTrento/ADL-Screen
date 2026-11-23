@@ -20,6 +20,8 @@ class SquareButton {
   void set_icon_color(lv_color_t color);
   void set_background_visible(bool visible);
   void set_subtitle(const char *text);
+  // Card a riga: icona a sinistra, titolo grande e sottotitolo che va a capo alla sua destra.
+  void set_row_layout();
   void set_pill(const char *text, lv_color_t dot);
   void hide_pill();
   void set_active(bool active, lv_color_t active_color);
@@ -34,6 +36,7 @@ class SquareButton {
   lv_obj_t *label;
   lv_obj_t *subtitle = NULL;
   lv_obj_t *pill = NULL;
+  bool row_layout = false;
   lv_color_t icon_color;
   lv_color_t text_color;
 };

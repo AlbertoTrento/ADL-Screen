@@ -510,7 +510,9 @@ PrintStatusPanel::PrintStatusPanel(KWebSocketClient &websocket_client,
         }
         lv_obj_t *value = lv_obj_get_child(row, 1);
         if (value != NULL) {
-          lv_obj_set_style_text_font(value, &lv_font_montserrat_20, LV_PART_MAIN);
+          // Le ventole hanno tre valori: un po' piu' piccoli, cosi' non finiscono sopra il nome.
+          lv_obj_set_style_text_font(value, category.rows[i].item == &fan0 ? &lv_font_montserrat_18 : &lv_font_montserrat_20,
+                                     LV_PART_MAIN);
           lv_obj_set_style_text_color(value, lv_color_hex(powerui::COLOR_FG), LV_PART_MAIN);
         }
         lv_obj_t *name = label(row, category.rows[i].name, &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_MUTED));
@@ -613,7 +615,7 @@ void PrintStatusPanel::init(json &fans) {
     }
   }
 
-  fan0.update_label(fmt::format("{}", fmt::join(values, ", ")).c_str());
+  fan0.update_label(fmt::format("{}", fmt::join(values, " ")).c_str());  // senza virgole: ci sta accanto a "Ventole"
 
   reset();
   populate();
@@ -824,7 +826,7 @@ void PrintStatusPanel::consume(json &j) {
     values.push_back(fmt::format("{}%", fv));
   }
 
-  fan0.update_label(fmt::format("{}", fmt::join(values, ", ")).c_str());
+  fan0.update_label(fmt::format("{}", fmt::join(values, " ")).c_str());  // senza virgole: ci sta accanto a "Ventole"
 
   // progress
   v = j["/params/0/print_stats/print_duration"_json_pointer];

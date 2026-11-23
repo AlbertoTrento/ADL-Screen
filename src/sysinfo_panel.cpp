@@ -23,6 +23,7 @@ namespace fs = std::experimental::filesystem;
 namespace sp = subprocess;
 
 LV_IMG_DECLARE(device);
+LV_IMG_DECLARE(ui_adl_logo);
 LV_IMG_DECLARE(network_img);
 
 #ifdef POWERSCREEN_VERSION
@@ -412,7 +413,7 @@ SysInfoPanel::SysInfoPanel()
   lv_obj_add_event_cb(channel_dd, &SysInfoPanel::_handle_callback,
                       LV_EVENT_VALUE_CHANGED, this);
 
-  lv_label_set_text(brand_label, "ADL Screen, from PowerScreen by Boris SdK");
+  lv_label_set_text(brand_label, "ADL Screen - Alberto Dev Labs");
   lv_obj_set_style_text_color(brand_label, lv_color_hex(powerui::COLOR_FG), LV_PART_MAIN);
   lv_obj_set_style_text_font(brand_label, &lv_font_montserrat_16, LV_PART_MAIN);
   lv_obj_set_pos(brand_label, 330, 292);
@@ -678,7 +679,7 @@ void SysInfoPanel::create_tabs() {
     lv_obj_set_style_border_width(button, 0, LV_PART_MAIN);
     lv_obj_set_style_shadow_width(button, 0, LV_PART_MAIN);
     lv_obj_set_style_radius(button, px(10), LV_PART_MAIN);
-    lv_obj_t *button_label = label(button, text, &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_WHITE));
+    lv_obj_t *button_label = label(button, text, &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_WHITE));
     lv_obj_center(button_label);
     return button;
   };
@@ -688,8 +689,8 @@ void SysInfoPanel::create_tabs() {
     lv_obj_t *t = lv_label_create(parent);
     lv_label_set_text(t, title);
     lv_obj_set_style_text_color(t, lv_color_hex(powerui::COLOR_MUTED), LV_PART_MAIN);
-    lv_obj_set_style_text_font(t, &lv_font_montserrat_14, LV_PART_MAIN);
-    lv_obj_set_pos(t, px(20), px(14));
+    lv_obj_set_style_text_font(t, &lv_font_montserrat_18, LV_PART_MAIN);
+    lv_obj_set_pos(t, px(20), px(12));
     lv_obj_t *v = lv_label_create(parent);
     lv_label_set_text(v, base.c_str());
     lv_label_set_long_mode(v, LV_LABEL_LONG_CLIP);
@@ -702,8 +703,8 @@ void SysInfoPanel::create_tabs() {
     lv_label_set_long_mode(sfx, LV_LABEL_LONG_CLIP);
     lv_obj_set_width(sfx, px(360));
     lv_obj_set_style_text_color(sfx, lv_color_hex(powerui::COLOR_MUTED), LV_PART_MAIN);
-    lv_obj_set_style_text_font(sfx, &lv_font_montserrat_12, LV_PART_MAIN);
-    lv_obj_set_pos(sfx, px(22), px(88));
+    lv_obj_set_style_text_font(sfx, &lv_font_montserrat_16, LV_PART_MAIN);
+    lv_obj_set_pos(sfx, px(22), px(84));
     *version_out = v;
     *suffix_out = sfx;
   };
@@ -718,8 +719,8 @@ void SysInfoPanel::create_tabs() {
     lv_obj_set_width(status, px(250));
     lv_obj_set_style_text_align(status, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
     lv_obj_set_style_text_color(status, lv_color_hex(powerui::COLOR_WHITE), LV_PART_MAIN);
-    lv_obj_set_style_text_font(status, &lv_font_montserrat_14, LV_PART_MAIN);
-    lv_obj_align(status, LV_ALIGN_TOP_RIGHT, -px(18), px(14));
+    lv_obj_set_style_text_font(status, &lv_font_montserrat_18, LV_PART_MAIN);
+    lv_obj_align(status, LV_ALIGN_TOP_RIGHT, -px(18), px(12));
     return status;
   };
 
@@ -732,22 +733,26 @@ void SysInfoPanel::create_tabs() {
   lv_img_set_src(photo, &device);
   lv_img_set_zoom(photo, 150);
   lv_obj_align(photo, LV_ALIGN_CENTER, 0, -px(22));
-  lv_obj_t *photo_name = label(photo_card, "Creality K1C", &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_FG));
-  lv_obj_align(photo_name, LV_ALIGN_BOTTOM_MID, 0, -px(32));
-  lv_obj_t *photo_info = label(photo_card, "CoreXY  220 x 220 x 250 mm", &lv_font_montserrat_12, lv_color_hex(powerui::COLOR_MUTED));
+  lv_obj_t *photo_name = label(photo_card, "Creality K1C", &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_FG));
+  lv_obj_align(photo_name, LV_ALIGN_BOTTOM_MID, 0, -px(34));
+  lv_obj_t *photo_info = label(photo_card, "CoreXY  220 x 220 x 250 mm", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_MUTED));
   lv_obj_align(photo_info, LV_ALIGN_BOTTOM_MID, 0, -px(10));
 
   lv_obj_t *credits = lv_obj_create(updates_page);
   style_card(credits);
   lv_obj_set_size(credits, px(292), px(108));
   lv_obj_set_pos(credits, px(12), px(320));
+  // Logo ADL e Alberto Dev Labs.
+  lv_obj_t *credits_logo = lv_img_create(credits);
+  lv_img_set_src(credits_logo, &ui_adl_logo);
+  lv_img_set_zoom(credits_logo, 384);  // 98x32 -> circa 147x48
+  lv_img_set_antialias(credits_logo, true);
+  lv_obj_align(credits_logo, LV_ALIGN_CENTER, 0, -px(16));
   lv_obj_set_parent(brand_label, credits);
   lv_obj_clear_flag(brand_label, LV_OBJ_FLAG_HIDDEN);
-  lv_label_set_text(brand_label, "Developed by Boris SdK");
-  lv_obj_set_style_text_font(brand_label, &lv_font_montserrat_16, LV_PART_MAIN);
-  lv_obj_align(brand_label, LV_ALIGN_CENTER, 0, -px(10));
-  lv_obj_t *theme_label = label(credits, "PowerUI 2026", &lv_font_montserrat_12, lv_color_hex(powerui::COLOR_MUTED));
-  lv_obj_align(theme_label, LV_ALIGN_CENTER, 0, px(14));
+  lv_label_set_text(brand_label, "Alberto Dev Labs");
+  lv_obj_set_style_text_font(brand_label, &lv_font_montserrat_18, LV_PART_MAIN);
+  lv_obj_align(brand_label, LV_ALIGN_CENTER, 0, px(28));
 
   // PowerScreen card.
   lv_obj_t *card = lv_obj_create(updates_page);
@@ -761,14 +766,16 @@ void SysInfoPanel::create_tabs() {
   lv_obj_set_parent(channel_cont, card);
   lv_obj_set_size(channel_cont, px(376), px(46));
   lv_obj_set_pos(channel_cont, px(16), px(110));
+  lv_obj_set_style_text_font(lv_dropdown_get_list(channel_dd), &lv_font_montserrat_18, LV_PART_MAIN);
   lv_obj_t *channel_label = find_row_label(channel_cont);
   if (channel_label != NULL) {
     lv_label_set_text(channel_label, "Update channel");
-    lv_obj_set_style_text_font(channel_label, &lv_font_montserrat_14, LV_PART_MAIN);
+    lv_obj_set_style_text_font(channel_label, &lv_font_montserrat_18, LV_PART_MAIN);
     lv_obj_set_style_translate_y(channel_label, 0, LV_PART_MAIN);
     lv_obj_align(channel_label, LV_ALIGN_LEFT_MID, px(4), 0);
   }
   lv_obj_align(channel_dd, LV_ALIGN_RIGHT_MID, 0, 0);
+  lv_obj_set_style_text_font(channel_dd, &lv_font_montserrat_18, LV_PART_MAIN);
 
   lv_obj_set_parent(update_button, card);
   lv_obj_set_size(update_button, px(376), px(48));

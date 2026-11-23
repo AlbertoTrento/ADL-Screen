@@ -43,6 +43,7 @@ class FilesExtraView {
     double filament_mm = 0;
     double weight_g = 0;
     bool exists = false;
+    json thumbnails;  // anteprime del file al momento della stampa (metadata di Moonraker)
   };
   struct Video {
     std::string path;

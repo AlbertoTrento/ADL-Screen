@@ -92,12 +92,32 @@ SquareButton::~SquareButton() {
 void SquareButton::set_subtitle(const char *text) {
   if (subtitle == NULL) {
     subtitle = lv_label_create(text_cont);
-    lv_label_set_long_mode(subtitle, LV_LABEL_LONG_CLIP);
+    lv_label_set_long_mode(subtitle, row_layout ? LV_LABEL_LONG_WRAP : LV_LABEL_LONG_CLIP);
     lv_obj_set_width(subtitle, LV_PCT(100));
     lv_obj_set_style_text_color(subtitle, lv_color_hex(powerui::COLOR_MUTED), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(subtitle, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(subtitle, row_layout ? &lv_font_montserrat_18 : &lv_font_montserrat_12,
+                               LV_PART_MAIN | LV_STATE_DEFAULT);
   }
   lv_label_set_text(subtitle, text);
+}
+
+void SquareButton::set_row_layout() {
+  using powerui::px;
+  row_layout = true;
+  lv_obj_set_size(icon_tile, px(64), px(64));
+  lv_obj_align(icon_tile, LV_ALIGN_LEFT_MID, px(16), 0);
+  lv_obj_center(icon);
+  // Testo a destra dell'icona, centrato in altezza.
+  lv_obj_set_size(text_cont, LV_PCT(100), LV_SIZE_CONTENT);
+  lv_obj_set_style_pad_left(text_cont, px(96), 0);
+  lv_obj_set_style_pad_right(text_cont, px(12), 0);
+  lv_obj_set_style_pad_row(text_cont, px(4), 0);
+  lv_obj_align(text_cont, LV_ALIGN_LEFT_MID, 0, 0);
+  lv_obj_set_style_text_font(label, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+  if (subtitle != NULL) {
+    lv_label_set_long_mode(subtitle, LV_LABEL_LONG_WRAP);
+    lv_obj_set_style_text_font(subtitle, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
 }
 
 // Status pill in the top-right corner (e.g. "Offline").

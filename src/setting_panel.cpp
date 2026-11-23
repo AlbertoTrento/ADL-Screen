@@ -70,6 +70,11 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
 
   sysinfo_panel.set_websocket(&ws);
   sysinfo_panel.set_wifi_callback([this]() { wifi_panel.foreground(); });
+  // Card a riga con scritte grandi: titolo 24, sottotitolo 18 che va a capo invece di tagliarsi.
+  for (SquareButton *b : {&wifi_btn, &restart_btn, &macros_btn, &sysinfo_btn, &spoolman_btn, &powerscreen_update_btn,
+                          &language_btn}) {
+    b->set_row_layout();
+  }
   wifi_btn.set_subtitle("Network");
   restart_btn.set_subtitle("Screen, Klipper, Firmware");
   macros_btn.set_subtitle("Run printer macros");
@@ -83,9 +88,10 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
   update_lock_timer = lv_timer_create(&SettingPanel::_refresh_update_lock_cb, 1000, this);
   refresh_update_lock();
 
-  static lv_coord_t grid_main_row_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-  static lv_coord_t grid_main_col_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1),
+  // Due colonne e quattro righe.
+  static lv_coord_t grid_main_row_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1),
       LV_GRID_TEMPLATE_LAST};
+  static lv_coord_t grid_main_col_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 
   lv_obj_set_grid_dsc_array(cont, grid_main_col_dsc, grid_main_row_dsc);
   lv_obj_set_style_pad_all(cont, 12, LV_PART_MAIN);
@@ -96,13 +102,13 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
   // row 1: CFS, macros, connectivity and system info
   lv_obj_set_grid_cell(spoolman_btn.get_button(), S, 0, 1, S, 0, 1);
   lv_obj_set_grid_cell(macros_btn.get_button(), S, 1, 1, S, 0, 1);
-  lv_obj_set_grid_cell(wifi_btn.get_button(), S, 2, 1, S, 0, 1);
-  lv_obj_set_grid_cell(sysinfo_btn.get_button(), S, 3, 1, S, 0, 1);
+  lv_obj_set_grid_cell(wifi_btn.get_button(), S, 0, 1, S, 1, 1);
+  lv_obj_set_grid_cell(sysinfo_btn.get_button(), S, 1, 1, S, 1, 1);
 
   // row 2: restart, the watermark and Power Update as the last tile (the Console lives in Calibrations)
-  lv_obj_set_grid_cell(restart_btn.get_button(), S, 0, 1, S, 1, 1);
-  lv_obj_set_grid_cell(powerscreen_update_btn.get_button(), S, 3, 1, S, 1, 1);
-  lv_obj_set_grid_cell(language_btn.get_button(), S, 1, 1, S, 1, 1);
+  lv_obj_set_grid_cell(language_btn.get_button(), S, 0, 1, S, 2, 1);
+  lv_obj_set_grid_cell(powerscreen_update_btn.get_button(), S, 1, 1, S, 2, 1);
+  lv_obj_set_grid_cell(restart_btn.get_button(), S, 0, 1, S, 3, 1);
 
   // Restart stands out: soft red surface, red icon and title.
   restart_btn.set_active(true, lv_color_hex(powerui::COLOR_DESTRUCTIVE));
@@ -114,16 +120,16 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
 
   // Watermark in the free grid cell: the PowerScreen logo at low opacity with the installed version below.
   lv_obj_t *mark = powerui::plain(cont);
-  lv_obj_set_grid_cell(mark, S, 2, 1, S, 1, 1);
+  lv_obj_set_grid_cell(mark, S, 1, 1, S, 3, 1);
   lv_obj_clear_flag(mark, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_t *mark_logo = lv_img_create(mark);
   lv_img_set_src(mark_logo, &ui_adl_logo);
   lv_obj_clear_flag(mark_logo, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_align(mark_logo, LV_ALIGN_CENTER, 0, -powerui::px(12));
+  // Logo e versione affiancati: la cella e' bassa e larga.
+  lv_obj_align(mark_logo, LV_ALIGN_LEFT_MID, powerui::px(24), 0);
   lv_obj_t *mark_version = powerui::label(mark, fmt::format("ADL Screen {}", package_version()).c_str(),
-                                          &lv_font_montserrat_12, lv_color_hex(powerui::COLOR_MUTED));
-  lv_obj_set_style_text_opa(mark_version, LV_OPA_60, 0);
-  lv_obj_align(mark_version, LV_ALIGN_BOTTOM_MID, 0, -powerui::px(14));
+                                          &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_MUTED));
+  lv_obj_align(mark_version, LV_ALIGN_RIGHT_MID, -powerui::px(16), 0);
 
 }
 

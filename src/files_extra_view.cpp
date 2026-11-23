@@ -186,6 +186,9 @@ void FilesExtraView::refresh() {
           h.exists = job.value("exists", false);
           if (job.contains("metadata") && job["metadata"].is_object()) {
             h.weight_g = job["metadata"].value("filament_weight_total", 0.0);
+            if (job["metadata"].contains("thumbnails") && job["metadata"]["thumbnails"].is_array()) {
+              h.thumbnails = job["metadata"]["thumbnails"];
+            }
           }
           jobs.push_back(h);
         }
@@ -257,7 +260,7 @@ void FilesExtraView::rebuild_toolbar() {
 lv_obj_t *FilesExtraView::add_row(const char *title, const std::string &subtitle, bool video, lv_color_t dot, bool is_selected, int index) {
   lv_obj_t *row = plain(list);
   lv_obj_add_flag(row, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_set_size(row, LV_PCT(100), px(56));
+  lv_obj_set_size(row, LV_PCT(100), px(64));
   lv_obj_set_style_radius(row, px(10), 0);
   lv_obj_set_style_bg_color(row, lv_color_hex(COLOR_SECONDARY), 0);
   lv_obj_set_style_bg_opa(row, is_selected ? LV_OPA_COVER : LV_OPA_TRANSP, 0);
@@ -272,32 +275,32 @@ lv_obj_t *FilesExtraView::add_row(const char *title, const std::string &subtitle
   lv_obj_set_style_pad_column(row, px(12), 0);
 
   lv_obj_t *tile = plain(row);
-  lv_obj_set_size(tile, px(40), px(40));
+  lv_obj_set_size(tile, px(48), px(48));
   lv_obj_set_style_radius(tile, px(8), 0);
   lv_obj_set_style_bg_color(tile, lv_color_hex(COLOR_BG), 0);
   lv_obj_set_style_bg_opa(tile, LV_OPA_COVER, 0);
   lv_obj_set_style_border_width(tile, 1, 0);
   lv_obj_set_style_border_color(tile, lv_color_hex(COLOR_WHITE), 0);
   lv_obj_set_style_border_opa(tile, LV_OPA_10, 0);
-  lv_obj_center(icon(tile, video ? &ui_icon_camera : &ui_file_cube_img, 22, lv_color_hex(COLOR_MUTED)));
+  lv_obj_center(icon(tile, video ? &ui_icon_camera : &ui_file_cube_img, 26, lv_color_hex(COLOR_MUTED)));
 
   lv_obj_t *text = plain(row);
   lv_obj_set_height(text, LV_SIZE_CONTENT);
   lv_obj_set_flex_grow(text, 1);
   lv_obj_set_flex_flow(text, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_row(text, 2, 0);
-  lv_obj_t *t = label(text, title, &lv_font_montserrat_14, lv_color_hex(COLOR_FG));
+  lv_obj_t *t = label(text, title, &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
   lv_label_set_long_mode(t, LV_LABEL_LONG_DOT);
   lv_obj_set_width(t, LV_PCT(100));
-  lv_obj_t *s = label(text, subtitle.c_str(), &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
+  lv_obj_t *s = label(text, subtitle.c_str(), &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
   lv_label_set_long_mode(s, LV_LABEL_LONG_DOT);
   lv_obj_set_width(s, LV_PCT(100));
 
   if (video) {
-    label(row, LV_SYMBOL_RIGHT, &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
+    label(row, LV_SYMBOL_RIGHT, &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
   } else {
     lv_obj_t *d = plain(row);
-    lv_obj_set_size(d, px(9), px(9));
+    lv_obj_set_size(d, px(12), px(12));
     lv_obj_set_style_radius(d, LV_RADIUS_CIRCLE, 0);
     lv_obj_set_style_bg_color(d, dot, 0);
     lv_obj_set_style_bg_opa(d, LV_OPA_COVER, 0);
@@ -342,10 +345,10 @@ void FilesExtraView::add_info_row(int y, const char *name, const std::string &va
   lv_obj_set_pos(sep, px(16), px(y));
   lv_obj_set_style_bg_color(sep, lv_color_hex(COLOR_WHITE), 0);
   lv_obj_set_style_bg_opa(sep, LV_OPA_10, 0);
-  lv_obj_t *n = label(detail, name, &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(n, px(16), px(y + 8));
-  lv_obj_t *v = label(detail, value.c_str(), &lv_font_montserrat_14, lv_color_hex(COLOR_FG));
-  lv_obj_align(v, LV_ALIGN_TOP_RIGHT, -px(16), px(y + 8));
+  lv_obj_t *n = label(detail, name, &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_pos(n, px(16), px(y + 6));
+  lv_obj_t *v = label(detail, value.c_str(), &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
+  lv_obj_align(v, LV_ALIGN_TOP_RIGHT, -px(16), px(y + 5));
 }
 
 void FilesExtraView::rebuild_detail() {
@@ -361,8 +364,8 @@ void FilesExtraView::rebuild_detail() {
                                           : selected >= 0 && selected < (int)videos.size();
 
   lv_obj_t *preview = plain(detail);
-  lv_obj_set_pos(preview, px(16), px(16));
-  lv_obj_set_size(preview, px(260), px(150));
+  lv_obj_set_pos(preview, px(16), px(12));
+  lv_obj_set_size(preview, px(260), px(100));
   lv_obj_set_style_radius(preview, px(10), 0);
   lv_obj_set_style_bg_color(preview, lv_color_hex(COLOR_BG), 0);
   lv_obj_set_style_bg_opa(preview, LV_OPA_COVER, 0);
@@ -372,6 +375,14 @@ void FilesExtraView::rebuild_detail() {
   lv_obj_clear_flag(preview, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_style_clip_corner(preview, true, 0);
   std::string preview_file;
+  int preview_width = 0;
+  if (mode == Mode::History && have && jobs[selected].exists && !jobs[selected].thumbnails.empty()) {
+    // Storico: l'anteprima del pezzo e' quella del file, se il file c'e' ancora.
+    json wrapper = {{"result", {{"thumbnails", jobs[selected].thumbnails}}}};
+    auto thumb = KUtils::get_thumbnail(jobs[selected].filename, wrapper, 96.0 / 300.0);
+    preview_file = thumb.first;
+    preview_width = static_cast<int>(thumb.second);
+  }
   if (mode == Mode::Timelapse && have && !videos[selected].thumb.empty()) {
     const std::string &thumb = videos[selected].thumb;
     preview_file = KUtils::is_running_local()
@@ -383,7 +394,11 @@ void FilesExtraView::rebuild_detail() {
     lv_img_cache_invalidate_src(thumb_src.c_str());
     lv_obj_t *shot = lv_img_create(preview);
     lv_img_set_src(shot, thumb_src.c_str());
-    lv_img_set_zoom(shot, 256 * px(260) / 1280);  // the camera frame is 1280x720: scale it to the 260 px box
+    if (mode == Mode::History && preview_width > 0) {
+      lv_img_set_zoom(shot, 256 * px(92) / preview_width);  // il pezzo entra nel riquadro alto 100
+    } else {
+      lv_img_set_zoom(shot, 256 * px(176) / 1280);  // il fotogramma 1280x720 entra nel riquadro alto 100
+    }
     lv_obj_clear_flag(shot, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_center(shot);
   } else {
@@ -396,27 +411,30 @@ void FilesExtraView::rebuild_detail() {
     lv_label_set_long_mode(hint, LV_LABEL_LONG_WRAP);
     lv_obj_set_width(hint, px(260));
     lv_obj_set_style_text_align(hint, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_pos(hint, px(16), px(190));
+    lv_obj_set_style_text_font(hint, &lv_font_montserrat_16, 0);
+    lv_obj_set_pos(hint, px(16), px(130));
     return;
   }
 
   if (mode == Mode::History) {
     const HistoryJob &h = jobs[selected];
-    lv_obj_t *title = label(detail, strip_ext(base_name(h.filename)).c_str(), &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
+    lv_obj_t *title = label(detail, strip_ext(base_name(h.filename)).c_str(), &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
     lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
     lv_obj_set_width(title, px(260));
-    lv_obj_set_pos(title, px(16), px(176));
+    lv_obj_set_pos(title, px(16), px(120));
     const bool ok = h.status == "completed";
     std::string status = h.status;
     if (!status.empty()) {
       status[0] = static_cast<char>(std::toupper(status[0]));
     }
     lv_obj_t *b = badge(detail, status.c_str(), lv_color_hex(ok ? COLOR_ACCENT : h.status == "in_progress" ? COLOR_WARNING : COLOR_DESTRUCTIVE));
-    lv_obj_set_pos(b, px(16), px(202));
-    add_info_row(236, "Started", format_time(h.start));
-    add_info_row(270, "Duration", format_duration(h.duration));
-    add_info_row(304, "Filament", h.weight_g > 0 ? fmt::format("{:.0f} g", h.weight_g) : fmt::format("{:.1f} m", h.filament_mm / 1000.0));
+    lv_obj_set_pos(b, px(16), px(150));
+    add_info_row(180, "Started", format_time(h.start));
+    add_info_row(212, "Duration", format_duration(h.duration));
+    add_info_row(244, "Filament", h.weight_g > 0 ? fmt::format("{:.0f} g", h.weight_g) : fmt::format("{:.1f} m", h.filament_mm / 1000.0));
     primary_btn = action_button(detail, NULL, "Print again", ActionKind::Primary, 16, 348, 260, 52, &FilesExtraView::_action_clicked, this);
+    // Attaccato al fondo del riquadro: non si taglia qualunque sia l'altezza.
+    lv_obj_align(primary_btn, LV_ALIGN_BOTTOM_LEFT, px(16), -px(12));
     // Same look as the Print button of Files (filled green, white 20 pt text); unavailable looks like a disabled
     // option elsewhere: card background and muted text.
     lv_obj_t *again_label = lv_obj_get_child(primary_btn, 0);
@@ -433,20 +451,23 @@ void FilesExtraView::rebuild_detail() {
     }
   } else {
     const Video &v = videos[selected];
-    lv_obj_t *title = label(detail, base_name(v.path).c_str(), &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
+    lv_obj_t *title = label(detail, base_name(v.path).c_str(), &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
     lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
     lv_obj_set_width(title, px(260));
-    lv_obj_set_pos(title, px(16), px(176));
-    lv_obj_t *sub = label(detail, fmt::format("Created {}", format_time(v.modified)).c_str(), &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-    lv_obj_set_pos(sub, px(16), px(200));
-    add_info_row(224, "Size", format_size(v.size));
+    lv_obj_set_pos(title, px(16), px(120));
+    lv_obj_t *sub = label(detail, fmt::format("Creato {}", format_time(v.modified)).c_str(), &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
+    lv_obj_set_pos(sub, px(16), px(148));
+    add_info_row(172, "Size", format_size(v.size));
     lv_obj_t *note = label(detail, "The screen cannot play videos. Open the file from Fluidd or copy it with USB.",
-                           &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
+                           &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
     lv_label_set_long_mode(note, LV_LABEL_LONG_WRAP);
     lv_obj_set_width(note, px(260));
-    lv_obj_set_pos(note, px(16), px(268));
+    lv_obj_set_pos(note, px(16), px(208));
     primary_btn = action_button(detail, &sd_img, "Copy to USB", ActionKind::Outline, 16, 348, 196, 52, &FilesExtraView::_action_clicked, this);
     delete_btn = action_button(detail, &ui_icon_trash, "", ActionKind::Destructive, 224, 348, 52, 52, &FilesExtraView::_action_clicked, this);
+    // Attaccati al fondo del riquadro: non si tagliano qualunque sia l'altezza.
+    lv_obj_align(primary_btn, LV_ALIGN_BOTTOM_LEFT, px(16), -px(12));
+    lv_obj_align(delete_btn, LV_ALIGN_BOTTOM_LEFT, px(224), -px(12));
     lv_obj_set_style_pad_column(delete_btn, 0, 0);
   }
 }
