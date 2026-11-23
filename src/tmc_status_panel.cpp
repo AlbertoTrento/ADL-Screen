@@ -89,6 +89,8 @@ TmcStatusPanel::TmcStatusPanel(KWebSocketClient &c,
 	p->ws.gcode_script("_PS_LOAD_MODULE SECTION=tmcstatus");
       } else {
 	p->ws.gcode_script("_PS_UNLOAD_MODULE SECTION=tmcstatus");
+	// Prima la pagina restava piena e sembrava ancora accesa: ora si svuota subito.
+	p->clear_metrics();
       }
     }
   }, LV_EVENT_VALUE_CHANGED, this);
@@ -158,10 +160,20 @@ void TmcStatusPanel::init(json &j) {
 void TmcStatusPanel::consume(json &j) {
   std::lock_guard<std::mutex> lock(lv_lock);
   auto tmc_status = j["/params/0/tmcstatus"_json_pointer];
-  if (!tmc_status.is_null()) {
+  // Con l'interruttore spento i dati che arrivano ancora non si mostrano.
+  if (!tmc_status.is_null() && lv_obj_has_state(toggle, LV_STATE_CHECKED)) {
     update_metrics(tmc_status);
   }
 
+}
+
+void TmcStatusPanel::clear_metrics() {
+  metrics.clear();  // le card si cancellano da sole (distruttore di TmcStatusContainer)
+  order.clear();
+  selected.clear();
+  lv_obj_add_flag(tabs, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_clear_flag(empty_label, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_scroll_to_y(list, 0, LV_ANIM_OFF);
 }
 
 void TmcStatusPanel::update_metrics(json &tmc_status) {

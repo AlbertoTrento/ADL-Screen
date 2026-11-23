@@ -31,6 +31,8 @@ class TmcStatusPanel : public NotifyConsumer {
   void rebuild_tabs();
   // Mostra solo la card del motore scelto.
   void show_selected();
+  // Spegne la lettura sullo schermo: toglie le card dei motori e torna alla spiegazione.
+  void clear_metrics();
 
   KWebSocketClient &ws;
   lv_obj_t *cont;
