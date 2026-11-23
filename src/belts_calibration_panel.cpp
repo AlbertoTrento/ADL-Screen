@@ -11,10 +11,30 @@ LV_IMG_DECLARE(emergency);
 
 namespace {
 // Graph area inside the left card (design px, overlay coordinates).
+// Parte piu' in basso (84) per il titolo a 24 e il sottotitolo a 16; la nota in fondo a 16 puo' andare su due righe.
 constexpr int GRAPH_X = 30;
-constexpr int GRAPH_Y = 90;
+constexpr int GRAPH_Y = 84;
 constexpr int GRAPH_W = 404;
-constexpr int GRAPH_H = 250;
+constexpr int GRAPH_H = 272;
+
+// Porta il testo di un pulsante di powerui::action_button al carattere indicato (l'etichetta e' l'ultimo figlio).
+void font_pulsante(lv_obj_t *btn, const lv_font_t *font) {
+  lv_obj_t *l = lv_obj_get_child(btn, -1);
+  if (l != NULL && lv_obj_check_type(l, &lv_label_class)) {
+    lv_obj_set_style_text_font(l, font, 0);
+  }
+}
+
+// Tendina a caratteri grandi: testo scelto, freccia e elenco aperto.
+void font_tendina(lv_obj_t *dd, const lv_font_t *font) {
+  lv_obj_set_style_text_font(dd, font, LV_PART_MAIN);
+  lv_obj_set_style_text_font(dd, font, LV_PART_INDICATOR);
+  lv_obj_t *list = lv_dropdown_get_list(dd);
+  if (list != NULL) {
+    lv_obj_set_style_text_font(list, font, LV_PART_MAIN);
+    lv_obj_set_style_text_line_space(list, powerui::px(12), LV_PART_MAIN);
+  }
+}
 }
 
 #define BELTS_PNG "belts_calibration.png"
@@ -56,13 +76,18 @@ BeltsCalibrationPanel::BeltsCalibrationPanel(KWebSocketClient &c, std::mutex &l)
 
   // Left card: belt resonance graph.
   lv_obj_t *graph_card = card(cont, 12, 12, 452, 416);
-  lv_obj_t *title = label(graph_card, "Belt resonance", &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(title, px(20), px(16));
-  lv_obj_t *subtitle = label(graph_card, "Compares the two belts of the CoreXY", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(subtitle, px(20), px(42));
-  lv_obj_t *footer = label(graph_card, "Run Shake Belts to refresh the graph. Tap the graph to enlarge it.", &lv_font_montserrat_12,
+  // Titolo a 24, sottotitolo e nota a 16 (a capo se servono piu' righe).
+  lv_obj_t *title = label(graph_card, "Belt resonance", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(title, px(20), px(12));
+  lv_obj_t *subtitle = label(graph_card, "Compares the two belts of the CoreXY", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
+  lv_label_set_long_mode(subtitle, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(subtitle, px(412));
+  lv_obj_set_pos(subtitle, px(20), px(46));
+  lv_obj_t *footer = label(graph_card, "Run Shake Belts to refresh the graph. Tap the graph to enlarge it.", &lv_font_montserrat_16,
 			   lv_color_hex(COLOR_MUTED));
-  lv_obj_align(footer, LV_ALIGN_BOTTOM_LEFT, px(20), -px(14));
+  lv_label_set_long_mode(footer, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(footer, px(412));
+  lv_obj_align(footer, LV_ALIGN_BOTTOM_LEFT, px(20), -px(12));
 
   graph_cont = plain(cont);
   lv_obj_add_flag(graph_cont, LV_OBJ_FLAG_CLICKABLE);
@@ -79,7 +104,7 @@ BeltsCalibrationPanel::BeltsCalibrationPanel(KWebSocketClient &c, std::mutex &l)
   lv_obj_add_flag(graph, LV_OBJ_FLAG_HIDDEN);
   lv_obj_center(graph);
 
-  graph_hint = label(graph_cont, "No graph yet", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
+  graph_hint = label(graph_cont, "No graph yet", &lv_font_montserrat_20, lv_color_hex(COLOR_MUTED));
   lv_obj_center(graph_hint);
 
   spinner = lv_spinner_create(graph_cont, 1000, 60);
@@ -90,35 +115,40 @@ BeltsCalibrationPanel::BeltsCalibrationPanel(KWebSocketClient &c, std::mutex &l)
   // Right card: excite controls.
   lv_obj_t *excite_card = card(cont, 476, 12, 248, 238);
   excite_control = excite_card;
-  lv_obj_t *excite_title = label(excite_card, "Excite", &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(excite_title, px(20), px(16));
-  lv_obj_t *freq_title = label(excite_card, "Frequency", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(freq_title, px(20), px(56));
-  excite_label = label(excite_card, "1 hz", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
-  lv_obj_align(excite_label, LV_ALIGN_TOP_RIGHT, -px(20), px(48));
+  // Titolo a 24, nomi a 18, valore a 24, tendina a 20.
+  lv_obj_t *excite_title = label(excite_card, "Excite", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(excite_title, px(20), px(12));
+  lv_obj_t *freq_title = label(excite_card, "Frequency", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_pos(freq_title, px(20), px(58));
+  excite_label = label(excite_card, "1 hz", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_obj_align(excite_label, LV_ALIGN_TOP_RIGHT, -px(20), px(54));
 
   excite_slider = lv_slider_create(excite_card);
   lv_obj_set_size(excite_slider, px(208), px(14));
-  lv_obj_set_pos(excite_slider, px(20), px(92));
+  lv_obj_set_pos(excite_slider, px(20), px(98));
   lv_slider_set_range(excite_slider, 10, 1400);
   style_slider(excite_slider);
   lv_obj_add_event_cb(excite_slider, &BeltsCalibrationPanel::_handle_update_slider, LV_EVENT_VALUE_CHANGED, this);
 
-  lv_obj_t *axis_title = label(excite_card, "Axis", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(axis_title, px(20), px(142));
+  lv_obj_t *axis_title = label(excite_card, "Axis", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_pos(axis_title, px(20), px(130));
   excite_dd = lv_dropdown_create(excite_card);
   lv_dropdown_set_options(excite_dd, fmt::format("{}", fmt::join(axes, "\n")).c_str());
-  lv_obj_set_size(excite_dd, px(208), px(40));
-  lv_obj_set_pos(excite_dd, px(20), px(166));
+  lv_obj_set_size(excite_dd, px(208), px(46));
+  lv_obj_set_pos(excite_dd, px(20), px(158));
   style_select(excite_dd);
+  font_tendina(excite_dd, &lv_font_montserrat_20);
 
-  // Actions.
+  // Actions: testo dei pulsanti a 20.
   calibrate_btn = action_button(cont, &ui_icon_play, "Shake Belts", ActionKind::Primary, 476, 262, 248, 52,
 				&BeltsCalibrationPanel::_handle_callback, this);
   excite_btn = action_button(cont, &ui_icon_activity, "Excite", ActionKind::Outline, 476, 322, 248, 48,
 			     &BeltsCalibrationPanel::_handle_callback, this);
   stop_btn = action_button(cont, &ui_icon_estop, "Stop", ActionKind::Destructive, 476, 378, 248, 50,
 			   &BeltsCalibrationPanel::_handle_callback, this);
+  font_pulsante(calibrate_btn, &lv_font_montserrat_20);
+  font_pulsante(excite_btn, &lv_font_montserrat_20);
+  font_pulsante(stop_btn, &lv_font_montserrat_20);
 
   ws.register_method_callback("notify_gcode_response",
 			      "BeltsCalibrationPanel",

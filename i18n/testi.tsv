@@ -401,7 +401,98 @@ In corso...	In corso...	In progress...	Läuft...	En cours...	En curso...
 Recenti	Recenti	Recent	Neueste	Récents	Recientes
 Temperature and fans	Temperature e ventole	Temperature and fans	Temperatur und Lüfter	Température et ventilateurs	Temperatura y ventiladores
 Distanza	Distanza	Distance	Strecke	Distance	Distancia
-Elimina più	Elimina più	Delete several	Mehrere löschen	Suppr. plusieurs	Borrar varios
+Cancella file	Cancella file	Delete files	Dateien löschen	Supprimer fichiers	Borrar archivos
 Tinta	Tinta	Hue	Farbton	Teinte	Tono
 Intensita'	Intensità	Saturation	Sättigung	Saturation	Saturación
 Luminosita'	Luminosità	Brightness	Helligkeit	Luminosité	Brillo
+Belts	Cinghie	Belts	Riemen	Courroies	Correas
+Input Shaper	Input shaper	Input Shaper	Input Shaper	Input Shaper	Input Shaper
+TMC Autotune	TMC automatico	TMC Autotune	TMC Autotune	TMC Autotune	TMC Autotune
+TMC Metrics	TMC dati	TMC Metrics	TMC Messwerte	TMC Mesures	TMC Métricas
+Console	Console	Console	Konsole	Console	Consola
+Shaper	Shaper	Shaper	Shaper	Shaper	Shaper
+Hotend	Ugello	Hotend	Hotend	Hotend	Hotend
+Bed	Piatto	Bed	Bett	Plateau	Cama
+current	attuale	current	aktuell	actuelle	actual
+Target temperature (°C)	Temperatura obiettivo (°C)	Target temperature (°C)	Zieltemperatur (°C)	Température cible (°C)	Temperatura objetivo (°C)
+Open - 	Aperta - 	Open - 	Offen - 	Ouvert - 	Abierta - 
+Regolazione driver TMC	Regolazione driver TMC	TMC driver tuning	TMC-Treiberabstimmung	Réglage des pilotes TMC	Ajuste de drivers TMC
+Regolazione automatica dei driver	Regolazione automatica dei driver	Automatic driver tuning	Automatische Treiberabstimmung	Réglage automatique des pilotes	Ajuste automático de los drivers
+Per ogni motore scegli il modello e l'obiettivo. Klipper calcola da solo i parametri del driver TMC quando si avvia.	Per ogni motore scegli il modello e l'obiettivo. Klipper calcola da solo i parametri del driver TMC quando si avvia.	For each motor choose the model and the goal. Klipper works out the TMC driver settings by itself at startup.	Wähle für jeden Motor Modell und Ziel. Klipper berechnet die TMC-Treiberwerte beim Start selbst.	Pour chaque moteur, choisissez le modèle et l'objectif. Klipper calcule seul les paramètres du pilote TMC au démarrage.	Para cada motor elige el modelo y el objetivo. Klipper calcula solo los parámetros del driver TMC al arrancar.
+Modello del motore	Modello del motore	Motor model	Motormodell	Modèle du moteur	Modelo del motor
+Scegli il motore montato: serve a calcolare la regolazione del driver.	Scegli il motore montato: serve a calcolare la regolazione del driver.	Choose the installed motor: it is used to calculate the driver tuning.	Wähle den eingebauten Motor: daraus wird die Treiberabstimmung berechnet.	Choisissez le moteur monté : il sert à calculer le réglage du pilote.	Elige el motor montado: sirve para calcular el ajuste del driver.
+Non configurato	Non configurato	Not configured	Nicht konfiguriert	Non configuré	No configurado
+Obiettivo	Obiettivo	Goal	Ziel	Objectif	Objetivo
+Silenzioso, prestazioni (più coppia) o automatico.	Silenzioso, prestazioni (più coppia) o automatico.	Silent, performance (more torque) or automatic.	Leise, Leistung (mehr Drehmoment) oder automatisch.	Silencieux, performance (plus de couple) ou automatique.	Silencioso, rendimiento (más par) o automático.
+Automatico	Automatico	Automatic	Automatisch	Automatique	Automático
+Silenzioso	Silenzioso	Silent	Leise	Silencieux	Silencioso
+Prestazioni	Prestazioni	Performance	Leistung	Performance	Rendimiento
+Cambio automatico	Cambio automatico	Auto switch	Automatisch wechseln	Bascule automatique	Cambio automático
+Sensibilità urto (homing senza finecorsa)	Sensibilità urto (homing senza finecorsa)	Stall sensitivity (sensorless homing)	Kollisionsempfindlichkeit (sensorloses Homing)	Sensibilité de butée (homing sans capteur)	Sensibilidad de choque (homing sin final de carrera)
+Più alto = si ferma prima contro il bordo.	Più alto = si ferma prima contro il bordo.	Higher = stops sooner against the edge.	Höher = stoppt früher am Anschlag.	Plus haut = s'arrête plus tôt contre le bord.	Más alto = se detiene antes contra el borde.
+Più basso = si ferma prima contro il bordo.	Più basso = si ferma prima contro il bordo.	Lower = stops sooner against the edge.	Niedriger = stoppt früher am Anschlag.	Plus bas = s'arrête plus tôt contre le bord.	Más bajo = se detiene antes contra el borde.
+Salva le scelte nella configurazione e riavvia Klipper.	Salva le scelte nella configurazione e riavvia Klipper.	Saves the choices to the configuration and restarts Klipper.	Speichert die Auswahl in der Konfiguration und startet Klipper neu.	Enregistre les choix dans la configuration et redémarre Klipper.	Guarda las opciones en la configuración y reinicia Klipper.
+Motore X	Motore X	Motor X	Motor X	Moteur X	Motor X
+Motore Y	Motore Y	Motor Y	Motor Y	Moteur Y	Motor Y
+Motore Z	Motore Z	Motor Z	Motor Z	Moteur Z	Motor Z
+Estrusore	Estrusore	Extruder	Extruder	Extrudeur	Extrusor
+Stato driver TMC	Stato driver TMC	TMC driver status	TMC-Treiberstatus	État des pilotes TMC	Estado de drivers TMC
+Lettura dei driver in tempo reale	Lettura dei driver in tempo reale	Live driver readout	Live-Werte der Treiber	Lecture des pilotes en temps réel	Lectura de los drivers en tiempo real
+Sperimentale: accendila solo quando serve.	Sperimentale: accendila solo quando serve.	Experimental: turn it on only when needed.	Experimentell: nur bei Bedarf einschalten.	Expérimental : activez-la seulement si besoin.	Experimental: actívala solo cuando haga falta.
+Accendi la lettura con l'interruttore qui sopra: dopo qualche secondo compaiono i dati di ogni motore.	Accendi la lettura con l'interruttore qui sopra: dopo qualche secondo compaiono i dati di ogni motore.	Turn on the readout with the switch above: each motor's data appears after a few seconds.	Schalte die Anzeige oben ein: nach einigen Sekunden erscheinen die Daten jedes Motors.	Activez la lecture avec l'interrupteur ci-dessus : les données de chaque moteur apparaissent après quelques secondes.	Activa la lectura con el interruptor de arriba: en unos segundos aparecen los datos de cada motor.
+Nessun problema	Nessun problema	No problems	Keine Probleme	Aucun problème	Sin problemas
+Allarme	Allarme	Alarm	Alarm	Alarme	Alarma
+Corrente attuale	Corrente attuale	Current now	Aktueller Strom	Courant actuel	Corriente actual
+assorbita adesso dal motore	assorbita adesso dal motore	drawn by the motor right now	jetzt vom Motor aufgenommen	absorbé maintenant par le moteur	consumida ahora por el motor
+Carico motore	Carico motore	Motor load	Motorlast	Charge moteur	Carga del motor
+più è basso, più il motore fatica	più è basso, più il motore fatica	the lower it is, the harder the motor works	je niedriger, desto stärker belastet	plus il est bas, plus le moteur force	cuanto más bajo, más se esfuerza el motor
+Temperatura	Temperatura	Temperature	Temperatur	Température	Temperatura
+soglia raggiunta dal chip del driver	soglia raggiunta dal chip del driver	threshold reached by the driver chip	vom Treiberchip erreichte Schwelle	seuil atteint par la puce du pilote	umbral alcanzado por el chip del driver
+Non disponibile	Non disponibile	Not available	Nicht verfügbar	Non disponible	No disponible
+Sotto 120 °C	Sotto 120 °C	Below 120 °C	Unter 120 °C	Sous 120 °C	Menos de 120 °C
+Oltre 120 °C	Oltre 120 °C	Above 120 °C	Über 120 °C	Au-dessus de 120 °C	Más de 120 °C
+Oltre 143 °C	Oltre 143 °C	Above 143 °C	Über 143 °C	Au-dessus de 143 °C	Más de 143 °C
+Oltre 150 °C	Oltre 150 °C	Above 150 °C	Über 150 °C	Au-dessus de 150 °C	Más de 150 °C
+Oltre 157 °C	Oltre 157 °C	Above 157 °C	Über 157 °C	Au-dessus de 157 °C	Más de 157 °C
+Corrente di marcia	Corrente di marcia	Run current	Laufstrom	Courant de marche	Corriente de marcha
+quando il motore si muove	quando il motore si muove	while the motor is moving	wenn der Motor läuft	quand le moteur tourne	cuando el motor se mueve
+Corrente di attesa	Corrente di attesa	Hold current	Haltestrom	Courant de maintien	Corriente de reposo
+quando il motore è fermo	quando il motore è fermo	while the motor is stopped	wenn der Motor steht	quand le moteur est à l'arrêt	cuando el motor está parado
+Stato	Stato	Status	Status	État	Estado
+Fermo	Fermo	Stopped	Steht	À l'arrêt	Parado
+In movimento	In movimento	Moving	In Bewegung	En mouvement	En movimiento
+Modo silenzioso (StealthChop)	Modo silenzioso (StealthChop)	Silent mode (StealthChop)	Leiser Modus (StealthChop)	Mode silencieux (StealthChop)	Modo silencioso (StealthChop)
+Modo SpreadCycle	Modo SpreadCycle	SpreadCycle mode	SpreadCycle-Modus	Mode SpreadCycle	Modo SpreadCycle
+Errori del driver	Errori del driver	Driver errors	Treiberfehler	Erreurs du pilote	Errores del driver
+Nessun errore segnalato	Nessun errore segnalato	No errors reported	Keine Fehler gemeldet	Aucune erreur signalée	Ningún error señalado
+Surriscaldamento: driver spento per protezione	Surriscaldamento: driver spento per protezione	Overheating: driver shut down for protection	Überhitzung: Treiber zum Schutz abgeschaltet	Surchauffe : pilote coupé par sécurité	Sobrecalentamiento: driver apagado por protección
+Preallarme temperatura del driver	Preallarme temperatura del driver	Driver temperature pre-warning	Temperatur-Vorwarnung des Treibers	Préalerte de température du pilote	Preaviso de temperatura del driver
+Cortocircuito verso massa (fase A)	Cortocircuito verso massa (fase A)	Short to ground (phase A)	Kurzschluss gegen Masse (Phase A)	Court-circuit à la masse (phase A)	Cortocircuito a masa (fase A)
+Cortocircuito verso massa (fase B)	Cortocircuito verso massa (fase B)	Short to ground (phase B)	Kurzschluss gegen Masse (Phase B)	Court-circuit à la masse (phase B)	Cortocircuito a masa (fase B)
+Cortocircuito verso alimentazione (fase A)	Cortocircuito verso alimentazione (fase A)	Short to supply (phase A)	Kurzschluss gegen Versorgung (Phase A)	Court-circuit à l'alimentation (phase A)	Cortocircuito a alimentación (fase A)
+Cortocircuito verso alimentazione (fase B)	Cortocircuito verso alimentazione (fase B)	Short to supply (phase B)	Kurzschluss gegen Versorgung (Phase B)	Court-circuit à l'alimentation (phase B)	Cortocircuito a alimentación (fase B)
+Andamento corrente e carico	Andamento corrente e carico	Current and load over time	Strom- und Lastverlauf	Évolution du courant et de la charge	Evolución de corriente y carga
+Carico	Carico	Load	Last	Charge	Carga
+Corrente (mA)	Corrente (mA)	Current (mA)	Strom (mA)	Courant (mA)	Corriente (mA)
+Soglia CoolStep minima	Soglia CoolStep minima	CoolStep lower threshold	CoolStep untere Schwelle	Seuil CoolStep bas	Umbral CoolStep mínimo
+Soglia CoolStep massima	Soglia CoolStep massima	CoolStep upper threshold	CoolStep obere Schwelle	Seuil CoolStep haut	Umbral CoolStep máximo
+Regolazioni avanzate	Regolazioni avanzate	Advanced settings	Erweiterte Einstellungen	Réglages avancés	Ajustes avanzados
+Cambiano subito il driver ma non vengono salvate: al riavvio tornano i valori della configurazione. Toccale solo se sai cosa fai.	Cambiano subito il driver ma non vengono salvate: al riavvio tornano i valori della configurazione. Toccale solo se sai cosa fai.	They change the driver immediately but are not saved: after a restart the configuration values come back. Only touch them if you know what you are doing.	Sie ändern den Treiber sofort, werden aber nicht gespeichert: nach einem Neustart gelten wieder die Werte der Konfiguration. Nur ändern, wenn du weißt, was du tust.	Ils modifient le pilote tout de suite mais ne sont pas enregistrés : au redémarrage, les valeurs de la configuration reviennent. N'y touchez que si vous savez ce que vous faites.	Cambian el driver al instante pero no se guardan: al reiniciar vuelven los valores de la configuración. Tócalos solo si sabes lo que haces.
+CoolStep: corrente automatica secondo il carico	CoolStep: corrente automatica secondo il carico	CoolStep: automatic current based on load	CoolStep: automatischer Strom je nach Last	CoolStep : courant automatique selon la charge	CoolStep: corriente automática según la carga
+Chopper: come il driver regola la corrente	Chopper: come il driver regola la corrente	Chopper: how the driver controls the current	Chopper: wie der Treiber den Strom regelt	Chopper : comment le pilote régule le courant	Chopper: cómo regula el driver la corriente
+Soglia minima (semin)	Soglia minima (semin)	Lower threshold (semin)	Untere Schwelle (semin)	Seuil bas (semin)	Umbral mínimo (semin)
+Sotto questo carico la corrente sale. 0 = CoolStep spento.	Sotto questo carico la corrente sale. 0 = CoolStep spento.	Below this load the current goes up. 0 = CoolStep off.	Unter dieser Last steigt der Strom. 0 = CoolStep aus.	Sous cette charge le courant augmente. 0 = CoolStep désactivé.	Por debajo de esta carga la corriente sube. 0 = CoolStep apagado.
+Soglia massima (semax)	Soglia massima (semax)	Upper threshold (semax)	Obere Schwelle (semax)	Seuil haut (semax)	Umbral máximo (semax)
+Sopra questo margine la corrente scende.	Sopra questo margine la corrente scende.	Above this margin the current goes down.	Über dieser Spanne sinkt der Strom.	Au-dessus de cette marge le courant baisse.	Por encima de este margen la corriente baja.
+Passo di aumento (seup)	Passo di aumento (seup)	Increase step (seup)	Erhöhungsschritt (seup)	Pas d'augmentation (seup)	Paso de aumento (seup)
+Quanto sale la corrente a ogni passo.	Quanto sale la corrente a ogni passo.	How much the current rises at each step.	Wie stark der Strom pro Schritt steigt.	De combien le courant monte à chaque pas.	Cuánto sube la corriente en cada paso.
+Velocità di riduzione (sedn)	Velocità di riduzione (sedn)	Decrease speed (sedn)	Absenkgeschwindigkeit (sedn)	Vitesse de réduction (sedn)	Velocidad de reducción (sedn)
+Quanto in fretta la corrente scende.	Quanto in fretta la corrente scende.	How fast the current goes down.	Wie schnell der Strom sinkt.	À quelle vitesse le courant baisse.	Qué tan rápido baja la corriente.
+Tempo di spegnimento (toff)	Tempo di spegnimento (toff)	Off time (toff)	Ausschaltzeit (toff)	Temps d'extinction (toff)	Tiempo de apagado (toff)
+Pausa del chopper. 0 = motore senza corrente!	Pausa del chopper. 0 = motore senza corrente!	Chopper pause. 0 = motor without current!	Chopper-Pause. 0 = Motor ohne Strom!	Pause du chopper. 0 = moteur sans courant !	Pausa del chopper. ¡0 = motor sin corriente!
+Tempo di blanking (tbl)	Tempo di blanking (tbl)	Blanking time (tbl)	Blankzeit (tbl)	Temps de blanking (tbl)	Tiempo de blanking (tbl)
+Ignora i disturbi all'inizio di ogni impulso.	Ignora i disturbi all'inizio di ogni impulso.	Ignores noise at the start of each pulse.	Ignoriert Störungen am Anfang jedes Impulses.	Ignore les parasites au début de chaque impulsion.	Ignora las interferencias al inicio de cada impulso.
+Isteresi iniziale (hstrt)	Isteresi iniziale (hstrt)	Hysteresis start (hstrt)	Hysterese-Start (hstrt)	Hystérésis de départ (hstrt)	Histéresis inicial (hstrt)
+Inizio dell'isteresi SpreadCycle.	Inizio dell'isteresi SpreadCycle.	Start of the SpreadCycle hysteresis.	Beginn der SpreadCycle-Hysterese.	Début de l'hystérésis SpreadCycle.	Inicio de la histéresis SpreadCycle.
+Isteresi finale (hend)	Isteresi finale (hend)	Hysteresis end (hend)	Hysterese-Ende (hend)	Hystérésis de fin (hend)	Histéresis final (hend)
+Fine dell'isteresi SpreadCycle.	Fine dell'isteresi SpreadCycle.	End of the SpreadCycle hysteresis.	Ende der SpreadCycle-Hysterese.	Fin de l'hystérésis SpreadCycle.	Fin de la histéresis SpreadCycle.

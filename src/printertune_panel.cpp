@@ -26,9 +26,54 @@ LV_IMG_DECLARE(ui_icon_plug_zap);
 LV_IMG_DECLARE(cooldown_img);
 LV_IMG_DECLARE(extruder);
 
-// Row heights of the tile grid: three rows fill the panel; more rows keep that height and the panel scrolls.
-static lv_coord_t grid_col_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+// Griglia delle card: due colonne di card a riga (icona a sinistra, titolo e sottotitolo a destra).
+// Le righe si dividono tutta l'altezza della pagina; se le card sono troppe, ogni riga tiene
+// l'altezza minima e la pagina scorre.
+static lv_coord_t grid_col_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 static lv_coord_t grid_rows[8] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+
+namespace {
+// Margine della pagina e distanza fra le card.
+constexpr int MARGINE_PAGINA = 8;
+constexpr int SPAZIO_CARD = 8;
+// Altezza minima di una riga: titolo su due righe (24) e sottotitolo (18) senza tagli.
+constexpr int ALTEZZA_MINIMA_RIGA = 78;
+
+// Colori delle icone delle card, leggibili sullo sfondo scuro.
+constexpr uint32_t COLORE_MESH = 0x38BDF8;         // azzurro
+constexpr uint32_t COLORE_REGOLAZIONE = 0x4ADE80;  // verde
+constexpr uint32_t COLORE_SHAPER = 0xC084FC;       // viola
+constexpr uint32_t COLORE_CINGHIE = 0xFB923C;      // arancio
+constexpr uint32_t COLORE_LIMITI = 0xFACC15;       // giallo
+constexpr uint32_t COLORE_TMC_TUNE = 0xF87171;     // corallo
+constexpr uint32_t COLORE_TMC_STATO = 0xF472B6;    // rosa
+constexpr uint32_t COLORE_ALIMENTAZIONE = 0x2DD4BF;  // verde acqua
+constexpr uint32_t COLORE_CONSOLE = 0xD4D4D4;      // grigio chiaro
+constexpr uint32_t COLORE_PID = 0xFF7043;          // rosso-arancio
+constexpr uint32_t COLORE_PULIZIA = 0x818CF8;      // indaco
+
+// Manda a capo tutte le scritte della card, anche il titolo (che SquareButton taglia):
+// con le traduzioni lunghe nessun testo resta tagliato.
+void testi_a_capo(lv_obj_t *obj) {
+  const uint32_t figli = lv_obj_get_child_cnt(obj);
+  for (uint32_t i = 0; i < figli; i++) {
+    lv_obj_t *figlio = lv_obj_get_child(obj, static_cast<int32_t>(i));
+    if (lv_obj_check_type(figlio, &lv_label_class)) {
+      lv_label_set_long_mode(figlio, LV_LABEL_LONG_WRAP);
+    } else {
+      testi_a_capo(figlio);
+    }
+  }
+}
+
+// Card a riga con sottotitolo e icona colorata (set_row_layout va chiamato prima di set_subtitle).
+void prepara_card(SquareButton &btn, const char *sottotitolo, uint32_t colore) {
+  btn.set_row_layout();
+  btn.set_subtitle(sottotitolo);
+  btn.set_icon_color(lv_color_hex(colore));
+  testi_a_capo(btn.get_button());
+}
+}  // namespace
 
 PrinterTunePanel::PrinterTunePanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent, FineTunePanel &finetune)
   : ws(c)
@@ -47,29 +92,29 @@ PrinterTunePanel::PrinterTunePanel(KWebSocketClient &c, std::mutex &l, lv_obj_t 
   , tmc_status_panel(c, l)
   , power_panel(c, l)
   , pid_tune_panel(c, l)
-  , bedmesh_btn(cont, &bedmesh_img, "Bed Mesh", &PrinterTunePanel::_handle_callback, this, true)
-  , finetune_btn(cont, &fine_tune_img, "Fine Tune", &PrinterTunePanel::_handle_callback, this, true)
-  , inputshaper_btn(cont, &ui_resonance_img, "Input Shaper", &PrinterTunePanel::_handle_callback, this, true)
-  , belts_calibration_btn(cont, &ui_belts_img, "Belts / Shake", &PrinterTunePanel::_handle_callback, this, true)
-  , limits_btn(cont, &limit_img, "Limits", &PrinterTunePanel::_handle_callback, this, true)
-  , tmc_tune_btn(cont, &motor_img, "TMC Autotune", &PrinterTunePanel::_handle_callback, this, true)
-  , tmc_status_btn(cont, &chart_img, "TMC Metrics", &PrinterTunePanel::_handle_callback, this, true)
-  , power_devices_btn(cont, &ui_icon_plug_zap, "Power Devices", &PrinterTunePanel::_handle_callback, this, true)
-  , console_btn(cont, &ui_console_img, "Console", &PrinterTunePanel::_handle_callback, this, true)
-  , pid_tune_btn(cont, &cooldown_img, "PID Tune", &PrinterTunePanel::_handle_callback, this, true)
-  , nozzle_clean_btn(cont, &extruder, "Nozzle Clean", &PrinterTunePanel::_handle_callback, this, true)
+  , bedmesh_btn(cont, &bedmesh_img, "Bed Mesh", &PrinterTunePanel::_handle_callback, this)
+  , finetune_btn(cont, &fine_tune_img, "Fine Tune", &PrinterTunePanel::_handle_callback, this)
+  , inputshaper_btn(cont, &ui_resonance_img, "Input Shaper", &PrinterTunePanel::_handle_callback, this)
+  , belts_calibration_btn(cont, &ui_belts_img, "Belts", &PrinterTunePanel::_handle_callback, this)
+  , limits_btn(cont, &limit_img, "Limits", &PrinterTunePanel::_handle_callback, this)
+  , tmc_tune_btn(cont, &motor_img, "TMC Autotune", &PrinterTunePanel::_handle_callback, this)
+  , tmc_status_btn(cont, &chart_img, "TMC Metrics", &PrinterTunePanel::_handle_callback, this)
+  , power_devices_btn(cont, &ui_icon_plug_zap, "Power Devices", &PrinterTunePanel::_handle_callback, this)
+  , console_btn(cont, &ui_console_img, "Console", &PrinterTunePanel::_handle_callback, this)
+  , pid_tune_btn(cont, &cooldown_img, "PID Tune", &PrinterTunePanel::_handle_callback, this)
+  , nozzle_clean_btn(cont, &extruder, "Nozzle Clean", &PrinterTunePanel::_handle_callback, this)
 {
-  bedmesh_btn.set_subtitle("Probe the bed surface");
-  finetune_btn.set_subtitle("Z, speed, flow and PA");
-  inputshaper_btn.set_subtitle("Resonance and shapers");
-  belts_calibration_btn.set_subtitle("Belt tension and shake");
-  limits_btn.set_subtitle("Velocity and acceleration");
-  tmc_tune_btn.set_subtitle("Motor driver tuning");
-  tmc_status_btn.set_subtitle("Stepper driver statistics");
-  power_devices_btn.set_subtitle("Printer power outlets");
-  console_btn.set_subtitle("G-code and macros");
-  pid_tune_btn.set_subtitle("Hotend and bed");
-  nozzle_clean_btn.set_subtitle("Clean the nozzle");
+  prepara_card(bedmesh_btn, "Probe the bed surface", COLORE_MESH);
+  prepara_card(finetune_btn, "Z, speed, flow and PA", COLORE_REGOLAZIONE);
+  prepara_card(inputshaper_btn, "Resonance and shapers", COLORE_SHAPER);
+  prepara_card(belts_calibration_btn, "Belt tension and shake", COLORE_CINGHIE);
+  prepara_card(limits_btn, "Velocity and acceleration", COLORE_LIMITI);
+  prepara_card(tmc_tune_btn, "Motor driver tuning", COLORE_TMC_TUNE);
+  prepara_card(tmc_status_btn, "Stepper driver statistics", COLORE_TMC_STATO);
+  prepara_card(power_devices_btn, "Printer power outlets", COLORE_ALIMENTAZIONE);
+  prepara_card(console_btn, "G-code and macros", COLORE_CONSOLE);
+  prepara_card(pid_tune_btn, "Hotend and bed", COLORE_PID);
+  prepara_card(nozzle_clean_btn, "Clean the nozzle", COLORE_PULIZIA);
 
   lv_obj_move_background(cont);
 
@@ -79,9 +124,9 @@ PrinterTunePanel::PrinterTunePanel(KWebSocketClient &c, std::mutex &l, lv_obj_t 
   tmc_tune_btn.disable();
 
   lv_obj_set_grid_dsc_array(cont, grid_col_dsc, grid_rows);
-  lv_obj_set_style_pad_all(cont, 12, LV_PART_MAIN);
-  lv_obj_set_style_pad_row(cont, 12, LV_PART_MAIN);
-  lv_obj_set_style_pad_column(cont, 12, LV_PART_MAIN);
+  lv_obj_set_style_pad_all(cont, powerui::px(MARGINE_PAGINA), LV_PART_MAIN);
+  lv_obj_set_style_pad_row(cont, powerui::px(SPAZIO_CARD), LV_PART_MAIN);
+  lv_obj_set_style_pad_column(cont, powerui::px(SPAZIO_CARD), LV_PART_MAIN);
 
   relayout();
 }
@@ -101,6 +146,13 @@ void PrinterTunePanel::relayout() {
     {&nozzle_clean_btn, nozzle_clean_mode != 0},
   };
 
+  int visibili = 0;
+  for (const auto &entry : buttons) {
+    if (entry.second) {
+      visibili++;
+    }
+  }
+
   int slot = 0;
   for (const auto &entry : buttons) {
     lv_obj_t *btn = entry.first->get_button();
@@ -109,19 +161,23 @@ void PrinterTunePanel::relayout() {
       continue;
     }
     lv_obj_clear_flag(btn, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_set_grid_cell(btn, LV_GRID_ALIGN_STRETCH, slot % 4, 1,
-                         LV_GRID_ALIGN_STRETCH, slot / 4, 1);
+    // Con un numero dispari di card l'ultima occupa tutta la riga: niente buco in fondo.
+    const bool ultima_sola = (slot == visibili - 1) && (slot % 2 == 0);
+    lv_obj_set_grid_cell(btn, LV_GRID_ALIGN_STRETCH, slot % 2, ultima_sola ? 2 : 1,
+                         LV_GRID_ALIGN_STRETCH, slot / 2, 1);
     slot++;
   }
-  // Rows: three rows fill the panel; from the fourth row on the tab scrolls.
-  const int rows = std::max(1, (slot + 3) / 4);
-  const lv_coord_t row_height = (powerui::overlay_height_px() - 4 * 12) / 3;
+  // Righe: si dividono tutta l'altezza della pagina; sotto l'altezza minima la pagina scorre.
+  const int rows = std::max(1, (slot + 1) / 2);
+  const lv_coord_t spazio_righe = 2 * powerui::px(MARGINE_PAGINA) + (rows - 1) * powerui::px(SPAZIO_CARD);
+  const lv_coord_t riga_piena = (powerui::overlay_height_px() - spazio_righe) / rows;
+  const lv_coord_t row_height = std::max<lv_coord_t>(riga_piena, powerui::px(ALTEZZA_MINIMA_RIGA));
   for (int r = 0; r < rows; r++) {
     grid_rows[r] = row_height;
   }
   grid_rows[rows] = LV_GRID_TEMPLATE_LAST;
   lv_obj_set_grid_dsc_array(cont, grid_col_dsc, grid_rows);
-  if (rows > 3) {
+  if (riga_piena < row_height) {
     lv_obj_add_flag(cont, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_scroll_dir(cont, LV_DIR_VER);
   } else {

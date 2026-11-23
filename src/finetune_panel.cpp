@@ -98,23 +98,32 @@ FineTunePanel::FineTunePanel(KWebSocketClient &websocket_client, std::mutex &l)
                        {&pa, &paup_btn, &padown_btn, &pareset_btn},
                        {&speed_factor, &speed_up_btn, &speed_down_btn, &speed_reset_btn},
                        {&flow_factor, &flow_up_btn, &flow_down_btn, &flow_reset_btn}};
-  struct Header { const lv_img_dsc_t *icon; const char *title; };
-  const Header headers[4] = {{&home_z, "Z offset"}, {&pa_plus_img, "Pressure advance"}, {&speed_up_img, "Speed"}, {&flow_up_img, "Flow"}};
+  // Intestazione delle card: icona colorata (Offset Z piu' grande) e titolo a 18 che va a capo.
+  struct Header { const lv_img_dsc_t *icon; const char *title; int size; uint32_t color; };
+  const Header headers[4] = {{&home_z, "Z offset", 40, 0x38BDF8},             // azzurro
+                             {&pa_plus_img, "Pressure advance", 32, 0xC084FC},  // viola
+                             {&speed_up_img, "Speed", 32, 0xFB923C},           // arancio
+                             {&flow_up_img, "Flow", 32, 0x4ADE80}};            // verde
   for (int c = 0; c < 4; ++c) {
     const int x0 = 12 + c * 181;
     lv_obj_t *metric_card = card(panel_cont, x0, 12, 169, 270);
     lv_obj_move_to_index(metric_card, 0);
 
-    lv_obj_t *header_icon = icon(metric_card, headers[c].icon, 20, lv_color_hex(powerui::COLOR_MUTED));
-    lv_obj_set_pos(header_icon, px(14), px(14));
-    lv_obj_t *header_title = label(metric_card, headers[c].title, &lv_font_montserrat_12, lv_color_hex(powerui::COLOR_MUTED));
-    lv_obj_set_pos(header_title, px(40), px(17));
+    // Fascia dell'intestazione: da 12 a 52 px dall'alto della card, icona centrata in altezza.
+    lv_obj_t *header_icon = icon(metric_card, headers[c].icon, headers[c].size, lv_color_hex(headers[c].color));
+    lv_obj_set_pos(header_icon, px(12), px(32 - headers[c].size / 2));
+    lv_obj_t *header_title = label(metric_card, headers[c].title, &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_FG));
+    lv_label_set_long_mode(header_title, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(header_title, px(99));
+    // Titolo nella stessa colonna per tutte le card (dopo l'icona piu' grande), centrato sull'icona.
+    lv_obj_align_to(header_title, header_icon, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+    lv_obj_set_x(header_title, px(60));
 
     // Value: only the number (the ImageLabel icon stays hidden).
     lv_obj_t *value = metrics[c].value->get_container();
     lv_obj_set_parent(value, metric_card);
     lv_obj_set_size(value, px(145), px(40));
-    lv_obj_set_pos(value, px(11), px(40));
+    lv_obj_set_pos(value, px(11), px(56));
     lv_obj_set_style_bg_opa(value, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(value, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_all(value, 0, LV_PART_MAIN);
@@ -132,9 +141,9 @@ FineTunePanel::FineTunePanel(KWebSocketClient &websocket_client, std::mutex &l)
 
     // + and - (outlined), Reset (soft green): plain text buttons like the reference.
     const struct { ButtonContainer *button; int y; int h; ButtonKind kind; const lv_font_t *font; } buttons[3] = {
-      {metrics[c].up, 96, 52, ButtonKind::Outline, &lv_font_montserrat_24},
-      {metrics[c].down, 156, 52, ButtonKind::Outline, &lv_font_montserrat_24},
-      {metrics[c].reset, 216, 42, ButtonKind::Soft, &lv_font_montserrat_14}};
+      {metrics[c].up, 102, 50, ButtonKind::Outline, &lv_font_montserrat_24},
+      {metrics[c].down, 158, 50, ButtonKind::Outline, &lv_font_montserrat_24},
+      {metrics[c].reset, 214, 44, ButtonKind::Soft, &lv_font_montserrat_18}};
     for (const auto &entry : buttons) {
       entry.button->set_fixed_size(px(145), px(entry.h));
       style_button(entry.button->get_container(), entry.button->get_button(), entry.kind);
@@ -157,17 +166,19 @@ FineTunePanel::FineTunePanel(KWebSocketClient &websocket_client, std::mutex &l)
     lv_obj_set_size(selector, px(322), px(100));
     lv_obj_set_pos(selector, px(14), px(12));
     lv_obj_set_flex_align(selector, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-    lv_obj_set_style_pad_row(selector, px(26), 0);
+    lv_obj_set_style_pad_row(selector, px(20), 0);
     lv_obj_set_style_bg_opa(selector, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(selector, 0, LV_PART_MAIN);
     lv_obj_t *selector_label = step.selector->get_label();
     lv_label_set_text(selector_label, step.title);
     lv_obj_set_style_text_align(selector_label, LV_TEXT_ALIGN_LEFT, 0);
     lv_obj_set_style_text_color(selector_label, lv_color_hex(powerui::COLOR_MUTED), 0);
-    lv_obj_set_style_text_font(selector_label, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_font(selector_label, &lv_font_montserrat_18, 0);
     lv_obj_t *btnm = step.selector->get_selector();
     lv_obj_set_size(btnm, px(322), px(56));
     style_segmented(btnm);
+    // Passi scritti piu' grandi (style_segmented usa 16).
+    lv_obj_set_style_text_font(btnm, &lv_font_montserrat_20, LV_PART_ITEMS);
   }
 
   ws.register_notify_update(this);

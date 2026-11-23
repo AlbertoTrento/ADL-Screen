@@ -33,13 +33,29 @@ const char *signal_text(int level) {
   }
 }
 
+// Tipo di protezione della rete letto dai flag di wpa_supplicant ("Open" se non ce n'e').
+std::string security_kind(const std::string &flags) {
+  for (const char *kind : {"WPA3", "WPA2", "WPA", "WEP"}) {
+    if (flags.find(kind) != std::string::npos) {
+      return kind;
+    }
+  }
+  return "Open";
+}
+
+// Protezione e banda, es. "WPA2 - 5 GHz".
+std::string security_text(const std::string &flags, int frequency) {
+  return fmt::format("{} - {}", security_kind(flags), frequency >= 4900 ? "5 GHz" : "2.4 GHz");
+}
+
 // Four rising bars; the first `level` are filled.
+// Barre piu' grandi (29x24) per leggerle bene sia nell'elenco sia nella scheda di stato.
 void fill_bars(lv_obj_t *bars, int level, lv_color_t color) {
   lv_obj_clean(bars);
-  const int heights[4] = {6, 10, 14, 18};
+  const int heights[4] = {8, 13, 18, 24};
   for (int i = 0; i < 4; ++i) {
     lv_obj_t *bar = plain(bars);
-    lv_obj_set_size(bar, px(4), px(heights[i]));
+    lv_obj_set_size(bar, px(5), px(heights[i]));
     lv_obj_set_style_radius(bar, px(2), 0);
     lv_obj_set_style_bg_color(bar, i < level ? color : lv_color_hex(COLOR_SECONDARY), 0);
     lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
@@ -48,7 +64,7 @@ void fill_bars(lv_obj_t *bars, int level, lv_color_t color) {
 
 lv_obj_t *make_bars(lv_obj_t *parent) {
   lv_obj_t *bars = plain(parent);
-  lv_obj_set_size(bars, px(21), px(18));
+  lv_obj_set_size(bars, px(29), px(24));
   lv_obj_set_flex_flow(bars, LV_FLEX_FLOW_ROW);
   lv_obj_set_flex_align(bars, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_END);
   lv_obj_set_style_pad_column(bars, px(3), 0);
@@ -102,28 +118,31 @@ WifiPanel::WifiPanel(std::mutex &l)
   lv_obj_add_flag(cont, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_CLICKABLE);
 
   // ---- Networks card (left).
+  // Titolo a 20 e tasto di aggiornamento 44x44 (comodo al dito); l'elenco parte sotto, a 66.
   list_card = card(cont, 12, 12, 420, 416);
-  lv_obj_t *list_title = label(list_card, "Networks", &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(list_title, px(20), px(24));
+  lv_obj_t *list_title = label(list_card, "Networks", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(list_title, px(20), px(23));
   refresh_btn = lv_btn_create(list_card);
-  lv_obj_set_size(refresh_btn, px(36), px(36));
-  lv_obj_align(refresh_btn, LV_ALIGN_TOP_RIGHT, -px(14), px(14));
+  lv_obj_set_size(refresh_btn, px(44), px(44));
+  lv_obj_align(refresh_btn, LV_ALIGN_TOP_RIGHT, -px(12), px(12));
   style_action_button(refresh_btn, lv_color_hex(COLOR_SECONDARY), LV_OPA_COVER, lv_color_hex(COLOR_PRESSED), lv_color_hex(COLOR_WHITE), LV_OPA_TRANSP, 8);
-  lv_obj_t *refresh_label = label(refresh_btn, LV_SYMBOL_REFRESH, &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
+  lv_obj_t *refresh_label = label(refresh_btn, LV_SYMBOL_REFRESH, &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
   lv_obj_center(refresh_label);
   lv_obj_add_event_cb(refresh_btn, &WifiPanel::_handle_action, LV_EVENT_CLICKED, this);
 
   list = lv_obj_create(list_card);
   lv_obj_remove_style_all(list);
-  lv_obj_set_size(list, px(396), px(344));
-  lv_obj_set_pos(list, px(12), px(60));
+  lv_obj_set_size(list, px(396), px(338));
+  lv_obj_set_pos(list, px(12), px(66));
   lv_obj_add_flag(list, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(list, LV_DIR_VER);
   lv_obj_set_flex_flow(list, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_row(list, px(4), 0);
 
   // ---- Status card (right).
-  status_card = card(cont, 444, 12, 280, 224);
+  // Testi grandi: nome 24, indirizzo/segnale/protezione 18. Righe a 86, 120, 150, 184 (scheda alta 220).
+  // Le etichette sono alte una riga: con LONG_DOT un testo troppo lungo finisce con i puntini invece di andare a capo.
+  status_card = card(cont, 444, 12, 280, 220);
   lv_obj_t *tile = plain(status_card);
   lv_obj_set_size(tile, px(56), px(56));
   lv_obj_set_pos(tile, px(20), px(18));
@@ -133,31 +152,43 @@ WifiPanel::WifiPanel(std::mutex &l)
   lv_obj_t *tile_icon = icon(tile, &network_img, 34, lv_color_hex(COLOR_ACCENT));
   lv_obj_center(tile_icon);
   status_badge = badge(status_card, "Not connected", lv_color_hex(COLOR_MUTED));
-  lv_obj_align(status_badge, LV_ALIGN_TOP_RIGHT, -px(16), px(18));
+  // Il badge di powerui scrive a 12: qui il testo (figlio 1) passa a 16 e la pillola si alza a 30.
+  lv_obj_set_height(status_badge, px(30));
+  lv_obj_set_style_text_font(lv_obj_get_child(status_badge, 1), &lv_font_montserrat_16, 0);
+  lv_obj_align(status_badge, LV_ALIGN_TOP_RIGHT, -px(16), px(31));
 
   ssid_label = label(status_card, "Select a network", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
-  lv_obj_set_width(ssid_label, px(240));
-  lv_label_set_long_mode(ssid_label, LV_LABEL_LONG_CLIP);
-  lv_obj_set_pos(ssid_label, px(20), px(90));
-  ip_label = label(status_card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(ip_label, px(20), px(124));
+  lv_obj_set_size(ssid_label, px(240), lv_font_get_line_height(&lv_font_montserrat_24));
+  lv_label_set_long_mode(ssid_label, LV_LABEL_LONG_DOT);
+  lv_obj_set_pos(ssid_label, px(20), px(86));
+  ip_label = label(status_card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_size(ip_label, px(240), lv_font_get_line_height(&lv_font_montserrat_18));
+  lv_label_set_long_mode(ip_label, LV_LABEL_LONG_DOT);
+  lv_obj_set_pos(ip_label, px(20), px(120));
   signal_bars = make_bars(status_card);
-  lv_obj_set_pos(signal_bars, px(20), px(156));
-  signal_label = label(status_card, "", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(signal_label, px(50), px(156));
-  security_label = label(status_card, "", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(security_label, px(20), px(188));
+  lv_obj_set_pos(signal_bars, px(20), px(150));
+  signal_label = label(status_card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_size(signal_label, px(200), lv_font_get_line_height(&lv_font_montserrat_18));
+  lv_label_set_long_mode(signal_label, LV_LABEL_LONG_DOT);
+  lv_obj_set_pos(signal_label, px(60), px(152));
+  security_label = label(status_card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_size(security_label, px(240), lv_font_get_line_height(&lv_font_montserrat_18));
+  lv_label_set_long_mode(security_label, LV_LABEL_LONG_DOT);
+  lv_obj_set_pos(security_label, px(20), px(184));
 
   // Password prompt (shown instead of the details when a new secured network is chosen).
+  // Etichetta a 18 su una riga (con i puntini se il nome e' lungo), campo alto 52 con testo a 20.
   password_cont = plain(status_card);
-  lv_obj_set_size(password_cont, px(248), px(120));
-  lv_obj_set_pos(password_cont, px(16), px(86));
+  lv_obj_set_size(password_cont, px(248), px(124));
+  lv_obj_set_pos(password_cont, px(16), px(84));
   lv_obj_add_flag(password_cont, LV_OBJ_FLAG_HIDDEN);
-  password_label = label(password_cont, "Password", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
+  password_label = label(password_cont, "Password", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_size(password_label, px(248), lv_font_get_line_height(&lv_font_montserrat_18));
+  lv_label_set_long_mode(password_label, LV_LABEL_LONG_DOT);
   lv_obj_set_pos(password_label, 0, 0);
   password_input = lv_textarea_create(password_cont);
-  lv_obj_set_size(password_input, px(248), px(48));
-  lv_obj_set_pos(password_input, 0, px(26));
+  lv_obj_set_size(password_input, px(248), px(52));
+  lv_obj_set_pos(password_input, 0, px(28));
   lv_textarea_set_password_mode(password_input, true);
   lv_textarea_set_one_line(password_input, true);
   lv_obj_set_style_bg_color(password_input, lv_color_hex(COLOR_SECONDARY), LV_PART_MAIN);
@@ -166,30 +197,31 @@ WifiPanel::WifiPanel(std::mutex &l)
   lv_obj_set_style_border_color(password_input, lv_color_hex(COLOR_ACCENT), LV_PART_MAIN | LV_STATE_FOCUSED);
   lv_obj_set_style_radius(password_input, px(10), LV_PART_MAIN);
   lv_obj_set_style_text_color(password_input, lv_color_hex(COLOR_FG), LV_PART_MAIN);
-  lv_obj_set_style_text_font(password_input, &lv_font_montserrat_16, LV_PART_MAIN);
+  lv_obj_set_style_text_font(password_input, &lv_font_montserrat_20, LV_PART_MAIN);
 
   // ---- Actions under the status card.
+  // Tre pulsanti larghi 280: Collega (56), Cerca di nuovo (56), Dimentica (48), testi a 20/20/18; finiscono a 428.
   connect_btn = lv_btn_create(cont);
   lv_obj_set_size(connect_btn, px(280), px(56));
-  lv_obj_set_pos(connect_btn, px(444), px(248));
+  lv_obj_set_pos(connect_btn, px(444), px(244));
   style_action_button(connect_btn, lv_color_hex(powerui::COLOR_PRIMARY), LV_OPA_COVER, lv_color_hex(powerui::COLOR_PRIMARY_PRESSED), lv_color_hex(COLOR_WHITE), LV_OPA_TRANSP, 10);
-  connect_label = label(connect_btn, "Connect to network", &lv_font_montserrat_16, lv_color_hex(COLOR_WHITE));
+  connect_label = label(connect_btn, "Connect to network", &lv_font_montserrat_20, lv_color_hex(COLOR_WHITE));
   lv_obj_center(connect_label);
   lv_obj_add_event_cb(connect_btn, &WifiPanel::_handle_action, LV_EVENT_CLICKED, this);
 
   scan_btn = lv_btn_create(cont);
   lv_obj_set_size(scan_btn, px(280), px(56));
-  lv_obj_set_pos(scan_btn, px(444), px(316));
+  lv_obj_set_pos(scan_btn, px(444), px(312));
   style_action_button(scan_btn, lv_color_hex(COLOR_CARD), LV_OPA_COVER, lv_color_hex(COLOR_SECONDARY), lv_color_hex(COLOR_WHITE), LV_OPA_10, 10);
-  lv_obj_t *scan_label = label(scan_btn, LV_SYMBOL_REFRESH "  Scan again", &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
+  lv_obj_t *scan_label = label(scan_btn, LV_SYMBOL_REFRESH "  Scan again", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
   lv_obj_center(scan_label);
   lv_obj_add_event_cb(scan_btn, &WifiPanel::_handle_action, LV_EVENT_CLICKED, this);
 
   forget_btn = lv_btn_create(cont);
-  lv_obj_set_size(forget_btn, px(280), px(44));
-  lv_obj_set_pos(forget_btn, px(444), px(384));
+  lv_obj_set_size(forget_btn, px(280), px(48));
+  lv_obj_set_pos(forget_btn, px(444), px(380));
   style_action_button(forget_btn, lv_color_hex(COLOR_CARD), LV_OPA_COVER, lv_color_hex(COLOR_SECONDARY), lv_color_hex(COLOR_DESTRUCTIVE), LV_OPA_40, 10);
-  lv_obj_t *forget_label = label(forget_btn, "Forget network", &lv_font_montserrat_14, lv_color_hex(COLOR_DESTRUCTIVE));
+  lv_obj_t *forget_label = label(forget_btn, "Forget network", &lv_font_montserrat_18, lv_color_hex(COLOR_DESTRUCTIVE));
   lv_obj_center(forget_label);
   lv_obj_add_event_cb(forget_btn, &WifiPanel::_handle_action, LV_EVENT_CLICKED, this);
 
@@ -201,6 +233,8 @@ WifiPanel::WifiPanel(std::mutex &l)
   lv_obj_set_style_bg_color(kb, lv_color_hex(COLOR_CARD), LV_PART_MAIN);
   lv_obj_set_style_bg_color(kb, lv_color_hex(COLOR_SECONDARY), LV_PART_ITEMS);
   lv_obj_set_style_text_color(kb, lv_color_hex(COLOR_FG), LV_PART_ITEMS);
+  // Tasti della tastiera a 20, leggibili quando si scrive la password.
+  lv_obj_set_style_text_font(kb, &lv_font_montserrat_20, LV_PART_ITEMS);
   lv_obj_set_style_radius(kb, px(8), LV_PART_ITEMS);
   lv_obj_set_style_border_width(kb, 0, LV_PART_ITEMS);
   lv_obj_add_event_cb(password_input, &WifiPanel::_handle_kb_input, LV_EVENT_FOCUSED, this);
@@ -301,14 +335,24 @@ void WifiPanel::rebuild_list() {
 
   lv_obj_clean(list);
   if (networks.empty()) {
-    empty_state(list, &network_img, "No networks found", "Move closer to the router and scan again.");
+    lv_obj_t *empty = empty_state(list, &network_img, "No networks found", "Move closer to the router and scan again.");
+    // empty_state scrive a 16 e 12: qui titolo a 20 e spiegazione a 16 (figli 1 e 2 del riquadro).
+    lv_obj_t *empty_title = lv_obj_get_child(empty, 1);
+    lv_obj_t *empty_text = lv_obj_get_child(empty, 2);
+    if (empty_title != NULL) {
+      lv_obj_set_style_text_font(empty_title, &lv_font_montserrat_20, 0);
+    }
+    if (empty_text != NULL) {
+      lv_obj_set_style_text_font(empty_text, &lv_font_montserrat_16, 0);
+    }
     return;
   }
   for (size_t i = 0; i < networks.size(); ++i) {
     const Network &network = networks[i];
     const bool connected = network.ssid == cur_network;
+    // Riga alta 64 (comoda al dito): barre, nome a 20 con sotto protezione e banda a 16, segno a destra.
     lv_obj_t *row = lv_obj_create(list);
-    lv_obj_set_size(row, LV_PCT(100), px(58));
+    lv_obj_set_size(row, LV_PCT(100), px(64));
     lv_obj_clear_flag(row, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(row, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_style_bg_opa(row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -333,15 +377,26 @@ void WifiPanel::rebuild_list() {
     lv_obj_t *bars = make_bars(row);
     fill_bars(bars, signal_level(network.signal), connected ? lv_color_hex(COLOR_ACCENT) : lv_color_hex(COLOR_MUTED));
 
-    lv_obj_t *name = label(row, network.ssid.c_str(), &lv_font_montserrat_16, connected ? lv_color_hex(COLOR_ACCENT) : lv_color_hex(COLOR_FG));
-    lv_obj_set_flex_grow(name, 1);
-    lv_label_set_long_mode(name, LV_LABEL_LONG_CLIP);
+    // Colonna con nome e dettagli: prende tutto lo spazio libero, i testi lunghi finiscono con i puntini.
+    lv_obj_t *texts = plain(row);
+    lv_obj_set_height(texts, LV_SIZE_CONTENT);
+    lv_obj_set_flex_grow(texts, 1);
+    lv_obj_set_flex_flow(texts, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(texts, px(2), 0);
+
+    lv_obj_t *name = label(texts, network.ssid.c_str(), &lv_font_montserrat_20, connected ? lv_color_hex(COLOR_ACCENT) : lv_color_hex(COLOR_FG));
+    lv_obj_set_size(name, LV_PCT(100), lv_font_get_line_height(&lv_font_montserrat_20));
+    lv_label_set_long_mode(name, LV_LABEL_LONG_DOT);
+
+    lv_obj_t *details = label(texts, security_text(network.flags, network.frequency).c_str(), &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
+    lv_obj_set_size(details, LV_PCT(100), lv_font_get_line_height(&lv_font_montserrat_16));
+    lv_label_set_long_mode(details, LV_LABEL_LONG_DOT);
 
     if (connected) {
-      lv_obj_t *mark = label(row, LV_SYMBOL_OK "  Connected", &lv_font_montserrat_12, lv_color_hex(COLOR_ACCENT));
+      lv_obj_t *mark = label(row, LV_SYMBOL_OK "  Connected", &lv_font_montserrat_16, lv_color_hex(COLOR_ACCENT));
       (void)mark;
     } else if (is_secure(network)) {
-      icon(row, &ui_icon_lock, 16, lv_color_hex(COLOR_MUTED));
+      icon(row, &ui_icon_lock, 20, lv_color_hex(COLOR_MUTED));
     }
     lv_obj_add_event_cb(row, &WifiPanel::_handle_row, LV_EVENT_CLICKED, this);
   }
@@ -381,14 +436,7 @@ void WifiPanel::update_status() {
   fill_bars(signal_bars, level, connected ? lv_color_hex(COLOR_ACCENT) : lv_color_hex(COLOR_MUTED));
   lv_label_set_text(signal_label, signal_text(level));
 
-  std::string security = "Open";
-  for (const char *kind : {"WPA3", "WPA2", "WPA", "WEP"}) {
-    if (network.flags.find(kind) != std::string::npos) {
-      security = kind;
-      break;
-    }
-  }
-  lv_label_set_text(security_label, fmt::format("{} - {}", security, network.frequency >= 4900 ? "5 GHz" : "2.4 GHz").c_str());
+  lv_label_set_text(security_label, security_text(network.flags, network.frequency).c_str());
 
   lv_label_set_text(connect_label, connected ? "Connected" : (saved ? "Connect" : "Connect to network"));
   if (connected) {

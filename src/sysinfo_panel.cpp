@@ -177,19 +177,49 @@ std::string k1c_firmware_version() {
   return "unknown";
 }
 
-// Backlight brightness 0-100 (the K1C PWM backlight driver is configured with max_brightness=100).
+// Luminosita' in percento (quella della barra e di /display_brightness nella configurazione).
+// Prima il percento veniva scritto tale e quale nel file del driver, dando per scontato max_brightness=100:
+// se il driver ha un massimo diverso la barra non riporta piu' lo schermo alla luminosita' piena (massimo piu'
+// alto, es. 255: "100" e' solo il 39%) oppure i valori sopra il massimo vengono rifiutati (massimo piu' basso).
+// Ora il percento si converte sul massimo vero letto dal driver, e il minimo e' alzato al 15% perche' sotto
+// lo schermo diventa troppo scuro per leggerlo e ritrovare la barra.
+constexpr const char *BACKLIGHT_MAX_FILE = "/sys/class/backlight/backlight_pwm0/max_brightness";
+constexpr int BRIGHTNESS_MIN_PERCENT = 15;
+
+int clamp_brightness_percent(int percent) {
+  return std::max(BRIGHTNESS_MIN_PERCENT, std::min(100, percent));
+}
+
+// Valore massimo accettato dal driver (letto una volta sola; 100 se il file manca o non si legge).
+int backlight_max() {
+  static int cached = 0;
+  if (cached > 0) {
+    return cached;
+  }
+  std::ifstream in(BACKLIGHT_MAX_FILE);
+  int value = 0;
+  if (in && (in >> value) && value > 0) {
+    cached = value;
+    return cached;
+  }
+  return 100;
+}
+
 void write_backlight(int percent) {
+  const int max = backlight_max();
+  const int raw = std::max(1, (clamp_brightness_percent(percent) * max + 50) / 100);
   std::ofstream out(BACKLIGHT_FILE);
   if (out) {
-    out << std::max(5, std::min(100, percent));
+    out << raw << '\n';
   }
 }
 
 int read_backlight() {
   std::ifstream in(BACKLIGHT_FILE);
-  int value = 0;
-  if (in && (in >> value)) {
-    return std::max(5, std::min(100, value));
+  int raw = 0;
+  if (in && (in >> raw)) {
+    const int max = backlight_max();
+    return clamp_brightness_percent((raw * 100 + max / 2) / max);
   }
   return 100;
 }
@@ -544,17 +574,19 @@ void SysInfoPanel::create_tabs() {
   lv_obj_align(printer_img, LV_ALIGN_LEFT_MID, px(14), 0);
   lv_obj_t *printer_name = label(printer_card, "Creality K1C", &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_FG));
   lv_obj_align(printer_name, LV_ALIGN_LEFT_MID, px(124), -px(14));
-  lv_obj_t *printer_info = label(printer_card, "CoreXY", &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
+  lv_obj_t *printer_info = label(printer_card, "CoreXY", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_MUTED));
   lv_obj_align(printer_info, LV_ALIGN_LEFT_MID, px(124), px(12));
-  lv_obj_t *printer_size = label(printer_card, "220 x 220 x 250 mm", &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
+  lv_obj_t *printer_size = label(printer_card, "220 x 220 x 250 mm", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_MUTED));
   lv_obj_align(printer_size, LV_ALIGN_LEFT_MID, px(124), px(34));
 
+  // Scheda Sistema: titolo a 20, nomi a 18 a sinistra (colonna fino a 150) e valori a 18 allineati a destra
+  // (larghi 180, con i puntini se una versione e' troppo lunga). Cinque righe da 49 a partire da 46.
   lv_obj_t *info_card = lv_obj_create(general_page);
   style_card(info_card);
   lv_obj_set_size(info_card, px(350), px(294));
   lv_obj_set_pos(info_card, px(12), px(134));
-  lv_obj_t *info_title = label(info_card, "System", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_FG));
-  lv_obj_set_pos(info_title, px(20), px(14));
+  lv_obj_t *info_title = label(info_card, "System", &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_FG));
+  lv_obj_set_pos(info_title, px(20), px(12));
   const char *info_names[5] = {"ADL Screen", "ADL Script", "Klipper", "Moonraker", "K1C Firmware"};
   for (int i = 0; i < 5; ++i) {
     const int row_y = 46 + i * 49;
@@ -564,13 +596,16 @@ void SysInfoPanel::create_tabs() {
     lv_obj_set_style_bg_color(line, lv_color_hex(powerui::COLOR_WHITE), 0);
     lv_obj_set_style_bg_opa(line, LV_OPA_10, 0);
 
-    lv_obj_t *name = label(info_card, info_names[i], &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_MUTED));
+    lv_obj_t *name = label(info_card, info_names[i], &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_MUTED));
+    // Altezza di una riga: con LONG_DOT il testo troppo lungo finisce con i puntini invece di andare a capo.
+    lv_obj_set_size(name, px(130), lv_font_get_line_height(&lv_font_montserrat_18));
+    lv_label_set_long_mode(name, LV_LABEL_LONG_DOT);
     lv_obj_set_pos(name, px(20), px(row_y + 14));
-    lv_obj_t *value = label(info_card, "...", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_FG));
-    lv_obj_set_width(value, px(160));
-    lv_label_set_long_mode(value, LV_LABEL_LONG_CLIP);
+    lv_obj_t *value = label(info_card, "...", &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_FG));
+    lv_obj_set_size(value, px(180), lv_font_get_line_height(&lv_font_montserrat_18));
+    lv_label_set_long_mode(value, LV_LABEL_LONG_DOT);
     lv_obj_set_style_text_align(value, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
-    lv_obj_set_pos(value, px(350 - 20 - 160), px(row_y + 14));
+    lv_obj_set_pos(value, px(350 - 20 - 180), px(row_y + 14));
     sys_value_labels[i] = value;
   }
   lv_label_set_text(sys_value_labels[0], split_version(installed_version()).first.c_str());
@@ -591,54 +626,80 @@ void SysInfoPanel::create_tabs() {
   lv_obj_set_style_bg_opa(network_tile, LV_OPA_COVER, 0);
   lv_obj_t *network_icon = icon(network_tile, &network_img, 36, lv_color_hex(powerui::COLOR_ACCENT));
   lv_obj_center(network_icon);
-  lv_obj_set_pos(network_name_label, px(92), px(22));
-  lv_obj_set_width(network_name_label, px(220));
-  lv_obj_set_height(network_name_label, px(24));
-  lv_obj_set_style_text_font(network_name_label, &lv_font_montserrat_18, LV_PART_MAIN);
-  lv_obj_set_pos(network_ip_label, px(92), px(50));
-  lv_obj_set_width(network_ip_label, px(220));
-  lv_obj_set_height(network_ip_label, LV_SIZE_CONTENT);
-  lv_obj_set_style_text_font(network_ip_label, &lv_font_montserrat_14, LV_PART_MAIN);
-  lv_obj_t *network_hint = label(network_card, "Tap to open Wi-Fi", &lv_font_montserrat_12, lv_color_hex(powerui::COLOR_MUTED));
-  lv_obj_set_pos(network_hint, px(92), px(76));
+  // Nome della rete a 20, indirizzo a 18, invito a 16 (righe a 14, 42, 70); larghi 210 per non toccare la freccia.
+  lv_obj_set_pos(network_name_label, px(92), px(14));
+  lv_obj_set_width(network_name_label, px(210));
+  lv_obj_set_height(network_name_label, lv_font_get_line_height(&lv_font_montserrat_20));
+  lv_obj_set_style_text_font(network_name_label, &lv_font_montserrat_20, LV_PART_MAIN);
+  lv_obj_set_pos(network_ip_label, px(92), px(42));
+  lv_obj_set_width(network_ip_label, px(210));
+  lv_obj_set_height(network_ip_label, lv_font_get_line_height(&lv_font_montserrat_18));
+  lv_label_set_long_mode(network_ip_label, LV_LABEL_LONG_DOT);
+  lv_obj_set_style_text_font(network_ip_label, &lv_font_montserrat_18, LV_PART_MAIN);
+  lv_obj_t *network_hint = label(network_card, "Tap to open Wi-Fi", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_MUTED));
+  lv_obj_set_size(network_hint, px(210), lv_font_get_line_height(&lv_font_montserrat_16));
+  lv_label_set_long_mode(network_hint, LV_LABEL_LONG_DOT);
+  lv_obj_set_pos(network_hint, px(92), px(70));
   lv_obj_t *network_chevron = label(network_card, LV_SYMBOL_RIGHT, &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_MUTED));
   lv_obj_align(network_chevron, LV_ALIGN_RIGHT_MID, -px(18), 0);
 
   // Right column: preferences card.
+  // Testi grandi: titolo a 20, nomi delle righe a 18 (vanno a capo se lunghi, es. "Conferma arresto di emergenza"),
+  // tendine 150x44 con testo a 18 anche nell'elenco aperto, interruttore 56x32.
+  // Righe: titolo 12, linea 44, Spegnimento 44-100, Luminosita' 100-178, Arresto 178-236, Log 236-292.
   lv_obj_set_size(controls_card, px(350), px(294));
   lv_obj_set_pos(controls_card, px(374), px(134));
-  lv_obj_t *prefs_title = label(controls_card, "Preferences", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_FG));
-  lv_obj_set_pos(prefs_title, px(20), px(14));
+  lv_obj_t *prefs_title = label(controls_card, "Preferences", &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_FG));
+  lv_obj_set_pos(prefs_title, px(20), px(12));
 
   lv_obj_add_flag(z_icon_toggle_cont, LV_OBJ_FLAG_HIDDEN);  // "Invert Z icon" is no longer offered
-  struct PrefRow { lv_obj_t *row; lv_obj_t *control; int y; };
-  PrefRow pref_rows[3] = {{disp_sleep_cont, display_sleep_dd, 46}, {estop_toggle_cont, prompt_estop_toggle, 182}, {ll_cont, loglevel_dd, 234}};
+  lv_obj_set_size(display_sleep_dd, px(150), px(44));
+  lv_obj_set_size(loglevel_dd, px(150), px(44));
+  style_select(display_sleep_dd);
+  style_select(loglevel_dd);
+  style_select(channel_dd);
+  for (lv_obj_t *dd : {display_sleep_dd, loglevel_dd}) {
+    lv_obj_set_style_text_font(dd, &lv_font_montserrat_18, LV_PART_MAIN);
+    lv_obj_t *dd_list = lv_dropdown_get_list(dd);
+    if (dd_list != NULL) {
+      lv_obj_set_style_text_font(dd_list, &lv_font_montserrat_18, LV_PART_MAIN);
+      lv_obj_set_style_text_line_space(dd_list, px(18), LV_PART_MAIN);
+    }
+  }
+  style_switch(prompt_estop_toggle);
+  lv_obj_set_size(prompt_estop_toggle, px(56), px(32));
+  lv_obj_set_ext_click_area(prompt_estop_toggle, px(10));
+
+  // `label_w`: spazio per il nome fino al controllo (bordo 20 a sinistra, 16 a destra, 10 di distacco).
+  struct PrefRow { lv_obj_t *row; lv_obj_t *control; int y; int h; int label_w; };
+  PrefRow pref_rows[3] = {{disp_sleep_cont, display_sleep_dd, 44, 56, 350 - 20 - 16 - 150 - 10},
+                          {estop_toggle_cont, prompt_estop_toggle, 178, 58, 350 - 20 - 16 - 56 - 10},
+                          {ll_cont, loglevel_dd, 236, 56, 350 - 20 - 16 - 150 - 10}};
   for (const auto &pref : pref_rows) {
-    lv_obj_set_size(pref.row, LV_PCT(100), px(52));
+    lv_obj_set_size(pref.row, LV_PCT(100), px(pref.h));
     lv_obj_set_pos(pref.row, 0, px(pref.y));
     lv_obj_t *row_label = find_row_label(pref.row);
     if (row_label != NULL) {
-      lv_obj_set_style_text_font(row_label, &lv_font_montserrat_16, LV_PART_MAIN);
+      lv_obj_set_style_text_font(row_label, &lv_font_montserrat_18, LV_PART_MAIN);
       lv_obj_set_style_translate_y(row_label, 0, LV_PART_MAIN);
+      lv_obj_set_width(row_label, px(pref.label_w));
+      lv_label_set_long_mode(row_label, LV_LABEL_LONG_WRAP);
       lv_obj_align(row_label, LV_ALIGN_LEFT_MID, px(20), 0);
     }
     lv_obj_align(pref.control, LV_ALIGN_RIGHT_MID, -px(16), 0);
   }
-  lv_obj_set_size(display_sleep_dd, px(130), px(40));
-  lv_obj_set_size(loglevel_dd, px(130), px(40));
-  style_select(display_sleep_dd);
-  style_select(loglevel_dd);
-  style_select(channel_dd);
 
-  // Brightness: label, percentage and a slider (backlight 5-100 %).
-  lv_obj_t *brightness_label = label(controls_card, "Brightness", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_FG));
-  lv_obj_set_pos(brightness_label, px(20), px(98 + 14));
-  brightness_value = label(controls_card, "100%", &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
-  lv_obj_align(brightness_value, LV_ALIGN_TOP_RIGHT, -px(20), px(98 + 16));
+  // Brightness: label, percentage and a slider (backlight 15-100 %, see write_backlight).
+  // Barra alta 20 con area di tocco allargata: si prende bene col dito anche quando e' al minimo.
+  lv_obj_t *brightness_label = label(controls_card, "Brightness", &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_FG));
+  lv_obj_set_pos(brightness_label, px(20), px(100 + 12));
+  brightness_value = label(controls_card, "100%", &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_FG));
+  lv_obj_align(brightness_value, LV_ALIGN_TOP_RIGHT, -px(20), px(100 + 12));
   brightness_slider = lv_slider_create(controls_card);
-  lv_slider_set_range(brightness_slider, 5, 100);
-  lv_obj_set_size(brightness_slider, px(310), px(16));
-  lv_obj_set_pos(brightness_slider, px(20), px(98 + 52));
+  lv_slider_set_range(brightness_slider, BRIGHTNESS_MIN_PERCENT, 100);
+  lv_obj_set_size(brightness_slider, px(298), px(20));
+  lv_obj_set_pos(brightness_slider, px(26), px(100 + 46));
+  lv_obj_set_ext_click_area(brightness_slider, px(14));
   lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(powerui::COLOR_SECONDARY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(brightness_slider, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(powerui::COLOR_ACCENT), LV_PART_INDICATOR);
@@ -653,8 +714,9 @@ void SysInfoPanel::create_tabs() {
   }
   lv_obj_add_event_cb(brightness_slider, &SysInfoPanel::_handle_brightness, LV_EVENT_VALUE_CHANGED, this);
   lv_obj_add_event_cb(brightness_slider, &SysInfoPanel::_handle_brightness, LV_EVENT_RELEASED, this);
+  lv_obj_add_event_cb(brightness_slider, &SysInfoPanel::_handle_brightness, LV_EVENT_PRESS_LOST, this);
 
-  for (int y : {46, 98, 182, 234}) {
+  for (int y : {44, 100, 178, 236}) {
     lv_obj_t *line = plain(controls_card);
     lv_obj_set_size(line, LV_PCT(100), 1);
     lv_obj_set_pos(line, 0, px(y));
@@ -1567,12 +1629,15 @@ void SysInfoPanel::refresh_system_versions() {
   }
 }
 
+// Mentre si trascina la barra la luminosita' cambia subito (in percento, convertito sul massimo del driver);
+// al rilascio, o se il dito esce dalla barra, il valore viene salvato.
 void SysInfoPanel::handle_brightness(lv_event_t *event) {
-  const int value = lv_slider_get_value(brightness_slider);
-  if (lv_event_get_code(event) == LV_EVENT_VALUE_CHANGED) {
+  const int value = clamp_brightness_percent(lv_slider_get_value(brightness_slider));
+  const lv_event_code_t code = lv_event_get_code(event);
+  if (code == LV_EVENT_VALUE_CHANGED) {
     lv_label_set_text(brightness_value, fmt::format("{}%", value).c_str());
     write_backlight(value);
-  } else if (lv_event_get_code(event) == LV_EVENT_RELEASED) {
+  } else if (code == LV_EVENT_RELEASED || code == LV_EVENT_PRESS_LOST) {
     Config *conf = Config::get_instance();
     conf->set<int>("/display_brightness", value);
     conf->save();

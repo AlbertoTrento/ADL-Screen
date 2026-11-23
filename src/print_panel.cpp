@@ -128,7 +128,7 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
 
   select_btn = lv_btn_create(file_table_btns);
   label = lv_label_create(select_btn);
-  lv_label_set_text(label, "Elimina più");
+  lv_label_set_text(label, "Cancella file");
   lv_obj_center(label);
   lv_obj_add_event_cb(select_btn, &PrintPanel::_handle_btns, LV_EVENT_CLICKED, this);
   
@@ -219,6 +219,8 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
   local_btn = make_storage_button("Local");
   usb_btn = make_storage_button("USB");
   timelapse_btn = make_storage_button("Timelapse");
+  // Timelapse tolta: lo schermo non riproduce i video (si guardano da Fluidd).
+  lv_obj_add_flag(timelapse_btn, LV_OBJ_FLAG_HIDDEN);
   history_btn = make_storage_button("History");
   update_storage_buttons();
   lv_obj_move_to_index(storage_row, 0);

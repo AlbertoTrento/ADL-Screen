@@ -29,15 +29,19 @@ PidTunePanel::PidTunePanel(KWebSocketClient &c, std::mutex &l)
   build_card(hotend, 12, "Hotend", &extruder, lv_color_hex(COLOR_EXTRUDER), {200, 220, 240, 260}, 220);
   build_card(bed_card, 374, "Bed", &::bed, lv_color_hex(COLOR_BED), {50, 60, 70, 80}, 60);
 
-  // Notice card (orange border).
-  lv_obj_t *notice = card(cont, 12, 354, 712, 74);
+  // Notice card (orange border): piu' alta (86) per il titolo a 18 e il testo a 16 su due righe.
+  lv_obj_t *notice = card(cont, 12, 342, 712, 86);
   lv_obj_set_style_border_color(notice, lv_color_hex(COLOR_WARNING), 0);
   lv_obj_set_style_border_opa(notice, LV_OPA_40, 0);
-  notice_title = label(notice, "The printer heats to the selected temperature", &lv_font_montserrat_14, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(notice_title, px(20), px(14));
+  notice_title = label(notice, "The printer heats to the selected temperature", &lv_font_montserrat_18, lv_color_hex(COLOR_FG));
+  lv_label_set_long_mode(notice_title, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(notice_title, px(672));
+  lv_obj_set_pos(notice_title, px(20), px(10));
   notice_text = label(notice, "Not available while printing. The result is saved with SAVE_CONFIG and restarts Klipper.",
-                      &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(notice_text, px(20), px(40));
+                      &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
+  lv_label_set_long_mode(notice_text, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(notice_text, px(672));
+  lv_obj_set_pos(notice_text, px(20), px(36));
 
   ws.register_notify_update(this);
 }
@@ -61,45 +65,53 @@ void PidTunePanel::build_card(HeaterCard &c, int x, const char *title, const lv_
   }
   c.map.push_back("");
 
-  lv_obj_t *k = card(cont, x, 12, 350, 328);
+  // Card piu' bassa (318) per lasciare spazio all'avviso in basso con i caratteri grandi.
+  lv_obj_t *k = card(cont, x, 12, 350, 318);
 
   lv_obj_t *tile = plain(k);
-  lv_obj_set_size(tile, px(44), px(44));
+  lv_obj_set_size(tile, px(48), px(48));
   lv_obj_set_pos(tile, px(20), px(18));
   lv_obj_set_style_radius(tile, px(10), 0);
   lv_obj_set_style_bg_color(tile, lv_color_hex(COLOR_SECONDARY), 0);
   lv_obj_set_style_bg_opa(tile, LV_OPA_COVER, 0);
-  lv_obj_center(icon(tile, icon_src, 28, icon_color));
+  lv_obj_center(icon(tile, icon_src, 30, icon_color));
 
-  lv_obj_t *name = label(k, title, &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(name, px(76), px(18));
-  lv_obj_t *sub = label(k, "Heater PID", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(sub, px(76), px(44));
+  // Nome a 24 e sottotitolo a 16; temperatura attuale a 24 con la scritta a 16.
+  lv_obj_t *name = label(k, title, &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(name, px(80), px(14));
+  lv_obj_t *sub = label(k, "Heater PID", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_pos(sub, px(80), px(44));
 
   c.current = label(k, "--", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
-  lv_obj_align(c.current, LV_ALIGN_TOP_RIGHT, -px(20), px(16));
-  lv_obj_t *current_tag = label(k, "current", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_align(current_tag, LV_ALIGN_TOP_RIGHT, -px(20), px(46));
+  lv_obj_align(c.current, LV_ALIGN_TOP_RIGHT, -px(20), px(14));
+  lv_obj_t *current_tag = label(k, "current", &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
+  lv_obj_align(current_tag, LV_ALIGN_TOP_RIGHT, -px(20), px(44));
 
-  lv_obj_t *target_title = label(k, "Target temperature (\xC2\xB0""C)", &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(target_title, px(20), px(98));
+  lv_obj_t *target_title = label(k, "Target temperature (\xC2\xB0""C)", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_label_set_long_mode(target_title, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(target_title, px(310));
+  lv_obj_set_pos(target_title, px(20), px(90));
 
   c.btnm = lv_btnmatrix_create(k);
   lv_btnmatrix_set_map(c.btnm, c.map.data());
   lv_btnmatrix_set_btn_ctrl_all(c.btnm, LV_BTNMATRIX_CTRL_CHECKABLE);
   lv_btnmatrix_set_one_checked(c.btnm, true);
-  lv_obj_set_size(c.btnm, px(310), px(48));
-  lv_obj_set_pos(c.btnm, px(20), px(124));
+  lv_obj_set_size(c.btnm, px(310), px(56));
+  lv_obj_set_pos(c.btnm, px(20), px(120));
   style_segmented(c.btnm);
+  // Dopo style_segmented (che usa il 16): temperature dei tasti a 20.
+  lv_obj_set_style_text_font(c.btnm, &lv_font_montserrat_20, LV_PART_ITEMS);
   for (size_t i = 0; i < c.options.size(); i++) {
     if (c.options[i] == default_option) {
       lv_btnmatrix_set_btn_ctrl(c.btnm, i, LV_BTNMATRIX_CTRL_CHECKED);
     }
   }
 
-  c.start = action_button(k, &ui_icon_sliders, "Start PID tune", ActionKind::Primary, 20, 256, 310, 52,
+  c.start = action_button(k, &ui_icon_sliders, "Start PID tune", ActionKind::Primary, 20, 246, 310, 56,
                           &PidTunePanel::_handle_callback, this);
   c.start_label = lv_obj_get_child(c.start, 1);
+  // Testo del pulsante a 20.
+  lv_obj_set_style_text_font(c.start_label, &lv_font_montserrat_20, 0);
 }
 
 void PidTunePanel::init(json &j) {

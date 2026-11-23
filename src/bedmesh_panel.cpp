@@ -139,15 +139,18 @@ BedMeshPanel::BedMeshPanel(KWebSocketClient &c, std::mutex &l)
     lv_obj_set_style_border_width(cont, 0, LV_PART_MAIN);
 
     lv_obj_t *mesh_card = card(cont, 12, 12, 400, 416);
-    lv_obj_t *mesh_title = powerui::label(mesh_card, "Bed mesh", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_FG));
-    lv_obj_set_pos(mesh_title, px(20), px(16));
-    mesh_profile_label = powerui::label(mesh_card, "", &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
-    lv_obj_set_pos(mesh_profile_label, px(20), px(40));
-    mesh_stats_label = powerui::label(mesh_card, "", &lv_font_montserrat_14, lv_color_hex(powerui::COLOR_MUTED));
-    lv_obj_align(mesh_stats_label, LV_ALIGN_BOTTOM_LEFT, px(20), -px(16));
+    // Scritte ingrandite: titolo 20, profilo attivo 18, statistiche 16 (stanno su una riga nella card).
+    lv_obj_t *mesh_title = powerui::label(mesh_card, "Bed mesh", &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_FG));
+    lv_obj_set_pos(mesh_title, px(20), px(14));
+    mesh_profile_label = powerui::label(mesh_card, "", &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_MUTED));
+    lv_obj_set_pos(mesh_profile_label, px(20), px(42));
+    mesh_stats_label = powerui::label(mesh_card, "", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_MUTED));
+    lv_obj_align(mesh_stats_label, LV_ALIGN_BOTTOM_LEFT, px(20), -px(14));
 
     lv_obj_set_parent(mesh_table, mesh_card);
-    lv_obj_align(mesh_table, LV_ALIGN_TOP_MID, 0, px(68));
+    lv_obj_align(mesh_table, LV_ALIGN_TOP_MID, 0, px(72));
+    // Valori della mappa in grande (18).
+    lv_obj_set_style_text_font(mesh_table, &lv_font_montserrat_18, LV_PART_ITEMS);
     lv_obj_set_style_bg_opa(mesh_table, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(mesh_table, 0, LV_PART_MAIN);
     lv_obj_set_style_radius(mesh_table, 0, LV_PART_ITEMS);
@@ -157,8 +160,8 @@ BedMeshPanel::BedMeshPanel(KWebSocketClient &c, std::mutex &l)
     lv_obj_set_style_pad_hor(mesh_table, 0, LV_PART_ITEMS);
 
     lv_obj_t *profile_card = card(cont, 424, 12, 300, 332);
-    lv_obj_t *profile_title = powerui::label(profile_card, "Profiles", &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_FG));
-    lv_obj_set_pos(profile_title, px(20), px(16));
+    lv_obj_t *profile_title = powerui::label(profile_card, "Profiles", &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_FG));
+    lv_obj_set_pos(profile_title, px(20), px(14));
     lv_obj_set_parent(profile_cont, profile_card);
     lv_obj_set_size(profile_cont, px(276), px(272));
     lv_obj_set_pos(profile_cont, px(10), px(48));
@@ -184,14 +187,16 @@ BedMeshPanel::BedMeshPanel(KWebSocketClient &c, std::mutex &l)
       lv_obj_set_style_border_width(table, 1, LV_PART_ITEMS);
       lv_obj_set_style_border_color(table, lv_color_hex(powerui::COLOR_WHITE), LV_PART_ITEMS);
       lv_obj_set_style_border_opa(table, LV_OPA_10, LV_PART_ITEMS);
-      lv_obj_set_style_pad_top(table, px(9), LV_PART_ITEMS);
-      lv_obj_set_style_pad_bottom(table, px(9), LV_PART_ITEMS);
+      // Celle un po' meno alte: con le scritte piu' grandi ci stanno ancora quattro profili.
+      lv_obj_set_style_pad_top(table, px(7), LV_PART_ITEMS);
+      lv_obj_set_style_pad_bottom(table, px(7), LV_PART_ITEMS);
       for (lv_state_t state : {LV_STATE_PRESSED, LV_STATE_FOCUSED, LV_STATE_FOCUS_KEY, LV_STATE_CHECKED, LV_STATE_EDITED}) {
         lv_obj_set_style_bg_opa(table, LV_OPA_TRANSP, LV_PART_ITEMS | state);
         lv_obj_set_style_outline_width(table, 0, LV_PART_ITEMS | state);
       }
-      lv_obj_set_style_text_font(table, &lv_font_montserrat_14, LV_PART_ITEMS);
     }
+    // Nomi dei profili a 18, dettagli del profilo a 16.
+    lv_obj_set_style_text_font(profile_table, &lv_font_montserrat_18, LV_PART_ITEMS);
     lv_obj_add_event_cb(profile_table, [](lv_event_t *e) {
       lv_obj_draw_part_dsc_t *dsc = lv_event_get_draw_part_dsc(e);
       if (dsc->part != LV_PART_ITEMS || dsc->label_dsc == NULL) {
@@ -231,7 +236,7 @@ BedMeshPanel::BedMeshPanel(KWebSocketClient &c, std::mutex &l)
     lv_table_set_col_width(profile_info, 0, px(176));
     lv_table_set_col_width(profile_info, 1, px(100));
     lv_obj_set_height(profile_info, LV_SIZE_CONTENT);
-    lv_obj_set_style_text_font(profile_info, &lv_font_montserrat_14, LV_PART_ITEMS);
+    lv_obj_set_style_text_font(profile_info, &lv_font_montserrat_16, LV_PART_ITEMS);
     lv_obj_set_style_pad_hor(profile_info, px(4), LV_PART_ITEMS);
     lv_obj_set_style_pad_hor(profile_table, px(4), LV_PART_ITEMS);
 
@@ -239,14 +244,16 @@ BedMeshPanel::BedMeshPanel(KWebSocketClient &c, std::mutex &l)
     lv_obj_add_flag(controls_cont, LV_OBJ_FLAG_HIDDEN);
 
     // Action row: three small buttons under the profiles card (Calibrate, Save, Clear).
+    // Scritta dei pulsanti a 18 (impostata prima di set_fixed_size, che centra icona e testo).
     auto put = [this](ButtonContainer &button, int x) {
       lv_obj_set_parent(button.get_container(), cont);
-      button.set_fixed_size(powerui::px(92), powerui::px(72));
+      lv_obj_set_style_text_font(button.get_label(), &lv_font_montserrat_18, LV_PART_MAIN);
+      button.set_fixed_size(powerui::px(96), powerui::px(72));
       lv_obj_set_pos(button.get_container(), powerui::px(x), powerui::px(356));
     };
     put(calibrate_btn, 424);
-    put(save_btn, 528);
-    put(clear_btn, 632);
+    put(save_btn, 526);
+    put(clear_btn, 628);
     style_button(calibrate_btn.get_container(), calibrate_btn.get_button(), ButtonKind::Soft);
     style_button(save_btn.get_container(), save_btn.get_button(), ButtonKind::Outline);
     style_button(clear_btn.get_container(), clear_btn.get_button(), ButtonKind::Destructive);
@@ -321,8 +328,9 @@ void BedMeshPanel::refresh_views(json &bm) {
       // calculate cell width
       if (mesh.size() > 0 && mesh[0].size() > 0) {
 	int col_width = std::max(4, (int)(powerui::px(372) / mesh[0].size()));
-	int row_height = std::max(8, (int)(powerui::px(316) / mesh.size()));
-	int cel_height = std::max(1, (int)((row_height - 22) / 2));
+	// Altezza della mappa ridotta di poco: i valori a 18 non toccano le statistiche in fondo.
+	int row_height = std::max(8, (int)(powerui::px(300) / mesh.size()));
+	int cel_height = std::max(1, (int)((row_height - 24) / 2));
 
 	lv_obj_set_style_pad_top(mesh_table, cel_height, LV_PART_ITEMS | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(mesh_table, cel_height, LV_PART_ITEMS | LV_STATE_DEFAULT);

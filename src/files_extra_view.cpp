@@ -365,7 +365,7 @@ void FilesExtraView::rebuild_detail() {
 
   lv_obj_t *preview = plain(detail);
   lv_obj_set_pos(preview, px(16), px(12));
-  lv_obj_set_size(preview, px(260), px(100));
+  lv_obj_set_size(preview, px(260), px(mode == Mode::History ? 150 : 100));
   lv_obj_set_style_radius(preview, px(10), 0);
   lv_obj_set_style_bg_color(preview, lv_color_hex(COLOR_BG), 0);
   lv_obj_set_style_bg_opa(preview, LV_OPA_COVER, 0);
@@ -379,7 +379,7 @@ void FilesExtraView::rebuild_detail() {
   if (mode == Mode::History && have && jobs[selected].exists && !jobs[selected].thumbnails.empty()) {
     // Storico: l'anteprima del pezzo e' quella del file, se il file c'e' ancora.
     json wrapper = {{"result", {{"thumbnails", jobs[selected].thumbnails}}}};
-    auto thumb = KUtils::get_thumbnail(jobs[selected].filename, wrapper, 96.0 / 300.0);
+    auto thumb = KUtils::get_thumbnail(jobs[selected].filename, wrapper, 1.0);  // la piu' grande, poi rimpicciolita
     preview_file = thumb.first;
     preview_width = static_cast<int>(thumb.second);
   }
@@ -395,7 +395,7 @@ void FilesExtraView::rebuild_detail() {
     lv_obj_t *shot = lv_img_create(preview);
     lv_img_set_src(shot, thumb_src.c_str());
     if (mode == Mode::History && preview_width > 0) {
-      lv_img_set_zoom(shot, 256 * px(92) / preview_width);  // il pezzo entra nel riquadro alto 100
+      lv_img_set_zoom(shot, 256 * px(140) / preview_width);  // il pezzo entra nel riquadro alto 150
     } else {
       lv_img_set_zoom(shot, 256 * px(176) / 1280);  // il fotogramma 1280x720 entra nel riquadro alto 100
     }
@@ -412,7 +412,7 @@ void FilesExtraView::rebuild_detail() {
     lv_obj_set_width(hint, px(260));
     lv_obj_set_style_text_align(hint, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_set_style_text_font(hint, &lv_font_montserrat_16, 0);
-    lv_obj_set_pos(hint, px(16), px(130));
+    lv_obj_set_pos(hint, px(16), px(mode == Mode::History ? 176 : 130));
     return;
   }
 
@@ -421,17 +421,19 @@ void FilesExtraView::rebuild_detail() {
     lv_obj_t *title = label(detail, strip_ext(base_name(h.filename)).c_str(), &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
     lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
     lv_obj_set_width(title, px(260));
-    lv_obj_set_pos(title, px(16), px(120));
+    lv_obj_set_pos(title, px(16), px(170));
     const bool ok = h.status == "completed";
     std::string status = h.status;
     if (!status.empty()) {
       status[0] = static_cast<char>(std::toupper(status[0]));
     }
     lv_obj_t *b = badge(detail, status.c_str(), lv_color_hex(ok ? COLOR_ACCENT : h.status == "in_progress" ? COLOR_WARNING : COLOR_DESTRUCTIVE));
-    lv_obj_set_pos(b, px(16), px(150));
-    add_info_row(180, "Started", format_time(h.start));
-    add_info_row(212, "Duration", format_duration(h.duration));
-    add_info_row(244, "Filament", h.weight_g > 0 ? fmt::format("{:.0f} g", h.weight_g) : fmt::format("{:.1f} m", h.filament_mm / 1000.0));
+    // Lo stato sta sopra l'anteprima, in alto a sinistra: l'anteprima grande prende il suo posto.
+    lv_obj_set_parent(b, preview);
+    lv_obj_set_pos(b, px(8), px(8));
+    add_info_row(198, "Started", format_time(h.start));
+    add_info_row(226, "Duration", format_duration(h.duration));
+    add_info_row(254, "Filament", h.weight_g > 0 ? fmt::format("{:.0f} g", h.weight_g) : fmt::format("{:.1f} m", h.filament_mm / 1000.0));
     primary_btn = action_button(detail, NULL, "Print again", ActionKind::Primary, 16, 348, 260, 52, &FilesExtraView::_action_clicked, this);
     // Attaccato al fondo del riquadro: non si taglia qualunque sia l'altezza.
     lv_obj_align(primary_btn, LV_ALIGN_BOTTOM_LEFT, px(16), -px(12));

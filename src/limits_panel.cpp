@@ -68,36 +68,53 @@ LimitsPanel::LimitCard LimitsPanel::create_card(int x, int y, const char *name, 
   c.unit = unit;
   c.card = card(limit_cont, x, y, 350, 202);
 
-  lv_obj_t *title = label(c.card, name, &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(title, px(20), px(18));
+  // Riga in alto: nome a 18 (va a capo nello spazio lasciato dal pulsante) e Reset con il testo a 18, largo quanto
+  // il suo testo nella lingua scelta.
+  lv_obj_t *header = plain(c.card);
+  lv_obj_set_pos(header, px(20), px(10));
+  lv_obj_set_size(header, px(310), LV_SIZE_CONTENT);
+  lv_obj_set_flex_flow(header, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(header, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_column(header, px(10), 0);
 
-  c.reset = action_button(c.card, &ui_icon_reset, "Reset", ActionKind::Outline, 246, 12, 90, 32, &LimitsPanel::_handle_callback, this);
+  lv_obj_t *title = label(header, name, &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_label_set_long_mode(title, LV_LABEL_LONG_WRAP);
+  lv_obj_set_flex_grow(title, 1);
+
+  c.reset = action_button(header, &ui_icon_reset, "Reset", ActionKind::Outline, 0, 0, 90, 36, &LimitsPanel::_handle_callback, this);
+  lv_obj_set_width(c.reset, LV_SIZE_CONTENT);
+  lv_obj_set_style_pad_hor(c.reset, px(12), 0);
+  lv_obj_t *reset_text = lv_obj_get_child(c.reset, -1);
+  if (reset_text != NULL && lv_obj_check_type(reset_text, &lv_label_class)) {
+    lv_obj_set_style_text_font(reset_text, &lv_font_montserrat_18, 0);
+  }
 
   // Value and unit share a flex row so the unit stays attached to the end of the number.
   lv_obj_t *value_row = plain(c.card);
-  lv_obj_set_pos(value_row, px(20), px(58));
-  lv_obj_set_size(value_row, px(310), px(52));
+  lv_obj_set_pos(value_row, px(20), px(56));
+  lv_obj_set_size(value_row, px(310), px(50));
   lv_obj_set_flex_flow(value_row, LV_FLEX_FLOW_ROW);
   lv_obj_set_flex_align(value_row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_END);
   lv_obj_set_style_pad_column(value_row, px(8), 0);
   c.value = label(value_row, "0", &lv_font_montserrat_40, lv_color_hex(COLOR_FG));
-  lv_obj_t *unit_label = label(value_row, unit, &lv_font_montserrat_14, lv_color_hex(COLOR_MUTED));
+  lv_obj_t *unit_label = label(value_row, unit, &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
   lv_obj_set_style_pad_bottom(unit_label, px(6), 0);
 
   c.slider = lv_slider_create(c.card);
   lv_obj_set_size(c.slider, px(310), px(14));
-  lv_obj_set_pos(c.slider, px(20), px(122));
+  lv_obj_set_pos(c.slider, px(20), px(116));
   lv_slider_set_range(c.slider, 0, max_range);
   style_slider(c.slider);
   lv_obj_add_event_cb(c.slider, &LimitsPanel::_handle_value_changed, LV_EVENT_VALUE_CHANGED, c.value);
   lv_obj_add_event_cb(c.slider, &LimitsPanel::_handle_callback, LV_EVENT_RELEASED, this);
 
-  c.min_label = label(c.card, "0", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_set_pos(c.min_label, px(20), px(150));
-  c.max_label = label(c.card, std::to_string(max_range).c_str(), &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_align(c.max_label, LV_ALIGN_TOP_RIGHT, -px(20), px(150));
-  c.default_label = label(c.card, "", &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-  lv_obj_align(c.default_label, LV_ALIGN_BOTTOM_LEFT, px(20), -px(14));
+  // Minimo, massimo e valore predefinito a 18.
+  c.min_label = label(c.card, "0", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_obj_set_pos(c.min_label, px(20), px(141));
+  c.max_label = label(c.card, std::to_string(max_range).c_str(), &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_obj_align(c.max_label, LV_ALIGN_TOP_RIGHT, -px(20), px(141));
+  c.default_label = label(c.card, "", &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_obj_align(c.default_label, LV_ALIGN_BOTTOM_LEFT, px(20), -px(10));
   c.set_default(max_range);
   return c;
 }
