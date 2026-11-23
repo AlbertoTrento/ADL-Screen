@@ -1008,7 +1008,16 @@ void PrintStatusPanel::update_clock() {
 }
 
 void PrintStatusPanel::update_time_progress(uint32_t time_passed) {
-    int32_t remaining = estimated_time_s - time_passed;
+    // Tempo rimanente: all'inizio vale la stima dello slicer; man mano che la stampa avanza conta sempre di piu'
+    // la velocita' vera (tempo passato / avanzamento). Solo la stima dello slicer sbagliava di molto.
+    int32_t remaining = static_cast<int32_t>(estimated_time_s) - static_cast<int32_t>(time_passed);
+    auto &progress_json = State::get_instance()->get_data("/printer_state/virtual_sdcard/progress"_json_pointer);
+    const double progress = progress_json.is_number() ? progress_json.template get<double>() : 0.0;
+    if (progress >= 0.02 && progress < 1.0 && time_passed > 60) {
+      const double from_progress = time_passed / progress - time_passed;
+      const double from_slicer = remaining > 0 ? static_cast<double>(remaining) : from_progress;
+      remaining = static_cast<int32_t>(from_slicer * (1.0 - progress) + from_progress * progress);
+    }
     if (remaining < 0) {
       // XXX: better estimate
       time_left.update_label("...");

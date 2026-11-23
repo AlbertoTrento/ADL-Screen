@@ -44,6 +44,8 @@ class CfsPanel {
   void open_color_dialog();
   void close_color_dialog(bool apply);
   void handle_color_slider();
+  // Colore personalizzato: tocco su un colore della tavolozza, le barre servono solo a ritoccarlo.
+  void set_color_draft(uint32_t color, bool move_sliders);
   void check_saved();
   // Sends the color of a slot in the given format (see color_formats in the .cpp).
   void send_color(int slot, uint32_t color, int format);
@@ -131,7 +133,8 @@ class CfsPanel {
   lv_obj_t *color_root;
   lv_obj_t *color_preview;
   lv_obj_t *color_hex;
-  lv_obj_t *color_sliders[3];
+  lv_obj_t *color_sliders[3];  // tinta, intensita', luminosita'
+  std::vector<ColorHandle> custom_swatch_handles;
   uint32_t color_draft;
 
   // Result of the last save, checked once the printer reports the new values.

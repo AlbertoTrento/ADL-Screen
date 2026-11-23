@@ -439,41 +439,84 @@ CfsPanel::CfsPanel(KWebSocketClient &c, std::mutex &l)
                          [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->save_edit(); }, this),
            &lv_font_montserrat_20);
 
-  // ---- Custom color dialog (three sliders), above the editor.
+  // ---- Colore personalizzato, sopra l'editor: a sinistra una tavolozza di 45 colori da toccare,
+  // a destra il colore scelto e tre barre (tinta, intensita', luminosita') per ritoccarlo.
   color_root = dim_overlay(cont);
-  lv_obj_t *cc = card(color_root, 146, 40, 420, 336);
-  lv_obj_t *color_title = label(cc, "Colore personalizzato", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(color_title, px(24), px(16));
+  lv_obj_t *cc = card(color_root, 12, 8, 712, 424);
+  lv_obj_t *color_title = label(cc, "Colore personalizzato", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(color_title, px(24), px(14));
+
+  // Tavolozza: 8 tinte e una colonna di grigi; dall'alto in basso dal chiaro allo scuro.
+  static const uint16_t HUES[8] = {0, 28, 52, 110, 170, 210, 265, 320};
+  static const uint8_t SATS[5] = {25, 55, 100, 100, 100};
+  static const uint8_t VALS[5] = {100, 100, 100, 70, 40};
+  static const uint8_t GRAYS[5] = {100, 75, 50, 25, 4};
+  custom_swatch_handles.clear();
+  custom_swatch_handles.reserve(45);
+  for (int r = 0; r < 5; ++r) {
+    for (int c = 0; c < 9; ++c) {
+      const lv_color_t col = c < 8 ? lv_color_hsv_to_rgb(HUES[c], SATS[r], VALS[r]) : lv_color_hsv_to_rgb(0, 0, GRAYS[r]);
+      const uint32_t rgb = lv_color_to32(col) & 0xFFFFFF;
+      lv_obj_t *sw = lv_obj_create(cc);
+      lv_obj_remove_style_all(sw);
+      lv_obj_clear_flag(sw, LV_OBJ_FLAG_SCROLLABLE);
+      lv_obj_add_flag(sw, LV_OBJ_FLAG_CLICKABLE);
+      lv_obj_set_size(sw, px(40), px(40));
+      lv_obj_set_pos(sw, px(24 + c * 48), px(60 + r * 48));
+      lv_obj_set_style_radius(sw, px(8), 0);
+      lv_obj_set_style_bg_color(sw, lv_color_hex(rgb), 0);
+      lv_obj_set_style_bg_opa(sw, LV_OPA_COVER, 0);
+      lv_obj_set_style_border_width(sw, 1, 0);
+      lv_obj_set_style_border_color(sw, lv_color_hex(COLOR_WHITE), 0);
+      lv_obj_set_style_border_opa(sw, LV_OPA_20, 0);
+      lv_obj_set_style_outline_width(sw, px(3), LV_STATE_PRESSED);
+      lv_obj_set_style_outline_color(sw, lv_color_hex(COLOR_ACCENT), LV_STATE_PRESSED);
+      custom_swatch_handles.push_back({this, rgb});
+      lv_obj_add_event_cb(sw, [](lv_event_t *e) {
+        ColorHandle *h = static_cast<ColorHandle *>(e->user_data);
+        h->panel->set_color_draft(h->color, true);
+      }, LV_EVENT_CLICKED, &custom_swatch_handles.back());
+    }
+  }
+
+  // Colore scelto, grande.
   color_preview = lv_obj_create(cc);
   lv_obj_remove_style_all(color_preview);
   lv_obj_clear_flag(color_preview, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_size(color_preview, px(48), px(48));
-  lv_obj_set_pos(color_preview, px(24), px(62));
+  lv_obj_set_size(color_preview, px(72), px(72));
+  lv_obj_set_pos(color_preview, px(476), px(56));
   lv_obj_set_style_radius(color_preview, LV_RADIUS_CIRCLE, 0);
   lv_obj_set_style_bg_opa(color_preview, LV_OPA_COVER, 0);
   lv_obj_set_style_border_width(color_preview, 1, 0);
   lv_obj_set_style_border_color(color_preview, lv_color_hex(COLOR_WHITE), 0);
   lv_obj_set_style_border_opa(color_preview, LV_OPA_30, 0);
-  color_hex = label(cc, "#FFFFFF", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(color_hex, px(90), px(74));
-  const char *channels[3] = {"R", "G", "B"};
+  color_hex = label(cc, "#FFFFFF", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(color_hex, px(560), px(78));
+
+  // Barre per ritoccare.
+  const char *channels[3] = {"Tinta", "Intensita'", "Luminosita'"};
+  const int ranges[3] = {359, 100, 100};
   for (int i = 0; i < 3; ++i) {
-    const int y = 132 + i * 46;
-    lv_obj_t *ch = label(cc, channels[i], &lv_font_montserrat_16, lv_color_hex(COLOR_MUTED));
-    lv_obj_set_pos(ch, px(24), px(y - 4));
+    const int y = 146 + i * 64;
+    lv_obj_t *ch = label(cc, channels[i], &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+    lv_obj_set_pos(ch, px(476), px(y));
     lv_obj_t *sl = lv_slider_create(cc);
     color_sliders[i] = sl;
-    lv_slider_set_range(sl, 0, 255);
-    lv_obj_set_size(sl, px(320), px(10));
-    lv_obj_set_pos(sl, px(58), px(y));
+    lv_slider_set_range(sl, 0, ranges[i]);
+    lv_obj_set_size(sl, px(200), px(14));
+    lv_obj_set_pos(sl, px(484), px(y + 32));
     style_slider(sl);
     lv_obj_add_event_cb(sl, [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->handle_color_slider(); },
                         LV_EVENT_VALUE_CHANGED, this);
   }
-  action_button(cc, NULL, "Annulla", ActionKind::Outline, 24, 268, 180, 46,
+
+  lv_obj_t *cancel_color = action_button(cc, NULL, "Annulla", ActionKind::Outline, 24, 352, 200, 56,
                 [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->close_color_dialog(false); }, this);
-  action_button(cc, NULL, "OK", ActionKind::Primary, 216, 268, 180, 46,
+  lv_obj_t *ok_color = action_button(cc, NULL, "OK", ActionKind::Primary, 476, 352, 212, 56,
                 [](lv_event_t *e) { static_cast<CfsPanel *>(e->user_data)->close_color_dialog(true); }, this);
+  for (lv_obj_t *btn : {cancel_color, ok_color}) {
+    lv_obj_set_style_text_font(lv_obj_get_child(btn, lv_obj_get_child_cnt(btn) - 1), &lv_font_montserrat_20, 0);
+  }
 
   refresh();
 }
@@ -831,22 +874,32 @@ void CfsPanel::pick_color(uint32_t color) {
 }
 
 void CfsPanel::open_color_dialog() {
-  color_draft = edit_color & 0xFFFFFF;
-  lv_slider_set_value(color_sliders[0], (color_draft >> 16) & 0xFF, LV_ANIM_OFF);
-  lv_slider_set_value(color_sliders[1], (color_draft >> 8) & 0xFF, LV_ANIM_OFF);
-  lv_slider_set_value(color_sliders[2], color_draft & 0xFF, LV_ANIM_OFF);
-  lv_obj_set_style_bg_color(color_preview, lv_color_hex(color_draft), 0);
-  lv_label_set_text(color_hex, hex_text(color_draft).c_str());
+  set_color_draft(edit_color & 0xFFFFFF, true);
   lv_obj_clear_flag(color_root, LV_OBJ_FLAG_HIDDEN);
   lv_obj_move_foreground(color_root);
 }
 
-void CfsPanel::handle_color_slider() {
-  color_draft = (static_cast<uint32_t>(lv_slider_get_value(color_sliders[0])) << 16)
-                | (static_cast<uint32_t>(lv_slider_get_value(color_sliders[1])) << 8)
-                | static_cast<uint32_t>(lv_slider_get_value(color_sliders[2]));
+void CfsPanel::set_color_draft(uint32_t color, bool move_sliders) {
+  color_draft = color & 0xFFFFFF;
+  if (move_sliders) {
+    const lv_color_hsv_t hsv = lv_color_rgb_to_hsv((color_draft >> 16) & 0xFF, (color_draft >> 8) & 0xFF, color_draft & 0xFF);
+    lv_slider_set_value(color_sliders[0], hsv.h, LV_ANIM_OFF);
+    lv_slider_set_value(color_sliders[1], hsv.s, LV_ANIM_OFF);
+    lv_slider_set_value(color_sliders[2], hsv.v, LV_ANIM_OFF);
+  }
   lv_obj_set_style_bg_color(color_preview, lv_color_hex(color_draft), 0);
   lv_label_set_text(color_hex, hex_text(color_draft).c_str());
+  // La barra prende il colore scelto: si vede subito cosa si sta ritoccando.
+  for (lv_obj_t *sl : color_sliders) {
+    lv_obj_set_style_bg_color(sl, lv_color_hex(color_draft), LV_PART_INDICATOR);
+  }
+}
+
+void CfsPanel::handle_color_slider() {
+  const lv_color_t col = lv_color_hsv_to_rgb(static_cast<uint16_t>(lv_slider_get_value(color_sliders[0])),
+                                             static_cast<uint8_t>(lv_slider_get_value(color_sliders[1])),
+                                             static_cast<uint8_t>(lv_slider_get_value(color_sliders[2])));
+  set_color_draft(lv_color_to32(col) & 0xFFFFFF, false);
 }
 
 void CfsPanel::close_color_dialog(bool apply) {

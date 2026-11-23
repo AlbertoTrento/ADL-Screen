@@ -463,6 +463,15 @@ PrintPanel::PrintPanel(KWebSocketClient &websocket, std::mutex &lock, PrintStatu
 
   ws.register_notify_update(this);
 
+  // Un file caricato da Orca (o cancellato da Fluidd) compare subito, senza premere Ricarica.
+  ws.register_method_callback("notify_filelist_changed", "PrintPanel", [this](json &d) {
+    auto &root_name = d["/params/0/item/root"_json_pointer];
+    if (root_name.is_string() && root_name.template get<std::string>() != "gcodes") {
+      return;
+    }
+    subscribe();
+  });
+
   // Timelapse and History views (hidden until their segment is selected).
   extra_view.reset(new FilesExtraView(ws, lv_lock, left_cont, lv_obj_get_parent(left_cont), [this](const std::string &file) {
     begin_print_flow(file);

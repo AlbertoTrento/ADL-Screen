@@ -400,3 +400,6 @@
 {"Temperature and fans", {"Temperature e ventole", "Temperature and fans", "Temperatur und Lüfter", "Température et ventilateurs", "Temperatura y ventiladores"}},
 {"Distanza", {"Distanza", "Distance", "Strecke", "Distance", "Distancia"}},
 {"Elimina più", {"Elimina più", "Delete several", "Mehrere löschen", "Suppr. plusieurs", "Borrar varios"}},
+{"Tinta", {"Tinta", "Hue", "Farbton", "Teinte", "Tono"}},
+{"Intensita'", {"Intensità", "Saturation", "Sättigung", "Saturation", "Saturación"}},
+{"Luminosita'", {"Luminosità", "Brightness", "Helligkeit", "Luminosité", "Brillo"}},
