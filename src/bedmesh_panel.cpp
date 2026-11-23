@@ -322,7 +322,7 @@ void BedMeshPanel::refresh_views(json &bm) {
           }
         }
         lv_label_set_text(mesh_stats_label,
-                          fmt::format("Min {:.3f}   Max {:.3f}   Range {:.3f} mm", lowest, highest, highest - lowest).c_str());
+                          fmt::format("Min {:.3f}   Max {:.3f}   Diff. {:.3f} mm", lowest, highest, highest - lowest).c_str());
       }
 
       // calculate cell width
@@ -403,14 +403,14 @@ void BedMeshPanel::refresh_profile_info(std::string profile) {
     uint32_t rowidx = 0;
     auto &v = mesh_params["/algo"_json_pointer];
     if (!v.is_null()) {
-      lv_table_set_cell_value(profile_info, rowidx, 0, "Algorithm");
+      lv_table_set_cell_value(profile_info, rowidx, 0, "Algoritmo");  // le celle della tabella non passano dalla traduzione
       lv_table_set_cell_value(profile_info, rowidx, 1, v.template get<std::string>().c_str());
       rowidx++;
     }
 
     v = mesh_params["/tension"_json_pointer];
     if (!v.is_null()) {
-      lv_table_set_cell_value(profile_info, rowidx, 0, "Tension");
+      lv_table_set_cell_value(profile_info, rowidx, 0, "Tensione");
       lv_table_set_cell_value(profile_info, rowidx, 1, fmt::format("{}", v.template get<double>()).c_str());
       rowidx++;
     }    
@@ -423,7 +423,7 @@ void BedMeshPanel::refresh_profile_info(std::string profile) {
       }
     }
 
-    lv_table_set_cell_value(profile_info, rowidx, 0, "X (min, max, count)");
+    lv_table_set_cell_value(profile_info, rowidx, 0, "X (min, max, punti)");
     lv_table_set_cell_value(profile_info, rowidx, 1, fmt::format("{}", fmt::join(xvalues, ", ")).c_str());
     rowidx++;    
 
@@ -435,7 +435,7 @@ void BedMeshPanel::refresh_profile_info(std::string profile) {
       }
     }
 
-    lv_table_set_cell_value(profile_info, rowidx, 0, "Y (min, max, count)");
+    lv_table_set_cell_value(profile_info, rowidx, 0, "Y (min, max, punti)");
     lv_table_set_cell_value(profile_info, rowidx, 1, fmt::format("{}", fmt::join(yvalues, ", ")).c_str());
     rowidx++;
   }
