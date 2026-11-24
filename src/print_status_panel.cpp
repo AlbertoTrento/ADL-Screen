@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "print_status_panel.h"
 #include "powerui.h"
 #include "finetune_panel.h"
@@ -574,6 +575,10 @@ void PrintStatusPanel::reset() {
   elapsed.update_label("0s");
   time_left.update_label("...");
   estimated_time_s = 0;
+  gcode_start_byte = 0;
+  gcode_end_byte = 0;
+  first_progress = -1.0;
+  first_passed = 0;
   lv_label_set_text(file_label, "Nessuna stampa");
   lv_obj_add_flag(file_cont, LV_OBJ_FLAG_HIDDEN);
   update_status_label("ready");
@@ -710,6 +715,17 @@ void PrintStatusPanel::handle_metadata(const std::string &gcode_file, json &j) {
       std::lock_guard<std::mutex> lock(lv_lock);
       update_time_progress(passed);
     }
+  }
+
+  auto start_byte = j["/result/gcode_start_byte"_json_pointer];
+  auto end_byte = j["/result/gcode_end_byte"_json_pointer];
+  if (start_byte.is_number() && end_byte.is_number()) {
+    gcode_start_byte = start_byte.template get<uint64_t>();
+    gcode_end_byte = end_byte.template get<uint64_t>();
+  }
+  // un file diverso e' una stampa nuova: il ritmo si misura da capo
+  if (!current_file.is_object() || current_file.value("filename", std::string()) != j["/result"_json_pointer].value("filename", std::string())) {
+    first_progress = -1.0;
   }
 
   current_file = j["/result"_json_pointer];
@@ -1008,15 +1024,32 @@ void PrintStatusPanel::update_clock() {
 }
 
 void PrintStatusPanel::update_time_progress(uint32_t time_passed) {
-    // Tempo rimanente: all'inizio vale la stima dello slicer; man mano che la stampa avanza conta sempre di piu'
-    // la velocita' vera (tempo passato / avanzamento). Solo la stima dello slicer sbagliava di molto.
+    // Tempo rimanente. All'inizio vale la stima di Orca; poi conta solo il ritmo vero della stampa:
+    // quanto file e' stato stampato nel tempo passato da quando la stampa muove davvero (escluso il
+    // riscaldamento), sui soli byte del G-code (escluse intestazione e miniature).
     int32_t remaining = static_cast<int32_t>(estimated_time_s) - static_cast<int32_t>(time_passed);
-    auto &progress_json = State::get_instance()->get_data("/printer_state/virtual_sdcard/progress"_json_pointer);
-    const double progress = progress_json.is_number() ? progress_json.template get<double>() : 0.0;
-    if (progress >= 0.02 && progress < 1.0 && time_passed > 60) {
-      const double from_progress = time_passed / progress - time_passed;
-      const double from_slicer = remaining > 0 ? static_cast<double>(remaining) : from_progress;
-      remaining = static_cast<int32_t>(from_slicer * (1.0 - progress) + from_progress * progress);
+    auto *st = State::get_instance();
+    double progress = 0.0;
+    auto &pos_json = st->get_data("/printer_state/virtual_sdcard/file_position"_json_pointer);
+    if (pos_json.is_number() && gcode_end_byte > gcode_start_byte) {
+      const double pos = pos_json.template get<double>();
+      progress = (pos - static_cast<double>(gcode_start_byte)) / static_cast<double>(gcode_end_byte - gcode_start_byte);
+    } else {
+      auto &progress_json = st->get_data("/printer_state/virtual_sdcard/progress"_json_pointer);
+      progress = progress_json.is_number() ? progress_json.template get<double>() : 0.0;
+    }
+    progress = std::min(1.0, std::max(0.0, progress));
+    if (first_progress < 0.0 && progress >= 0.005) { first_progress = progress; first_passed = time_passed; }
+    if (first_progress >= 0.0 && progress < 1.0) {
+      const double done = progress - first_progress;
+      const double spent = static_cast<double>(time_passed) - first_passed;
+      if (done >= 0.01 && spent >= 60.0) {
+        const double from_pace = spent / done * (1.0 - progress);
+        const double from_slicer = remaining > 0 ? static_cast<double>(remaining) : from_pace;
+        // dal 10% di avanzamento in poi vale solo il ritmo vero
+        const double w = std::min(1.0, done / 0.10);
+        remaining = static_cast<int32_t>(from_slicer * (1.0 - w) + from_pace * w);
+      }
     }
     if (remaining < 0) {
       // XXX: better estimate

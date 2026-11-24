@@ -119,6 +119,12 @@ class PrintStatusPanel : public NotifyConsumer {
 
   /* json &metadata; */
   uint32_t estimated_time_s;
+  // Byte del G-code vero (dopo l'intestazione e le miniature) e primo punto misurato della stampa:
+  // il tempo rimanente si calcola dal ritmo reale da quel punto in poi, senza il riscaldamento.
+  uint64_t gcode_start_byte = 0;
+  uint64_t gcode_end_byte = 0;
+  double first_progress = -1.0;
+  uint32_t first_passed = 0;
 
   // flow rate
   std::time_t flow_ts;
