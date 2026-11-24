@@ -10,8 +10,15 @@ LV_IMG_DECLARE(ui_icon_exclude);
 
 namespace {
 // Map of the bed (right card), in design pixels.
-constexpr int MAP_W = 268;
-constexpr int MAP_H = 268;
+// Lista a sinistra 12-448, mappa a destra 460-724.
+constexpr int LIST_W = 436;
+constexpr int MAP_CARD_X = 460;
+constexpr int MAP_CARD_W = 264;
+constexpr int MAP_W = 236;
+constexpr int MAP_H = 236;
+constexpr int ROW_W = LIST_W - 24;  // righe della lista
+constexpr int ROW_H = 84;
+constexpr int BTN_W = 128;
 constexpr int MAP_PAD = 10;
 }  // namespace
 
@@ -40,41 +47,41 @@ ExcludeObjectPanel::ExcludeObjectPanel(KWebSocketClient &websocket_client, std::
   lv_obj_add_flag(cont, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_CLICKABLE);
 
   // ---- Objects card (left).
-  lv_obj_t *list_card = card(cont, 12, 12, 400, 416);
-  lv_obj_t *list_title = label(list_card, "Objects", &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(list_title, px(20), px(18));
+  lv_obj_t *list_card = card(cont, 12, 12, LIST_W, 416);
+  lv_obj_t *list_title = label(list_card, "Objects", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(list_title, px(20), px(14));
   list = lv_obj_create(list_card);
   lv_obj_remove_style_all(list);
-  lv_obj_set_size(list, px(376), px(348));
-  lv_obj_set_pos(list, px(12), px(54));
+  lv_obj_set_size(list, px(ROW_W), px(346));
+  lv_obj_set_pos(list, px(12), px(58));
   lv_obj_add_flag(list, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(list, LV_DIR_VER);
   lv_obj_set_flex_flow(list, LV_FLEX_FLOW_COLUMN);
-  lv_obj_set_style_pad_row(list, px(8), 0);
+  lv_obj_set_style_pad_row(list, px(10), 0);
   empty = empty_state(list_card, &ui_icon_exclude, "No objects",
                       "This file has no labeled objects. Enable \"Label objects\" in the slicer.");
   lv_obj_add_flag(empty, LV_OBJ_FLAG_HIDDEN);
 
   // ---- Bed map card (right).
-  lv_obj_t *map_card = card(cont, 424, 12, 300, 416);
-  lv_obj_t *map_title = label(map_card, "Bed map", &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(map_title, px(20), px(18));
+  lv_obj_t *map_card = card(cont, MAP_CARD_X, 12, MAP_CARD_W, 416);
+  lv_obj_t *map_title = label(map_card, "Bed map", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_obj_set_pos(map_title, px(20), px(14));
   map = lv_obj_create(map_card);
   lv_obj_remove_style_all(map);
   lv_obj_clear_flag(map, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_size(map, px(MAP_W), px(MAP_H));
-  lv_obj_set_pos(map, px(16), px(54));
+  lv_obj_set_pos(map, px((MAP_CARD_W - MAP_W) / 2), px(58));
   lv_obj_set_style_bg_color(map, lv_color_hex(COLOR_BG), 0);
   lv_obj_set_style_bg_opa(map, LV_OPA_COVER, 0);
   lv_obj_set_style_radius(map, px(12), 0);
   lv_obj_set_style_border_width(map, 1, 0);
   lv_obj_set_style_border_color(map, lv_color_hex(COLOR_WHITE), 0);
   lv_obj_set_style_border_opa(map, LV_OPA_10, 0);
-  lv_obj_t *note = label(map_card, "Excluding an object cannot be undone until the next print.", &lv_font_montserrat_12,
+  lv_obj_t *note = label(map_card, "Excluding an object cannot be undone until the next print.", &lv_font_montserrat_18,
                          lv_color_hex(COLOR_MUTED));
   lv_label_set_long_mode(note, LV_LABEL_LONG_WRAP);
-  lv_obj_set_width(note, px(260));
-  lv_obj_set_pos(note, px(20), px(336));
+  lv_obj_set_width(note, px(MAP_W));
+  lv_obj_set_pos(note, px((MAP_CARD_W - MAP_W) / 2), px(58 + MAP_H + 12));
 
   // ---- Confirmation (shown over the whole panel).
   confirm = lv_obj_create(cont);
@@ -84,32 +91,34 @@ ExcludeObjectPanel::ExcludeObjectPanel(KWebSocketClient &websocket_client, std::
   lv_obj_set_style_bg_opa(confirm, LV_OPA_70, 0);
   lv_obj_add_flag(confirm, LV_OBJ_FLAG_CLICKABLE);  // swallows touches while asking
   lv_obj_clear_flag(confirm, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_t *dlg = card(confirm, 0, 0, 380, 190);
+  lv_obj_t *dlg = card(confirm, 0, 0, 600, 270);
   lv_obj_center(dlg);
   lv_obj_set_style_border_opa(dlg, LV_OPA_30, 0);
-  confirm_title = label(dlg, "Exclude object?", &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
-  lv_obj_set_pos(confirm_title, px(24), px(22));
-  lv_obj_t *msg = label(dlg, "It will not be printed. This cannot be undone until the next print.", &lv_font_montserrat_14,
+  confirm_title = label(dlg, "Exclude object?", &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
+  lv_label_set_long_mode(confirm_title, LV_LABEL_LONG_DOT);
+  lv_obj_set_width(confirm_title, px(552));
+  lv_obj_set_pos(confirm_title, px(24), px(24));
+  lv_obj_t *msg = label(dlg, "It will not be printed. This cannot be undone until the next print.", &lv_font_montserrat_20,
                         lv_color_hex(COLOR_MUTED));
   lv_label_set_long_mode(msg, LV_LABEL_LONG_WRAP);
-  lv_obj_set_width(msg, px(332));
-  lv_obj_set_pos(msg, px(24), px(62));
+  lv_obj_set_width(msg, px(552));
+  lv_obj_set_pos(msg, px(24), px(72));
   auto make_button = [this, dlg](const char *text, bool danger, int x) {
     lv_obj_t *b = lv_btn_create(dlg);
-    lv_obj_set_size(b, px(156), px(44));
-    lv_obj_set_pos(b, px(x), px(122));
+    lv_obj_set_size(b, px(268), px(64));
+    lv_obj_set_pos(b, px(x), px(182));
     lv_obj_set_style_radius(b, px(10), LV_PART_MAIN);
     lv_obj_set_style_shadow_width(b, 0, LV_PART_MAIN);
     lv_obj_set_style_border_width(b, 0, LV_PART_MAIN);
     lv_obj_set_style_bg_color(b, lv_color_hex(danger ? powerui::COLOR_DANGER : powerui::COLOR_SECONDARY), LV_PART_MAIN);
     lv_obj_set_style_bg_color(b, lv_color_hex(danger ? powerui::COLOR_MAT_RED_DARK : powerui::COLOR_PRESSED), LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_t *t = powerui::label(b, text, &lv_font_montserrat_16, lv_color_hex(powerui::COLOR_WHITE));
+    lv_obj_t *t = powerui::label(b, text, &lv_font_montserrat_24, lv_color_hex(powerui::COLOR_WHITE));
     lv_obj_center(t);
     lv_obj_add_event_cb(b, &ExcludeObjectPanel::_handle_event, LV_EVENT_CLICKED, this);
     return b;
   };
   confirm_cancel = make_button("Cancel", false, 24);
-  confirm_ok = make_button("Exclude", true, 200);
+  confirm_ok = make_button("Exclude", true, 308);
   lv_obj_add_flag(confirm, LV_OBJ_FLAG_HIDDEN);
 
   lv_obj_move_background(cont);
@@ -303,7 +312,7 @@ void ExcludeObjectPanel::rebuild() {
     lv_obj_t *row = lv_obj_create(list);
     lv_obj_remove_style_all(row);
     lv_obj_clear_flag(row, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_size(row, px(376), px(64));
+    lv_obj_set_size(row, px(ROW_W), px(ROW_H));
     lv_obj_set_style_radius(row, px(12), 0);
     lv_obj_set_style_border_width(row, 1, 0);
     lv_obj_set_style_border_color(row, lv_color_hex(COLOR_WHITE), 0);
@@ -311,24 +320,25 @@ void ExcludeObjectPanel::rebuild() {
     lv_obj_set_style_opa(row, ob.excluded ? LV_OPA_60 : LV_OPA_COVER, 0);
 
     lv_obj_t *index = plain(row);
-    lv_obj_set_size(index, px(32), px(32));
-    lv_obj_set_pos(index, px(12), px(15));
+    lv_obj_set_size(index, px(48), px(48));
+    lv_obj_set_pos(index, px(12), px((ROW_H - 48) / 2));
     lv_obj_set_style_radius(index, px(8), 0);
     lv_obj_set_style_bg_color(index, lv_color_hex(COLOR_SECONDARY), 0);
     lv_obj_set_style_bg_opa(index, LV_OPA_COVER, 0);
-    lv_obj_t *number = label(index, std::to_string(i + 1).c_str(), &lv_font_montserrat_14, lv_color_hex(COLOR_FG));
+    lv_obj_t *number = label(index, std::to_string(i + 1).c_str(), &lv_font_montserrat_24, lv_color_hex(COLOR_FG));
     lv_obj_center(number);
 
-    lv_obj_t *name = label(row, display_name(ob.name).c_str(), &lv_font_montserrat_16, lv_color_hex(COLOR_FG));
+    // Nome grande; se e' lungo va a capo su due righe (si legge tutto, es. i nomi del test di flusso).
+    lv_obj_t *name = label(row, display_name(ob.name).c_str(), &lv_font_montserrat_20, lv_color_hex(COLOR_FG));
     lv_label_set_long_mode(name, LV_LABEL_LONG_DOT);
-    lv_obj_set_size(name, px(200), px(22));
-    lv_obj_set_pos(name, px(56), px(10));
+    lv_obj_set_size(name, px(ROW_W - 72 - BTN_W - 20), px(48));
+    lv_obj_set_pos(name, px(72), px(6));
     lv_obj_t *status = label(row, ob.excluded ? "Excluded" : (ob.name == current_object ? "Printing now" : "Printing"),
-                             &lv_font_montserrat_12, lv_color_hex(COLOR_MUTED));
-    lv_obj_set_pos(status, px(56), px(36));
+                             &lv_font_montserrat_18, lv_color_hex(ob.name == current_object && !ob.excluded ? COLOR_ACCENT : COLOR_MUTED));
+    lv_obj_set_pos(status, px(72), px(56));
 
     lv_obj_t *btn = lv_btn_create(row);
-    lv_obj_set_size(btn, px(92), px(36));
+    lv_obj_set_size(btn, px(BTN_W), px(60));
     lv_obj_align(btn, LV_ALIGN_RIGHT_MID, -px(12), 0);
     lv_obj_set_style_radius(btn, px(10), LV_PART_MAIN);
     lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
@@ -338,7 +348,7 @@ void ExcludeObjectPanel::rebuild() {
     lv_obj_set_style_border_opa(btn, LV_OPA_50, LV_PART_MAIN);
     lv_obj_set_style_bg_color(btn, lv_color_hex(COLOR_DESTRUCTIVE_BG), LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_t *btn_label = label(btn, ob.excluded ? "Excluded" : "Exclude", &lv_font_montserrat_14,
+    lv_obj_t *btn_label = label(btn, ob.excluded ? "Excluded" : "Exclude", &lv_font_montserrat_20,
                                 lv_color_hex(ob.excluded ? COLOR_MUTED : COLOR_DESTRUCTIVE));
     lv_obj_center(btn_label);
     if (ob.excluded) {
@@ -357,7 +367,7 @@ void ExcludeObjectPanel::rebuild() {
   const double scale = std::min(area_w / bed_w, area_h / bed_h);
   const double off_x = px(MAP_PAD) + (area_w - bed_w * scale) / 2;
   const double off_y = px(MAP_PAD) + (area_h - bed_h * scale) / 2;
-  const lv_coord_t min_side = px(22);
+  const lv_coord_t min_side = px(28);
   for (size_t i = 0; i < objects.size(); ++i) {
     const Object &ob = objects[i];
     lv_coord_t w = std::max<lv_coord_t>(min_side, (lv_coord_t)((ob.x1 - ob.x0) * scale));
@@ -384,7 +394,7 @@ void ExcludeObjectPanel::rebuild() {
       lv_obj_set_style_border_opa(r, ob.name == current_object ? LV_OPA_COVER : LV_OPA_60, 0);
       tone = COLOR_ACCENT;
     }
-    lv_obj_t *n = label(r, std::to_string(i + 1).c_str(), &lv_font_montserrat_14, lv_color_hex(tone));
+    lv_obj_t *n = label(r, std::to_string(i + 1).c_str(), &lv_font_montserrat_18, lv_color_hex(tone));
     lv_obj_center(n);
   }
 }
