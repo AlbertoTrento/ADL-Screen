@@ -169,17 +169,22 @@ void PowerScreen::loop() {
 #if !defined(SIMULATOR)
   std::atomic_bool is_sleeping(false);
   Config *conf = Config::get_instance();
-  int32_t display_sleep = conf->get<int32_t>("/display_sleep_sec") * 1000;
+  int32_t display_sleep_sec = -1;
 #endif
 
   while (1) {
     lv_lock.lock();
     lv_timer_handler();
+#if !defined(SIMULATOR)
+    // Il tempo si rilegge a ogni giro (sotto il lock, come quando si salva da Sistema):
+    // prima si leggeva una volta sola all'avvio e la scelta valeva solo dopo un riavvio.
+    display_sleep_sec = conf->get<int32_t>("/display_sleep_sec");
+#endif
     lv_lock.unlock();
 
 #if !defined(SIMULATOR)
-    if (display_sleep != -1) {
-      if (lv_disp_get_inactive_time(NULL) > display_sleep) {
+    if (display_sleep_sec > 0) {
+      if (lv_disp_get_inactive_time(NULL) > (uint32_t)display_sleep_sec * 1000) {
         if (!is_sleeping.load()) {
           spdlog::debug("putting display to sleeping");
           fbdev_blank();
