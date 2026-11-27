@@ -39,6 +39,10 @@ constexpr lv_coord_t PREVIEW_AREA_EXTRA_HEIGHT = 5;
 // Job card (PowerUI): the thumbnail box is as tall as the card allows, so the name, the status, the percentage and the
 // bar sit right above Pause and Cancel. Design pixels, like the rest of that layout.
 constexpr int JOB_THUMB_HEIGHT = 212;
+// Sfondo grigio chiaro dietro l'anteprima: un pezzo nero sul nero non si vedeva.
+constexpr uint32_t PREVIEW_BG = 0xBFC3CA;
+// Lato del riquadro dell'anteprima grande (lo schermo e' alto 480).
+constexpr int BIG_PREVIEW_SIZE = 456;
 constexpr lv_coord_t PROGRESS_WIDTH = 311;
 constexpr lv_coord_t PAUSE_CANCEL_BUTTON_WIDTH = 152;
 constexpr lv_coord_t PAUSE_CANCEL_SIDE_PAD = 10;
@@ -377,8 +381,13 @@ PrintStatusPanel::PrintStatusPanel(KWebSocketClient &websocket_client,
     lv_obj_set_parent(thumbnail_cont, left);
     lv_obj_set_size(thumbnail_cont, px(224), px(JOB_THUMB_HEIGHT));
     lv_obj_set_pos(thumbnail_cont, px(11), px(11));
-    lv_obj_set_style_bg_color(thumbnail_cont, lv_color_hex(powerui::COLOR_BG), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(thumbnail_cont, lv_color_hex(PREVIEW_BG), LV_PART_MAIN);
     lv_obj_set_style_radius(thumbnail_cont, px(10), LV_PART_MAIN);
+    lv_obj_set_style_clip_corner(thumbnail_cont, true, LV_PART_MAIN);
+    lv_obj_set_style_radius(thumbnail, 0, LV_PART_MAIN);
+    // Toccando l'anteprima si apre grande.
+    lv_obj_add_flag(thumbnail_cont, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(thumbnail_cont, &PrintStatusPanel::_big_preview_cb, LV_EVENT_CLICKED, this);
     lv_obj_set_style_border_width(thumbnail_cont, 1, LV_PART_MAIN);
     lv_obj_set_style_border_color(thumbnail_cont, lv_color_hex(powerui::COLOR_WHITE), LV_PART_MAIN);
     lv_obj_set_style_border_opa(thumbnail_cont, LV_OPA_10, LV_PART_MAIN);
@@ -568,6 +577,9 @@ void PrintStatusPanel::set_back_home_callback(const std::function<void()> &callb
 }
 
 void PrintStatusPanel::reset() {
+  close_big_preview();
+  big_thumb_path.clear();
+  big_thumb_width = 0;
   lv_bar_set_value(progress_bar, 0, LV_ANIM_OFF);
   lv_label_set_text(progress_label, "0%");
   print_speed.update_label("0 mm/s");
@@ -738,6 +750,13 @@ void PrintStatusPanel::handle_metadata(const std::string &gcode_file, json &j) {
 
   auto width_scale = powerui::overlay_width_scale();
   auto thumb_detail = KUtils::get_thumbnail(gcode_file, j, width_scale);
+  // Per l'anteprima a tutto schermo serve l'immagine piu' grande del file (es. 400x400 da Orca).
+  auto big_detail = KUtils::get_thumbnail(gcode_file, j, 10.0);
+  {
+    std::lock_guard<std::mutex> lock(lv_lock);
+    big_thumb_path = big_detail.first;
+    big_thumb_width = big_detail.second;
+  }
   std::string fullpath = thumb_detail.first;
   if (fullpath.length() > 0) {
     spdlog::trace("thumb path: {}", fullpath);
@@ -752,6 +771,48 @@ void PrintStatusPanel::handle_metadata(const std::string &gcode_file, json &j) {
   }
 }
 
+
+void PrintStatusPanel::open_big_preview() {
+  if (big_thumb_path.empty() || big_thumb_width == 0 || big_preview != NULL) {
+    return;
+  }
+  using namespace powerui;
+  // Sopra tutto lo schermo: sfondo scuro, riquadro grigio chiaro al centro con l'immagine.
+  big_preview = lv_obj_create(lv_layer_top());
+  lv_obj_remove_style_all(big_preview);
+  lv_obj_set_size(big_preview, LV_PCT(100), LV_PCT(100));
+  lv_obj_set_style_bg_color(big_preview, lv_color_hex(COLOR_BLACK), 0);
+  lv_obj_set_style_bg_opa(big_preview, LV_OPA_80, 0);
+  lv_obj_add_flag(big_preview, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_clear_flag(big_preview, LV_OBJ_FLAG_SCROLLABLE);
+
+  lv_obj_t *box = lv_obj_create(big_preview);
+  lv_obj_remove_style_all(box);
+  lv_obj_clear_flag(box, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_size(box, px(BIG_PREVIEW_SIZE), px(BIG_PREVIEW_SIZE));
+  lv_obj_center(box);
+  lv_obj_set_style_bg_color(box, lv_color_hex(PREVIEW_BG), 0);
+  lv_obj_set_style_bg_opa(box, LV_OPA_COVER, 0);
+  lv_obj_set_style_radius(box, px(16), 0);
+  lv_obj_set_style_clip_corner(box, true, 0);
+
+  lv_obj_t *img = lv_img_create(box);
+  lv_obj_clear_flag(img, LV_OBJ_FLAG_CLICKABLE);
+  const std::string img_path = "A:" + big_thumb_path;
+  lv_img_set_src(img, img_path.c_str());
+  const uint32_t zoom = ((double)px(BIG_PREVIEW_SIZE - 16) / (double)big_thumb_width) * 256;
+  lv_img_set_zoom(img, zoom);
+  lv_obj_center(img);
+
+  lv_obj_add_event_cb(big_preview, &PrintStatusPanel::_big_preview_cb, LV_EVENT_CLICKED, this);
+}
+
+void PrintStatusPanel::close_big_preview() {
+  if (big_preview != NULL) {
+    lv_obj_del_async(big_preview);
+    big_preview = NULL;
+  }
+}
 
 void PrintStatusPanel::consume(json &j) {
   std::lock_guard<std::mutex> lock(lv_lock);

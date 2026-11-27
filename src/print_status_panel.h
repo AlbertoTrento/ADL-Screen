@@ -47,6 +47,18 @@ class PrintStatusPanel : public NotifyConsumer {
     panel->handle_callback(event);
   };
 
+  // Anteprima grande: si apre toccando l'anteprima e si chiude toccandola di nuovo.
+  void open_big_preview();
+  void close_big_preview();
+  static void _big_preview_cb(lv_event_t *event) {
+    PrintStatusPanel *panel = (PrintStatusPanel*)event->user_data;
+    if (lv_event_get_current_target(event) == panel->thumbnail_cont) {
+      panel->open_big_preview();
+    } else {
+      panel->close_big_preview();
+    }
+  }
+
   static void _update_clock_cb(lv_timer_t *timer) {
     PrintStatusPanel *panel = static_cast<PrintStatusPanel *>(timer->user_data);
     panel->update_clock();
@@ -102,6 +114,10 @@ class PrintStatusPanel : public NotifyConsumer {
   lv_obj_t *file_icon;
   lv_obj_t *file_label;
   lv_obj_t *thumbnail;
+  // Immagine piu' grande del file (per l'anteprima a tutto schermo) e la finestra che la mostra.
+  std::string big_thumb_path;
+  size_t big_thumb_width = 0;
+  lv_obj_t *big_preview = NULL;
   lv_obj_t *detail_cont;
   std::function<void()> back_home_callback;
 

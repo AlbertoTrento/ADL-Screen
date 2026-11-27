@@ -98,6 +98,16 @@ I nomi interni `powerscreen`, `powerscreen-k1c.tar.gz` e `/usr/data/powerscreen`
 4. Per la bobina esterna, inserire prima il filamento fino all'estrusore. Il caricamento e lo spurgo automatici descritti dall'autore dipendono dalle macro ADL Script.
 5. Confermare **Avvia** e seguire lo stato del lavoro.
 
+#### Anteprima del pezzo più nitida
+
+In **Stato stampa**, toccando l'anteprima del pezzo la si vede a tutto schermo; toccandola di nuovo si chiude. L'immagine è quella che lo slicer salva nel G-code: per averla nitida anche ingrandita, in OrcaSlicer aprire le impostazioni della **stampante** (icona di modifica accanto al nome della stampante), scheda **Base** (Basic information), e nel campo **G-code thumbnails** scrivere:
+
+```
+96x96/PNG,400x400/PNG
+```
+
+Salvare il profilo della stampante. Vale per i file preparati da quel momento in poi; i file già slicati mantengono l'anteprima che avevano.
+
 Il pannello imposta la sorgente tramite `BOX_ENABLE_CFS_PRINT ENABLE=0` per la bobina esterna o `ENABLE=1` per il CFS. Le opzioni di mesh e spurgo appaiono solo se vengono rilevati i rispettivi elementi di configurazione.
 
 ### Gestire CFS e filamento
