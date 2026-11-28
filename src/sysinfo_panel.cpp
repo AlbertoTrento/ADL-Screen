@@ -250,6 +250,60 @@ static std::map<std::string, int32_t> sleep_label_to_sec = {
   {"5 Hours", 18000} // 5 hour
 };
 
+// ---- Pulizia schermo: lo schermo resta nero e non risponde ai tocchi per CLEAN_SECONDS secondi,
+// cosi' si puo' passare il panno senza premere niente. Poi si sblocca da solo.
+namespace {
+constexpr int CLEAN_SECONDS = 30;
+lv_obj_t *clean_overlay = NULL;
+lv_obj_t *clean_count = NULL;
+lv_timer_t *clean_timer = NULL;
+int clean_left = 0;
+
+void clean_tick(lv_timer_t *) {
+  clean_left--;
+  if (clean_left <= 0) {
+    lv_timer_del(clean_timer);
+    clean_timer = NULL;
+    lv_obj_del(clean_overlay);
+    clean_overlay = NULL;
+    clean_count = NULL;
+    return;
+  }
+  lv_label_set_text_fmt(clean_count, "%d", clean_left);
+}
+
+void start_screen_cleaning() {
+  if (clean_overlay != NULL) {
+    return;
+  }
+  using namespace powerui;
+  clean_overlay = lv_obj_create(lv_layer_top());
+  lv_obj_remove_style_all(clean_overlay);
+  lv_obj_set_size(clean_overlay, LV_PCT(100), LV_PCT(100));
+  lv_obj_set_style_bg_color(clean_overlay, lv_color_hex(COLOR_BLACK), 0);
+  lv_obj_set_style_bg_opa(clean_overlay, LV_OPA_COVER, 0);
+  lv_obj_add_flag(clean_overlay, LV_OBJ_FLAG_CLICKABLE);  // prende tutti i tocchi e non fa niente
+  lv_obj_clear_flag(clean_overlay, LV_OBJ_FLAG_SCROLLABLE);
+
+  lv_obj_t *title = label(clean_overlay, "Pulizia schermo", &lv_font_montserrat_24, lv_color_hex(COLOR_MUTED));
+  lv_obj_align(title, LV_ALIGN_CENTER, 0, -px(90));
+  clean_count = lv_label_create(clean_overlay);
+  lv_obj_set_style_text_font(clean_count, &lv_font_montserrat_40, 0);
+  lv_obj_set_style_text_color(clean_count, lv_color_hex(COLOR_MUTED), 0);
+  lv_obj_align(clean_count, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_t *hint = label(clean_overlay, "Lo schermo non risponde ai tocchi: puoi pulirlo. Si sblocca da solo.",
+                         &lv_font_montserrat_18, lv_color_hex(COLOR_MUTED));
+  lv_label_set_long_mode(hint, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(hint, px(560));
+  lv_obj_set_style_text_align(hint, LV_TEXT_ALIGN_CENTER, 0);
+  lv_obj_align(hint, LV_ALIGN_CENTER, 0, px(80));
+
+  clean_left = CLEAN_SECONDS;
+  lv_label_set_text_fmt(clean_count, "%d", clean_left);
+  clean_timer = lv_timer_create(&clean_tick, 1000, NULL);
+}
+}  // namespace
+
 SysInfoPanel::SysInfoPanel()
   : cont(lv_obj_create(lv_scr_act()))
   , title_bar(lv_obj_create(cont))
@@ -588,6 +642,20 @@ void SysInfoPanel::create_tabs() {
   lv_obj_set_pos(info_card, px(12), px(134));
   lv_obj_t *info_title = label(info_card, "System", &lv_font_montserrat_20, lv_color_hex(powerui::COLOR_FG));
   lv_obj_set_pos(info_title, px(20), px(12));
+  // Tasto "Pulisci schermo" nella riga del titolo, a destra.
+  {
+    lv_obj_t *clean_btn = lv_btn_create(info_card);
+    lv_obj_set_size(clean_btn, px(176), px(36));
+    lv_obj_set_pos(clean_btn, px(350 - 16 - 176), px(5));
+    lv_obj_set_style_radius(clean_btn, px(10), LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(clean_btn, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_width(clean_btn, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(clean_btn, lv_color_hex(powerui::COLOR_SECONDARY), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(clean_btn, lv_color_hex(powerui::COLOR_PRESSED), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_t *clean_text = label(clean_btn, "Pulisci schermo", &lv_font_montserrat_18, lv_color_hex(powerui::COLOR_FG));
+    lv_obj_center(clean_text);
+    lv_obj_add_event_cb(clean_btn, [](lv_event_t *) { start_screen_cleaning(); }, LV_EVENT_CLICKED, NULL);
+  }
   const char *info_names[5] = {"ADL Screen", "ADL Script", "Klipper", "Moonraker", "K1C Firmware"};
   for (int i = 0; i < 5; ++i) {
     const int row_y = 46 + i * 49;
