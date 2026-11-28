@@ -124,7 +124,7 @@ void FilePanel::refresh_view(json &j, const std::string &gcode_path) {
   std::string sub;
   auto type = j["/result/filament_type"_json_pointer];
   if (type.is_string() && !type.template get<std::string>().empty()) {
-    sub = type.template get<std::string>();
+    sub = KUtils::material_text(type.template get<std::string>());
   }
   auto modified = j["/result/modified"_json_pointer];
   if (modified.is_number()) {

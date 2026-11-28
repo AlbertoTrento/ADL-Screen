@@ -1,4 +1,5 @@
 #include "mini_print_status.h"
+#include "utils.h"
 #include "powerui.h"
 #include "spdlog/spdlog.h"
 
@@ -402,7 +403,7 @@ void MiniPrintStatus::update_name(const std::string &name) {
 }
 
 void MiniPrintStatus::update_material(const std::string &material_str) {
-  material = material_str;
+  material = KUtils::material_text(material_str);
   refresh_subtitle();
 }
 

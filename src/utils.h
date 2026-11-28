@@ -35,6 +35,8 @@ namespace KUtils {
   std::string get_obj_name(const std::string &id);
   std::string to_title(std::string s);
   std::string eta_string(int64_t s);
+  // Materiali del file leggibili: ["PETG","PLA","PLA"] oppure PETG;PLA;PLA -> "PETG, PLA" (senza ripetizioni).
+  std::string material_text(const std::string &raw);
   size_t bytes_to_mb(size_t s);
 
   template<typename T, typename U> void sort_map_values(std::map<T, U> v,

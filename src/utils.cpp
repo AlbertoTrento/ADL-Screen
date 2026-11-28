@@ -262,6 +262,37 @@ namespace KUtils {
   }
 
 
+  std::string material_text(const std::string &raw) {
+    std::vector<std::string> names;
+    std::string cur;
+    auto push = [&names, &cur]() {
+      // spazi ai lati via
+      size_t a = cur.find_first_not_of(" \t");
+      size_t b = cur.find_last_not_of(" \t");
+      std::string name = a == std::string::npos ? std::string() : cur.substr(a, b - a + 1);
+      if (!name.empty() && std::find(names.begin(), names.end(), name) == names.end()) {
+        names.push_back(name);
+      }
+      cur.clear();
+    };
+    for (char c : raw) {
+      if (c == '[' || c == ']' || c == '"' || c == '\'') {
+        continue;
+      }
+      if (c == ',' || c == ';') {
+        push();
+      } else {
+        cur += c;
+      }
+    }
+    push();
+    std::string out;
+    for (const auto &n : names) {
+      out += (out.empty() ? "" : ", ") + n;
+    }
+    return out;
+  }
+
   std::string eta_string(int64_t s) {
     time_t seconds (s);
     tm p;

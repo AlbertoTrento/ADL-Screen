@@ -521,7 +521,7 @@ PrintStatusPanel::PrintStatusPanel(KWebSocketClient &websocket_client,
         lv_obj_t *value = lv_obj_get_child(row, 1);
         if (value != NULL) {
           // Le ventole hanno tre valori: un po' piu' piccoli, cosi' non finiscono sopra il nome.
-          lv_obj_set_style_text_font(value, category.rows[i].item == &fan0 ? &lv_font_montserrat_18 : &lv_font_montserrat_20,
+          lv_obj_set_style_text_font(value, category.rows[i].item == &fan0 ? &lv_font_montserrat_16 : &lv_font_montserrat_20,
                                      LV_PART_MAIN);
           lv_obj_set_style_text_color(value, lv_color_hex(powerui::COLOR_FG), LV_PART_MAIN);
         }
@@ -620,7 +620,7 @@ void PrintStatusPanel::init(json &fans) {
     if (!fan_value.is_null()) {
       int v = static_cast<int>(fan_value.template get<double>() * 100);
       fan_speeds.insert({fan_name, v});
-      values.push_back(fmt::format("{}%", v));
+      values.push_back(fmt::format("{}", v));
     }
 
     fan_value = State::get_instance()
@@ -628,11 +628,12 @@ void PrintStatusPanel::init(json &fans) {
     if (!fan_value.is_null()) {
       int v = static_cast<int>(fan_value.template get<double>() * 100);
       fan_speeds.insert({fan_name, v});
-      values.push_back(fmt::format("{}%", v));
+      values.push_back(fmt::format("{}", v));
     }
   }
 
-  fan0.update_label(fmt::format("{}", fmt::join(values, " ")).c_str());  // senza virgole: ci sta accanto a "Ventole"
+  // Forma corta "100/100/50%": anche con tutte le ventole al massimo non va sopra la scritta "Ventole".
+  fan0.update_label(values.empty() ? "--" : fmt::format("{}%", fmt::join(values, "/")).c_str());
 
   reset();
   populate();
@@ -900,10 +901,11 @@ void PrintStatusPanel::consume(json &j) {
       fv = static_cast<int>(fan_value.template get<double>() * 100);
       f.second = fv;
     }
-    values.push_back(fmt::format("{}%", fv));
+    values.push_back(fmt::format("{}", fv));
   }
 
-  fan0.update_label(fmt::format("{}", fmt::join(values, " ")).c_str());  // senza virgole: ci sta accanto a "Ventole"
+  // Forma corta "100/100/50%": anche con tutte le ventole al massimo non va sopra la scritta "Ventole".
+  fan0.update_label(values.empty() ? "--" : fmt::format("{}%", fmt::join(values, "/")).c_str());
 
   // progress
   v = j["/params/0/print_stats/print_duration"_json_pointer];
